@@ -22,6 +22,8 @@ import AdminRoute from "./components/AdminRoute";
 import { useAuth } from "./AuthContext";
 import { Toast } from "@/components/prime";
 import { useRef } from "react";
+import FormDetail from "./pages/FormDetail";
+import FormList from "./pages/FormList";
 import { ConfirmDialog } from "primereact/confirmdialog";
 const App = () => {
   const { loading } = useAuth();
@@ -55,6 +57,8 @@ const App = () => {
           element={<HealthRecordsDetail />}
         />
         <Route path="/schedule" element={<WorkSchedule />} />
+        <Route path="/forms" element={<FormList />} />
+        <Route path="/forms/:formId" element={<FormDetail />} />
         <Route path="/policy" element={<PolicyHealthInsurance />} />
         <Route path="/news/:categoryId" element={<NewsCategory />} />
         <Route path="/news/detail/:id" element={<NewsDetail />} />

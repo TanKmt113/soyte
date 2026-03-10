@@ -337,6 +337,12 @@ export const MAIN_MENU: MenuItem[] = [
         icon: CalendarDays,
       },
       {
+        id: "form-list",
+        title: "Danh sách biểu mẫu",
+        path: "/forms",
+        icon: FileText,
+      },
+      {
         id: "guide-exam",
         title: "Quy trình khám bệnh",
         path: "/guide/exam",
