@@ -5,35 +5,36 @@ import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { api } from "@/api";
 
-export default function SurveyForm({ id, type, formJson }) {
+export default function SurveyForm({ id,type,formJson }) {
+  
   const { info, data, name, description } = formJson;
-  const toRoman = (num) => {
-    const roman = [
-      "I",
-      "II",
-      "III",
-      "IV",
-      "V",
-      "VI",
-      "VII",
-      "VIII",
-      "IX",
-      "X",
-      "XI",
-      "XII",
-      "XIII",
-      "XIV",
-      "XV",
-      "XVI",
-      "XVII",
-      "XVIII",
-      "XIX",
-    ];
-    return roman[num] || num;
-  };
+const toRoman = (num) => {
+  const roman = [
+    "I",
+    "II",
+    "III",
+    "IV",
+    "V",
+    "VI",
+    "VII",
+    "VIII",
+    "IX",
+    "X",
+    "XI",
+    "XII",
+    "XIII",
+    "XIV",
+    "XV",
+    "XVI",
+    "XVII",
+    "XVIII",
+    "XIX",
+  ];
+  return roman[num] || num;
+};
   const [tableData, setTableData] = useState(data);
   const [openSections, setOpenSections] = useState({});
-  const [checkRating, setcheckRating] = useState(false);
+  const [checkRating,setcheckRating] = useState(false);
   const [errors, setErrors] = useState({});
   const [infoErrors, setInfoErrors] = useState({});
   const validateInfo = () => {
@@ -61,7 +62,7 @@ export default function SurveyForm({ id, type, formJson }) {
       [index]: !prev[index],
     }));
   };
-
+ 
   const convertSubmissionData = (data) => {
     return data.map((section) => ({
       name: section.name,
@@ -116,8 +117,8 @@ export default function SurveyForm({ id, type, formJson }) {
       type: type,
       submission_data: datamap,
       status: "pending",
-    };
-    const res = await api.post("/feedbacks", payload);
+    }; 
+    const res = await api.post("/feedbacks", payload); 
   };
   const updateAnswerValue = (sIndex, oIndex, value) => {
     setTableData((prev) =>
@@ -339,152 +340,152 @@ export default function SurveyForm({ id, type, formJson }) {
       </div>
     );
   }
-  return (
-    <div className="mx-auto mt-4 sm:mt-6 w-[100%] xl:w-[88%] 2xl:w-[92%]">
-      {/* TITLE */}
-      <div className="mb-6 rounded-[28px] border border-white/60 bg-white/70 p-5 sm:p-7 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-800">
-          {name}
-        </h2>
-        <span className="mt-2 block text-sm sm:text-base text-slate-500">
-          {description}
-        </span>
-      </div>
+ return (
+   <div className="mx-auto mt-4 sm:mt-6 w-[100%] xl:w-[88%] 2xl:w-[92%]">
+     {/* TITLE */}
+     <div className="mb-6 rounded-[28px] border border-white/60 bg-white/70 p-5 sm:p-7 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+       <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-800">
+         {name}
+       </h2>
+       <span className="mt-2 block text-sm sm:text-base text-slate-500">
+         {description}
+       </span>
+     </div>
 
-      {/* INFO FORM */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 mb-6">
-        {info
-          .filter((data) => data.status)
-          .map((data, index) => {
-            const errorKey = data.value;
-            const hasError = !!infoErrors[errorKey];
+     {/* INFO FORM */}
+     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 mb-6">
+       {info
+         .filter((data) => data.status)
+         .map((data, index) => {
+           const errorKey = data.value;
+           const hasError = !!infoErrors[errorKey];
 
-            return (
-              <div
-                key={errorKey}
-                className={`rounded-[24px] p-4 shadow-sm backdrop-blur-xl ${
-                  hasError
-                    ? "border border-red-400 bg-red-50/80 ring-2 ring-red-200"
-                    : "border border-white/60 bg-white/70"
-                }`}
-              >
-                <SurveyInfo info={data} />
+           return (
+             <div
+               key={errorKey}
+               className={`rounded-[24px] p-4 shadow-sm backdrop-blur-xl ${
+                 hasError
+                   ? "border border-red-400 bg-red-50/80 ring-2 ring-red-200"
+                   : "border border-white/60 bg-white/70"
+               }`}
+             >
+               <SurveyInfo info={data} />
 
-                {hasError && (
-                  <div className="mt-2 text-sm text-red-500">
-                    Vui lòng nhập thông tin này
-                    {infoErrors[errorKey]}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-      </div>
+               {hasError && (
+                 <div className="mt-2 text-sm text-red-500">
+                   Vui lòng nhập thông tin này
+                   {infoErrors[errorKey]}
+                 </div>
+               )}
+             </div>
+           );
+         })}
+     </div>
 
-      {/* GUIDE SCORE */}
-      {!checkRating && (
-        <div className="mb-6 overflow-hidden rounded-[28px] border border-slate-200 bg-white/75 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
-            {[
-              { score: 1, text1: "Rất không hài lòng", text2: "hoặc: Rất kém" },
-              { score: 2, text1: "Không hài lòng", text2: "hoặc: Kém" },
-              { score: 3, text1: "Bình thường", text2: "hoặc: Trung bình" },
-              { score: 4, text1: "Hài lòng", text2: "hoặc: Tốt" },
-              { score: 5, text1: "Rất hài lòng", text2: "hoặc: Rất tốt" },
-              { score: 0, text1: "Không sử dụng", text2: "" },
-            ].map((item, idx, arr) => (
-              <div
-                key={item.score}
-                className={`p-4 text-center ${
-                  idx !== arr.length - 1
-                    ? "border-b md:border-b-0 xl:border-r border-slate-200"
-                    : ""
-                }`}
-              >
-                <div className="mb-2 flex justify-center">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm">
-                    {item.score}
-                  </div>
-                </div>
-                <div className="text-sm text-slate-500">là:</div>
-                <div className="mt-1 text-sm font-semibold text-slate-700">
-                  {item.text1}
-                </div>
-                {item.text2 && (
-                  <div className="mt-1 text-xs italic text-slate-400">
-                    {item.text2}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+     {/* GUIDE SCORE */}
+     {!checkRating && (
+       <div className="mb-6 overflow-hidden rounded-[28px] border border-slate-200 bg-white/75 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+           {[
+             { score: 1, text1: "Rất không hài lòng", text2: "hoặc: Rất kém" },
+             { score: 2, text1: "Không hài lòng", text2: "hoặc: Kém" },
+             { score: 3, text1: "Bình thường", text2: "hoặc: Trung bình" },
+             { score: 4, text1: "Hài lòng", text2: "hoặc: Tốt" },
+             { score: 5, text1: "Rất hài lòng", text2: "hoặc: Rất tốt" },
+             { score: 0, text1: "Không sử dụng", text2: "" },
+           ].map((item, idx, arr) => (
+             <div
+               key={item.score}
+               className={`p-4 text-center ${
+                 idx !== arr.length - 1
+                   ? "border-b md:border-b-0 xl:border-r border-slate-200"
+                   : ""
+               }`}
+             >
+               <div className="mb-2 flex justify-center">
+                 <div className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm">
+                   {item.score}
+                 </div>
+               </div>
+               <div className="text-sm text-slate-500">là:</div>
+               <div className="mt-1 text-sm font-semibold text-slate-700">
+                 {item.text1}
+               </div>
+               {item.text2 && (
+                 <div className="mt-1 text-xs italic text-slate-400">
+                   {item.text2}
+                 </div>
+               )}
+             </div>
+           ))}
+         </div>
+       </div>
+     )}
 
-      {/* TABLE */}
-      <div className="overflow-hidden rounded-[30px] border border-slate-200 bg-white/70 shadow-[0_12px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-        {tableData.map(
-          (section, sIndex) =>
-            section.status && (
-              <div key={sIndex}>
-                {/* SECTION HEADER */}
-                <button
-                  onClick={() => toggleSection(sIndex)}
-                  className="flex w-full items-center gap-3 bg-primary-800 px-4 py-4 text-left text-white transition-all hover:brightness-110"
-                >
-                  <i
-                    className={`pi ${
-                      openSections[sIndex]
-                        ? "pi-chevron-down"
-                        : "pi-chevron-right"
-                    } text-xs`}
-                  />
+     {/* TABLE */}
+     <div className="overflow-hidden rounded-[30px] border border-slate-200 bg-white/70 shadow-[0_12px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+       {tableData.map(
+         (section, sIndex) =>
+           section.status && (
+             <div key={sIndex}>
+               {/* SECTION HEADER */}
+               <button
+                 onClick={() => toggleSection(sIndex)}
+                 className="flex w-full items-center gap-3 bg-primary-800 px-4 py-4 text-left text-white transition-all hover:brightness-110"
+               >
+                 <i
+                   className={`pi ${
+                     openSections[sIndex]
+                       ? "pi-chevron-down"
+                       : "pi-chevron-right"
+                   } text-xs`}
+                 />
 
-                  <span className="min-w-[30px] font-semibold">
-                    {toRoman(sIndex)}
-                  </span>
+                 <span className="min-w-[30px] font-semibold">
+                   {toRoman(sIndex)}
+                 </span>
 
-                  <span className="text-sm sm:text-base font-semibold">
-                    {section.name}
-                  </span>
-                </button>
+                 <span className="text-sm sm:text-base font-semibold">
+                   {section.name}
+                 </span>
+               </button>
 
-                {/* QUESTIONS */}
-                {!openSections[sIndex] && (
-                  <div className="space-y-4 p-3 sm:p-4">
-                    {section.option.map(
-                      (item, oIndex) =>
-                        item.status && (
-                          <QuestionCard
-                            key={oIndex}
-                            item={item}
-                            sIndex={sIndex}
-                            oIndex={oIndex}
-                          />
-                        ),
-                    )}
-                  </div>
-                )}
-              </div>
-            ),
-        )}
-      </div>
+               {/* QUESTIONS */}
+               {!openSections[sIndex] && (
+                 <div className="space-y-4 p-3 sm:p-4">
+                   {section.option.map(
+                     (item, oIndex) =>
+                       item.status && (
+                         <QuestionCard
+                           key={oIndex}
+                           item={item}
+                           sIndex={sIndex}
+                           oIndex={oIndex}
+                         />
+                       ),
+                   )}
+                 </div>
+               )}
+             </div>
+           ),
+       )}
+     </div>
 
-      {/* SUBMIT */}
-      <div className="mt-6 mb-4 flex justify-end">
-        <Button
-          label="Gửi biểu mẫu"
-          icon="pi pi-send"
-          onClick={handleSubmit}
-          className="
+     {/* SUBMIT */}
+     <div className="mt-6 mb-4 flex justify-end">
+       <Button
+         label="Gửi biểu mẫu"
+         icon="pi pi-send"
+         onClick={handleSubmit}
+         className="
           rounded-2xl border-0 bg-gradient-to-r from-emerald-400 to-green-500
           px-5 py-3 text-sm sm:text-base font-semibold text-white
           shadow-lg shadow-emerald-200 transition-all duration-200
           hover:-translate-y-0.5 hover:shadow-xl
           active:translate-y-0
         "
-        />
-      </div>
-    </div>
-  );
+       />
+     </div>
+   </div>
+ );
 }
