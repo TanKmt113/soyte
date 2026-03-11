@@ -18,6 +18,7 @@ import UserManagement from "./pages/UserManagement";
 import AdminWorkSchedule from "./pages/AdminWorkSchedule";
 import TemplatesManagement from "./pages/TemplatesManagement";
 import TemplateCreate from "./pages/TemplateCreate";
+import FeedbacksManagement from "./pages/FeedbacksManagement";
 import AdminRoute from "./components/AdminRoute";
 import { useAuth } from "./AuthContext";
 import { Toast } from "@/components/prime";
@@ -75,6 +76,8 @@ const App = () => {
           <Route path="schedules" element={<AdminWorkSchedule />} />{" "}
           <Route path="templates" element={<TemplatesManagement />} />{" "}
           <Route path="templates/create" element={<TemplateCreate />} />{" "}
+          <Route path="templates/edit/:id" element={<TemplateCreate />} />{" "}
+          <Route path="feedbacks" element={<FeedbacksManagement />} />{" "}
           {/* New Admin Schedule Route */}
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>

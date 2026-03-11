@@ -7,6 +7,7 @@ import {
   User,
   NotebookText,
   CalendarDays,
+  MessageSquare,
 } from "lucide-react"; // Add User and CalendarDays icon
 import { useAuth } from "../AuthContext";
 import { Toast } from "primereact/toast";
@@ -90,6 +91,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <span>Quản lý lịch biểu mẫu</span>
               </Link>
             </li>
+            {/* <li>
+              <Link
+                to="/admin/feedbacks"
+                className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-white/10 transition-colors"
+              >
+                <MessageSquare size={18} />
+                <span>Quản lý phản hồi</span>
+              </Link>
+            </li> */}
           </ul>
         </nav>
       </aside>
