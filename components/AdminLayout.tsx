@@ -7,6 +7,7 @@ import {
   User,
   NotebookText,
   CalendarDays,
+  MessageSquare,
 } from "lucide-react"; // Add User and CalendarDays icon
 import { useAuth } from "../AuthContext";
 import { Toast } from "primereact/toast";
@@ -37,7 +38,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
       <Toast />
       <ConfirmDialog />
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-primary-900 text-white flex flex-col sticky top-0 h-screen shadow-2xl">
+      <aside className="w-64 shrink-0 bg-primary-900 text-white flex flex-col sticky top-0 h-screen shadow-2xl">
         <div className="px-6 py-4 flex items-center gap-4 border-b border-white/10">
           <div className="bg-white/10 p-2 rounded-lg">
             <LayoutDashboard size={24} className="text-secondary-400" />
@@ -90,12 +91,21 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <span>Quản lý lịch biểu mẫu</span>
               </Link>
             </li>
+            {/* <li>
+              <Link
+                to="/admin/feedbacks"
+                className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-white/10 transition-colors"
+              >
+                <MessageSquare size={18} />
+                <span>Quản lý phản hồi</span>
+              </Link>
+            </li> */}
           </ul>
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-grow flex flex-col">
+      <main className="flex-grow flex flex-col min-w-0">
         {/* Admin Top Header */}
         <div className="bg-white px-8 py-4 shadow-sm flex items-center justify-between sticky top-0 z-10 border-b border-gray-200">
           <div className="flex items-center gap-4">
