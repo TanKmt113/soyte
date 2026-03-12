@@ -1,241 +1,715 @@
 import { api } from "@/api";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { RadioButton } from "primereact/radiobutton";
-import React, { useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import SurveyInfo from "./SurveyInfo";
 
-export default function BieuMau1Table({ id, type, formJson }) {
- const toast = useRef<Toast>(null);
- const navigate = useNavigate();
-const { info, data, name, description } = formJson;
- const [errors, setErrors] = useState<Record<string, boolean>>({});
- const [formData, setFormData] = useState({});
- const [infoErrors, setInfoErrors] = useState({});
-  const [tableData, setTableData] = useState(data);
-  const [formInfo, setFormInfo] = useState({
-    title: formJson.name,
-    description: formJson.description,
-  });
- const handleChange = (fieldKey, fieldData) => {
-   setFormData((prev) => ({
-     ...prev,
-     [fieldKey]: fieldData,
-   }));
+type OptionValue = number | string;
 
-   setInfoErrors((prev) => ({
-     ...prev,
-     [fieldKey]: false,
-   }));
- };
+const PROGRESS_OPTIONS = [
+  { label: "Đã thực hiện", value: 1 },
+  { label: "Đang thực hiện", value: 2 },
+  { label: "Chưa thực hiện", value: 3 },
+];
 
+const RATING_OPTIONS = [
+  { label: "Đạt", value: 1 },
+  { label: "Không đạt", value: 2 },
+];
 
- const [openSections, setOpenSections] = useState<Record<number, boolean>>({});
-
- const toRoman = (num: number) => {
-   const roman = [
-     "I",
-     "II",
-     "III",
-     "IV",
-     "V",
-     "VI",
-     "VII",
-     "VIII",
-     "IX",
-     "X",
-     "XI",
-     "XII",
-     "XIII",
-     "XIV",
-     "XV",
-     "XVI",
-     "XVII",
-     "XVIII",
-     "XIX",
-   ];
-   return roman[num] || num;
- };
-
- const toggleSection = (index: number) => {
-   setOpenSections((prev) => ({
-     ...prev,
-     [index]: !prev[index],
-   }));
- };
-
- const clearFieldError = (key: string) => {
-   setErrors((prev) => ({
-     ...prev,
-     [key]: false,
-   }));
- };
-
- const updateProgress = (
-   sectionIndex: number,
-   optionIndex: number,
-   value: number | string,
- ) => {
-   const newData = [...tableData];
-   newData[sectionIndex].option[optionIndex].progress.value = value;
-   setTableData(newData);
-
-   clearFieldError(`progress-${sectionIndex}-${optionIndex}`);
- };
-
- const updateRating = (
-   sectionIndex: number,
-   optionIndex: number,
-   value: number | string,
- ) => {
-   const newData = [...tableData];
-   newData[sectionIndex].option[optionIndex].rating.value = value;
-   setTableData(newData);
-
-   clearFieldError(`rating-${sectionIndex}-${optionIndex}`);
- };
-
-const updateNote = (
-  sectionIndex: number,
-  optionIndex: number,
-  value: string,
-) => {
-  const newData = [...tableData];
-  newData[sectionIndex].option[optionIndex].note = value;
-  setTableData(newData);
-
-  if (value.trim()) {
-    clearFieldError(`note-${sectionIndex}-${optionIndex}`);
-  }
+const toRoman = (num: number) => {
+  const roman = [
+    "I",
+    "II",
+    "III",
+    "IV",
+    "V",
+    "VI",
+    "VII",
+    "VIII",
+    "IX",
+    "X",
+    "XI",
+    "XII",
+    "XIII",
+    "XIV",
+    "XV",
+    "XVI",
+    "XVII",
+    "XVIII",
+    "XIX",
+  ];
+  return roman[num] || String(num + 1);
 };
 
- const isValidEmail = (value: string) => {
-   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
- };
+const getInfoKey = (item: any, index: number) =>
+  item.key || item.value || item.name || `info-${index}`;
 
-const validateForm = () => {
-  const newErrors: Record<string, boolean> = {};
-  const sectionsToOpen: Record<number, boolean> = {};
-  let isValid = true;
-  const newInfoErrors = {};
-  
-info.forEach((item, index) => {
-  if (!item.status) return;
+const isEmptyValue = (value: any) => {
+  if (value === undefined || value === null) return true;
 
-  const key = item.key || item.name || `info-${index}`;
-  const value = formData[key];
-
-  const isEmpty =
-    value === undefined || value === null || String(value).trim() === "";
-
-  if (isEmpty) {
-    newInfoErrors[key] = true;
-    isValid = false;
+  if (typeof value === "object") {
+    if ("value" in value) {
+      return (
+        value.value === undefined ||
+        value.value === null ||
+        String(value.value).trim() === ""
+      );
+    }
   }
+
+  return String(value).trim() === "";
+};
+
+const SelectOptionButton = memo(function SelectOptionButton({
+  active,
+  label,
+  onClick,
+  error = false,
+  activeClassName,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+  error?: boolean;
+  activeClassName: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`min-h-[46px] rounded-2xl border px-4 py-3 text-sm font-medium transition-all duration-150 ${
+        active
+          ? activeClassName
+          : error
+            ? "border-red-300 bg-white text-slate-700 hover:border-red-400"
+            : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
+      }`}
+    >
+      {label}
+    </button>
+  );
 });
-  tableData.forEach((section: any, sectionIndex: number) => {
-    section.option.forEach((item: any, optionIndex: number) => {
-      const progressValue = item?.progress?.value;
-      const ratingValue = item?.rating?.value;
-      const noteValue = item?.note;
 
-      if (
-        progressValue === null ||
-        progressValue === undefined ||
-        progressValue === "" ||
-        progressValue === -1
-      ) {
-        newErrors[`progress-${sectionIndex}-${optionIndex}`] = true;
-        sectionsToOpen[sectionIndex] = true;
-        isValid = false;
+const SurveyInfoCard = memo(function SurveyInfoCard({
+  item,
+  fieldKey,
+  value,
+  error,
+  onChange,
+}: {
+  item: any;
+  fieldKey: string;
+  value: any;
+  error: boolean;
+  onChange: (fieldKey: string, fieldData: any) => void;
+}) {
+  return (
+    <div
+      className={`rounded-[24px] p-4 shadow-sm backdrop-blur-xl ${
+        error
+          ? "border border-red-400 bg-red-50/80 ring-2 ring-red-200"
+          : "border border-white/60 bg-white/70"
+      }`}
+    >
+      <SurveyInfo
+        info={item}
+        fieldKey={fieldKey}
+        value={value}
+        onChange={onChange}
+        error={error}
+      />
+    </div>
+  );
+});
+
+const TableOptionRow = memo(function TableOptionRow({
+  item,
+  sIndex,
+  oIndex,
+  noteError,
+  progressError,
+  ratingError,
+  onUpdateNote,
+  onUpdateProgress,
+  onUpdateRating,
+}: {
+  item: any;
+  sIndex: number;
+  oIndex: number;
+  noteError: boolean;
+  progressError: boolean;
+  ratingError: boolean;
+  onUpdateNote: (
+    sectionIndex: number,
+    optionIndex: number,
+    value: string,
+  ) => void;
+  onUpdateProgress: (
+    sectionIndex: number,
+    optionIndex: number,
+    value: OptionValue,
+  ) => void;
+  onUpdateRating: (
+    sectionIndex: number,
+    optionIndex: number,
+    value: OptionValue,
+  ) => void;
+}) {
+  const itemHasError = noteError || progressError || ratingError;
+
+  return (
+    <div
+      className={`overflow-hidden rounded-[24px] border bg-white/90 shadow-sm ${
+        itemHasError ? "border-red-400 shadow-red-100" : "border-slate-200/80"
+      }`}
+    >
+      <div
+        className={`px-4 py-4 ${
+          itemHasError
+            ? "border-b border-red-200 bg-red-50/60"
+            : "border-b border-slate-200/70"
+        }`}
+      >
+        <div className="mb-3 flex items-center gap-3">
+          <div
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${
+              itemHasError
+                ? "border-red-300 bg-red-100 text-red-600"
+                : "border-slate-300 bg-slate-50 text-slate-600"
+            }`}
+          >
+            {oIndex + 1}
+          </div>
+          <div
+            className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${
+              itemHasError ? "text-red-400" : "text-slate-400"
+            }`}
+          >
+            Nội dung thực hiện
+          </div>
+        </div>
+
+        <div className="text-[15px] leading-7 text-slate-700">
+          {item.content}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4">
+          <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Phương thức thực hiện
+          </div>
+          <div className="text-sm leading-6 text-slate-700">{item.method}</div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4">
+          <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Sản phẩm đầu ra
+          </div>
+          <div className="text-sm leading-6 text-slate-700">
+            {item.productOut}
+          </div>
+        </div>
+
+        <div
+          className={`rounded-2xl border bg-slate-50/60 p-4 ${
+            noteError ? "border-red-500 bg-red-50/70" : "border-slate-200/70"
+          }`}
+        >
+          <div
+            className={`mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+              noteError ? "text-red-500" : "text-slate-400"
+            }`}
+          >
+            Ghi chú / Kiến nghị <span className="text-red-500">*</span>
+          </div>
+
+          <InputTextarea
+            value={item.note || ""}
+            onChange={(e) => onUpdateNote(sIndex, oIndex, e.target.value)}
+            rows={3}          
+            className={`w-full rounded-2xl border bg-white/80 px-4 py-3 text-[15px] shadow-sm outline-none transition-all ${
+              noteError
+                ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+                : "border-slate-200 focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+            }`}
+            placeholder="Nhập ghi chú hoặc kiến nghị"
+          />
+
+          {noteError && (
+            <small className="mt-2 block text-red-500">
+              Vui lòng nhập ghi chú / kiến nghị
+            </small>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 border-t border-slate-200/70 px-4 py-4 xl:grid-cols-2">
+        <div>
+          <div
+            className={`mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+              progressError ? "text-red-500" : "text-slate-400"
+            }`}
+          >
+            Tiến độ thực hiện <span className="text-red-500">*</span>
+          </div>
+
+          <div
+            className={`rounded-2xl p-2 ${
+              progressError
+                ? "border border-red-500 bg-red-50/60"
+                : "border border-transparent"
+            }`}
+          >
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {PROGRESS_OPTIONS.map((progress) => {
+                const active = item?.progress?.value === progress.value;
+
+                return (
+                  <SelectOptionButton
+                    key={progress.value}
+                    active={active}
+                    label={progress.label}
+                    error={progressError}
+                    activeClassName="border-blue-500 bg-blue-500 text-white"
+                    onClick={() =>
+                      onUpdateProgress(sIndex, oIndex, progress.value)
+                    }
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {progressError && (
+            <small className="mt-2 block text-red-500">
+              Vui lòng chọn tiến độ thực hiện
+            </small>
+          )}
+        </div>
+
+        <div>
+          <div
+            className={`mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+              ratingError ? "text-red-500" : "text-slate-400"
+            }`}
+          >
+            Đánh giá <span className="text-red-500">*</span>
+          </div>
+
+          <div
+            className={`rounded-2xl p-2 ${
+              ratingError
+                ? "border border-red-500 bg-red-50/60"
+                : "border border-transparent"
+            }`}
+          >
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {RATING_OPTIONS.map((rating) => {
+                const active = item?.rating?.value === rating.value;
+
+                return (
+                  <SelectOptionButton
+                    key={rating.value}
+                    active={active}
+                    label={rating.label}
+                    error={ratingError}
+                    activeClassName="border-emerald-500 bg-emerald-500 text-white"
+                    onClick={() => onUpdateRating(sIndex, oIndex, rating.value)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {ratingError && (
+            <small className="mt-2 block text-red-500">
+              Vui lòng chọn đánh giá
+            </small>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+const TableSection = memo(function TableSection({
+  section,
+  sIndex,
+  isOpen,
+  onToggle,
+  errors,
+  onUpdateNote,
+  onUpdateProgress,
+  onUpdateRating,
+}: {
+  section: any;
+  sIndex: number;
+  isOpen: boolean;
+  onToggle: (index: number) => void;
+  errors: Record<string, boolean>;
+  onUpdateNote: (
+    sectionIndex: number,
+    optionIndex: number,
+    value: string,
+  ) => void;
+  onUpdateProgress: (
+    sectionIndex: number,
+    optionIndex: number,
+    value: OptionValue,
+  ) => void;
+  onUpdateRating: (
+    sectionIndex: number,
+    optionIndex: number,
+    value: OptionValue,
+  ) => void;
+}) {
+  const sectionHasError = section.option.some((_: any, oIndex: number) => {
+    return (
+      errors[`note-${sIndex}-${oIndex}`] ||
+      errors[`progress-${sIndex}-${oIndex}`] ||
+      errors[`rating-${sIndex}-${oIndex}`]
+    );
+  });
+
+  return (
+    <div className="border-b border-slate-200/70 last:border-b-0">
+      <button
+        type="button"
+        onClick={() => onToggle(sIndex)}
+        className={`flex w-full items-center gap-3 px-4 py-4 text-left text-white transition-all duration-200 hover:brightness-110 ${
+          sectionHasError ? "bg-red-500" : "bg-primary-800"
+        }`}
+      >
+        <i
+          className={`pi ${
+            isOpen ? "pi-chevron-down" : "pi-chevron-right"
+          } text-xs`}
+        />
+        <span className="min-w-[30px] font-semibold">{toRoman(sIndex)}</span>
+        <span className="text-sm font-semibold sm:text-base">
+          {section.name}
+        </span>
+
+        {sectionHasError && (
+          <span className="ml-auto rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
+            Thiếu thông tin
+          </span>
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="space-y-4 p-3 sm:p-4">
+          {section.option.map((item: any, oIndex: number) => (
+            <TableOptionRow
+              key={`${sIndex}-${oIndex}`}
+              item={item}
+              sIndex={sIndex}
+              oIndex={oIndex}
+              noteError={!!errors[`note-${sIndex}-${oIndex}`]}
+              progressError={!!errors[`progress-${sIndex}-${oIndex}`]}
+              ratingError={!!errors[`rating-${sIndex}-${oIndex}`]}
+              onUpdateNote={onUpdateNote}
+              onUpdateProgress={onUpdateProgress}
+              onUpdateRating={onUpdateRating}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+
+export default function BieuMau1Table({ id, type, formJson }: any) {
+  const toast = useRef<Toast>(null);
+  const navigate = useNavigate();
+
+  const { info = [], data = [], name, description } = formJson;
+
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [infoErrors, setInfoErrors] = useState<Record<string, boolean>>({});
+  const [tableData, setTableData] = useState<any[]>(() => data || []);
+  const [openSection, setOpenSection] = useState<number | null>(0);
+  const sectionRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const visibleInfo = useMemo(() => {
+    return (info ?? [])
+      .filter((item) => item?.status)
+      .map((item, index) => ({
+        item,
+        fieldKey: getInfoKey(item, index),
+      }));
+  }, [info]);
+
+  const handleChange = useCallback((fieldKey: string, fieldData: any) => {
+    setFormData((prev) => {
+      if (prev[fieldKey] === fieldData) return prev;
+
+      return {
+        ...prev,
+        [fieldKey]: fieldData,
+      };
+    });
+
+    setInfoErrors((prev) => {
+      if (!prev[fieldKey]) return prev;
+
+      return {
+        ...prev,
+        [fieldKey]: false,
+      };
+    });
+  }, []);
+
+const toggleSection = useCallback((index: number) => {
+  setOpenSection((prev) => (prev === index ? null : index));
+}, []);
+useEffect(() => {
+  if (openSection === null) return;
+
+  const el = sectionRefs.current[openSection];
+  if (!el) return;
+
+  requestAnimationFrame(() => {
+    el.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  });
+}, [openSection]);
+  const clearFieldError = useCallback((key: string) => {
+    setErrors((prev) => {
+      if (!prev[key]) return prev;
+
+      return {
+        ...prev,
+        [key]: false,
+      };
+    });
+  }, []);
+
+  const updateProgress = useCallback(
+    (sectionIndex: number, optionIndex: number, value: OptionValue) => {
+      setTableData((prev) => {
+        const section = prev[sectionIndex];
+        if (!section) return prev;
+
+        const option = section.option?.[optionIndex];
+        if (!option) return prev;
+
+        if (option?.progress?.value === value) return prev;
+
+        const next = [...prev];
+        const nextSection = { ...section };
+        const nextOptions = [...section.option];
+
+        nextOptions[optionIndex] = {
+          ...option,
+          progress: {
+            ...(option.progress || {}),
+            value,
+          },
+        };
+
+        nextSection.option = nextOptions;
+        next[sectionIndex] = nextSection;
+
+        return next;
+      });
+
+      clearFieldError(`progress-${sectionIndex}-${optionIndex}`);
+    },
+    [clearFieldError],
+  );
+
+  const updateRating = useCallback(
+    (sectionIndex: number, optionIndex: number, value: OptionValue) => {
+      setTableData((prev) => {
+        const section = prev[sectionIndex];
+        if (!section) return prev;
+
+        const option = section.option?.[optionIndex];
+        if (!option) return prev;
+
+        if (option?.rating?.value === value) return prev;
+
+        const next = [...prev];
+        const nextSection = { ...section };
+        const nextOptions = [...section.option];
+
+        nextOptions[optionIndex] = {
+          ...option,
+          rating: {
+            ...(option.rating || {}),
+            value,
+          },
+        };
+
+        nextSection.option = nextOptions;
+        next[sectionIndex] = nextSection;
+
+        return next;
+      });
+
+      clearFieldError(`rating-${sectionIndex}-${optionIndex}`);
+    },
+    [clearFieldError],
+  );
+
+  const updateNote = useCallback(
+    (sectionIndex: number, optionIndex: number, value: string) => {
+      setTableData((prev) => {
+        const section = prev[sectionIndex];
+        if (!section) return prev;
+
+        const option = section.option?.[optionIndex];
+        if (!option) return prev;
+
+        if ((option.note || "") === value) return prev;
+
+        const next = [...prev];
+        const nextSection = { ...section };
+        const nextOptions = [...section.option];
+
+        nextOptions[optionIndex] = {
+          ...option,
+          note: value,
+        };
+
+        nextSection.option = nextOptions;
+        next[sectionIndex] = nextSection;
+
+        return next;
+      });
+
+      if (value.trim()) {
+        clearFieldError(`note-${sectionIndex}-${optionIndex}`);
       }
+    },
+    [clearFieldError],
+  );
 
-      if (
-        ratingValue === null ||
-        ratingValue === undefined ||
-        ratingValue === "" ||
-        ratingValue === -1
-      ) {
-        newErrors[`rating-${sectionIndex}-${optionIndex}`] = true;
-        sectionsToOpen[sectionIndex] = true;
-        isValid = false;
-      }
+  const validateForm = useCallback(() => {
+    const newErrors: Record<string, boolean> = {};
+    const newInfoErrors: Record<string, boolean> = {};
+    const sectionsToOpen: Record<number, boolean> = {};
+    let isValid = true;
 
-      if (!noteValue || !String(noteValue).trim()) {
-        newErrors[`note-${sectionIndex}-${optionIndex}`] = true;
-        sectionsToOpen[sectionIndex] = true;
+    visibleInfo.forEach(({ item, fieldKey }: any, index: number) => {
+      const key = fieldKey || item.key || item.name || `info-${index}`;
+      const value = formData[key];
+
+      if (isEmptyValue(value)) {
+        newInfoErrors[key] = true;
         isValid = false;
       }
     });
-  });
 
-  setErrors(newErrors);
-  setInfoErrors(newInfoErrors);
-  if (!isValid) {
-    setOpenSections((prev) => ({
-      ...prev,
-      ...sectionsToOpen,
-    }));
-  }
+    tableData.forEach((section: any, sectionIndex: number) => {
+      section.option.forEach((item: any, optionIndex: number) => {
+        const progressValue = item?.progress?.value;
+        const ratingValue = item?.rating?.value;
+        const noteValue = item?.note;
 
-  return isValid;
-};
- const submitForm = async () => {
-   const isValid = validateForm();
-  
-  
-   if (!isValid) {
-     toast.current?.show({
-       severity: "error",
-       summary: "Thiếu thông tin",
-       detail: "Vui lòng nhập đầy đủ tất cả trường bắt buộc trước khi gửi",
-     });
-     return;
-   }
+        if (
+          progressValue === null ||
+          progressValue === undefined ||
+          progressValue === "" ||
+          progressValue === -1
+        ) {
+          newErrors[`progress-${sectionIndex}-${optionIndex}`] = true;
+          sectionsToOpen[sectionIndex] = true;
+          isValid = false;
+        }
 
-   try {
-     const payload = {
-       name: name,
-       description: description,
-       form_id: Number(id),
-       info: formData,
-       type: type,
-       submission_data: tableData,
-       status: "pending",
-     };
-    
-          await api.post("/feedbacks", payload);
-    
-          toast.current?.show({
-            severity: "success",
-            summary: "Thành công",
-            detail: "Lưu thành công",
-          });
-    
-          navigate("/");
-   } catch (error) {
-     console.error("Submit error:", error);
-     toast.current?.show({
-       severity: "error",
-       summary: "Lỗi",
-       detail: "Gửi biểu mẫu thất bại",
-     });
-   }
- };
+        if (
+          ratingValue === null ||
+          ratingValue === undefined ||
+          ratingValue === "" ||
+          ratingValue === -1
+        ) {
+          newErrors[`rating-${sectionIndex}-${optionIndex}`] = true;
+          sectionsToOpen[sectionIndex] = true;
+          isValid = false;
+        }
 
-  const convertSubmissionData = (data: any) => {
-    return data.map((section) => ({
-      name: section.name,
-      option: section.option.map((item) => ({
-        tiendo: item.progress?.value ?? 0,
-        danhgia: item.rating?.value ?? 0,
-        ghichu: item.note || "",
-      })),
-    }));
-  };
+        if (!noteValue || !String(noteValue).trim()) {
+          newErrors[`note-${sectionIndex}-${optionIndex}`] = true;
+          sectionsToOpen[sectionIndex] = true;
+          isValid = false;
+        }
+      });
+    });
+
+    setErrors(newErrors);
+    setInfoErrors(newInfoErrors);
+
+    if (!isValid) {
+      const firstInvalidSection = Object.keys(sectionsToOpen)
+        .map(Number)
+        .sort((a, b) => a - b)[0];
+
+      if (firstInvalidSection !== undefined) {
+        setOpenSection(firstInvalidSection);
+      }
+    }
+
+    return isValid;
+  }, [formData, tableData, visibleInfo]);
+
+  const submitForm = useCallback(async () => {
+    const isValid = validateForm();
+
+    if (!isValid) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Thiếu thông tin",
+        detail: "Vui lòng nhập đầy đủ tất cả trường bắt buộc trước khi gửi",
+      });
+      return;
+    }
+
+    try {
+      const payload = {
+        name,
+        description,
+        form_id: Number(id),
+        info: formData,
+        type,
+        submission_data: tableData,
+        status: "pending",
+      };
+
+      await api.post("/feedbacks", payload);
+
+      toast.current?.show({
+        severity: "success",
+        summary: "Thành công",
+        detail: "Lưu thành công",
+      });
+
+      navigate("/");
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Gửi biểu mẫu thất bại",
+      });
+    }
+  }, [
+    validateForm,
+    name,
+    description,
+    id,
+    formData,
+    type,
+    tableData,
+    navigate,
+  ]);
 
   return (
     <div className="mx-auto mt-4 w-full px-3 sm:mt-6 sm:px-4 xl:w-[88%] 2xl:w-[92%]">
@@ -250,324 +724,39 @@ info.forEach((item, index) => {
         </p>
       </div>
 
-      
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {info
-                  .filter((item) => item.status)
-                  .map((item, index) => {
-                    const fieldKey =
-                      item.key || item.value || item.name || `info-${index}`;
-                    const hasError = !!infoErrors[fieldKey];
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {visibleInfo.map(({ item, fieldKey }: any) => (
+          <SurveyInfoCard
+            key={fieldKey}
+            item={item}
+            fieldKey={fieldKey}
+            value={formData[fieldKey]}
+            onChange={handleChange}
+            error={!!infoErrors[fieldKey]}
+          />
+        ))}
+      </div>
 
-                    return (
-                      <div
-                        key={fieldKey}
-                        className={`rounded-[24px] p-4 shadow-sm backdrop-blur-xl ${
-                          hasError
-                            ? "border border-red-400 bg-red-50/80 ring-2 ring-red-200"
-                            : "border border-white/60 bg-white/70"
-                        }`}
-                      >
-                        <SurveyInfo
-                          info={item}
-                          fieldKey={fieldKey}
-                          value={formData[fieldKey]}
-                          onChange={handleChange}
-                          error={hasError}
-                        />
-                      </div>
-                    );
-                  })}
-        </div>
       <div className="overflow-hidden rounded-[30px] border border-slate-200 bg-white/70 shadow-[0_12px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-        {tableData.map((section, sIndex) => {
-          const sectionHasError = section.option.some((_, oIndex) => {
-            return (
-              errors[`note-${sIndex}-${oIndex}`] ||
-              errors[`progress-${sIndex}-${oIndex}`] ||
-              errors[`rating-${sIndex}-${oIndex}`]
-            );
-          });
-
-          return (
-            <div
-              key={sIndex}
-              className="border-b border-slate-200/70 last:border-b-0"
-            >
-              <button
-                type="button"
-                onClick={() => toggleSection(sIndex)}
-                className={`flex w-full items-center gap-3 px-4 py-4 text-left text-white transition-all duration-200 hover:brightness-110 ${
-                  sectionHasError ? "bg-red-500" : "bg-primary-800"
-                }`}
-              >
-                <i
-                  className={`pi ${
-                    openSections[sIndex]
-                      ? "pi-chevron-down"
-                      : "pi-chevron-right"
-                  } text-xs`}
-                />
-                <span className="min-w-[30px] font-semibold">
-                  {toRoman(sIndex)}
-                </span>
-                <span className="text-sm font-semibold sm:text-base">
-                  {section.name}
-                </span>
-                {sectionHasError && (
-                  <span className="ml-auto rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
-                    Thiếu thông tin
-                  </span>
-                )}
-              </button>
-
-              {!openSections[sIndex] && (
-                <div className="space-y-4 p-3 sm:p-4">
-                  {section.option.map((item, oIndex) => {
-                    const noteError = errors[`note-${sIndex}-${oIndex}`];
-                    const progressError =
-                      errors[`progress-${sIndex}-${oIndex}`];
-                    const ratingError = errors[`rating-${sIndex}-${oIndex}`];
-                    const itemHasError =
-                      noteError || progressError || ratingError;
-
-                    return (
-                      <div
-                        key={oIndex}
-                        className={`overflow-hidden rounded-[24px] border bg-white/90 shadow-sm ${
-                          itemHasError
-                            ? "border-red-400 shadow-red-100"
-                            : "border-slate-200/80"
-                        }`}
-                      >
-                        <div
-                          className={`px-4 py-4 ${
-                            itemHasError
-                              ? "border-b border-red-200 bg-red-50/60"
-                              : "border-b border-slate-200/70"
-                          }`}
-                        >
-                          <div className="mb-3 flex items-center gap-3">
-                            <div
-                              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${
-                                itemHasError
-                                  ? "border-red-300 bg-red-100 text-red-600"
-                                  : "border-slate-300 bg-slate-50 text-slate-600"
-                              }`}
-                            >
-                              {oIndex + 1}
-                            </div>
-                            <div
-                              className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${
-                                itemHasError ? "text-red-400" : "text-slate-400"
-                              }`}
-                            >
-                              Nội dung thực hiện
-                            </div>
-                          </div>
-
-                          <div className="text-[15px] leading-7 text-slate-700">
-                            {item.content}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-3">
-                          <div className="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4">
-                            <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                              Phương thức thực hiện
-                            </div>
-                            <div className="text-sm leading-6 text-slate-700">
-                              {item.method}
-                            </div>
-                          </div>
-
-                          <div className="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4">
-                            <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                              Sản phẩm đầu ra
-                            </div>
-                            <div className="text-sm leading-6 text-slate-700">
-                              {item.productOut}
-                            </div>
-                          </div>
-
-                          <div
-                            className={`rounded-2xl border bg-slate-50/60 p-4 ${
-                              noteError
-                                ? "border-red-500 bg-red-50/70"
-                                : "border-slate-200/70"
-                            }`}
-                          >
-                            <div
-                              className={`mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${
-                                noteError ? "text-red-500" : "text-slate-400"
-                              }`}
-                            >
-                              Ghi chú / Kiến nghị{" "}
-                              <span className="text-red-500">*</span>
-                            </div>
-
-                            <InputTextarea
-                              value={item.note || ""}
-                              onChange={(e) =>
-                                updateNote(sIndex, oIndex, e.target.value)
-                              }
-                              rows={3}
-                              autoResize
-                              className={`w-full rounded-2xl border bg-white/80 px-4 py-3 text-[15px] shadow-sm outline-none transition-all ${
-                                noteError
-                                  ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-100"
-                                  : "border-slate-200 focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
-                              }`}
-                              placeholder="Nhập ghi chú hoặc kiến nghị"
-                            />
-
-                            {noteError && (
-                              <small className="mt-2 block text-red-500">
-                                Vui lòng nhập ghi chú / kiến nghị
-                              </small>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4 border-t border-slate-200/70 px-4 py-4 xl:grid-cols-2">
-                          <div>
-                            <div
-                              className={`mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${
-                                progressError
-                                  ? "text-red-500"
-                                  : "text-slate-400"
-                              }`}
-                            >
-                              Tiến độ thực hiện{" "}
-                              <span className="text-red-500">*</span>
-                            </div>
-
-                            <div
-                              className={`rounded-2xl p-2 ${
-                                progressError
-                                  ? "border border-red-500 bg-red-50/60"
-                                  : "border border-transparent"
-                              }`}
-                            >
-                              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                                {[
-                                  { label: "Đã thực hiện", value: 1 },
-                                  { label: "Đang thực hiện", value: 2 },
-                                  { label: "Chưa thực hiện", value: 3 },
-                                ].map((progress) => {
-                                  const active =
-                                    item.progress.value === progress.value;
-
-                                  return (
-                                    <label
-                                      key={progress.value}
-                                      htmlFor={`progress-${sIndex}-${oIndex}-${progress.value}`}
-                                      className={`inline-flex min-h-[46px] cursor-pointer items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-medium transition-all ${
-                                        active
-                                          ? "border-blue-500 bg-blue-500 text-white"
-                                          : progressError
-                                            ? "border-red-300 bg-white text-slate-700 hover:border-red-400"
-                                            : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
-                                      }`}
-                                    >
-                                      <RadioButton
-                                        inputId={`progress-${sIndex}-${oIndex}-${progress.value}`}
-                                        name={`progress-${sIndex}-${oIndex}`}
-                                        value={progress.value}
-                                        checked={active}
-                                        onChange={() =>
-                                          updateProgress(
-                                            sIndex,
-                                            oIndex,
-                                            progress.value,
-                                          )
-                                        }
-                                      />
-                                      <span>{progress.label}</span>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                            </div>
-
-                            {progressError && (
-                              <small className="mt-2 block text-red-500">
-                                Vui lòng chọn tiến độ thực hiện
-                              </small>
-                            )}
-                          </div>
-
-                          <div>
-                            <div
-                              className={`mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] ${
-                                ratingError ? "text-red-500" : "text-slate-400"
-                              }`}
-                            >
-                              Đánh giá <span className="text-red-500">*</span>
-                            </div>
-
-                            <div
-                              className={`rounded-2xl p-2 ${
-                                ratingError
-                                  ? "border border-red-500 bg-red-50/60"
-                                  : "border border-transparent"
-                              }`}
-                            >
-                              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                {[
-                                  { label: "Đạt", value: 1 },
-                                  { label: "Không đạt", value: 2 },
-                                ].map((rating) => {
-                                  const active =
-                                    item.rating.value === rating.value;
-
-                                  return (
-                                    <label
-                                      key={rating.value}
-                                      htmlFor={`rating-${sIndex}-${oIndex}-${rating.value}`}
-                                      className={`inline-flex min-h-[46px] cursor-pointer items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-medium transition-all ${
-                                        active
-                                          ? "border-emerald-500 bg-emerald-500 text-white"
-                                          : ratingError
-                                            ? "border-red-300 bg-white text-slate-700 hover:border-red-400"
-                                            : "border-slate-300 bg-white text-slate-700 hover:border-slate-400"
-                                      }`}
-                                    >
-                                      <RadioButton
-                                        inputId={`rating-${sIndex}-${oIndex}-${rating.value}`}
-                                        name={`rating-${sIndex}-${oIndex}`}
-                                        value={rating.value}
-                                        checked={active}
-                                        onChange={() =>
-                                          updateRating(
-                                            sIndex,
-                                            oIndex,
-                                            rating.value,
-                                          )
-                                        }
-                                      />
-                                      <span>{rating.label}</span>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                            </div>
-
-                            {ratingError && (
-                              <small className="mt-2 block text-red-500">
-                                Vui lòng chọn đánh giá
-                              </small>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {tableData.map((section, sIndex) => (
+          <div
+            key={section.id || section.name || sIndex}
+            ref={(el) => {
+              sectionRefs.current[sIndex] = el;
+            }}
+          >
+            <TableSection
+              section={section}
+              sIndex={sIndex}
+              isOpen={openSection === sIndex}
+              onToggle={toggleSection}
+              errors={errors}
+              onUpdateNote={updateNote}
+              onUpdateProgress={updateProgress}
+              onUpdateRating={updateRating}
+            />
+          </div>
+        ))}
       </div>
 
       <div className="mb-4 mt-6 flex justify-end">
@@ -576,12 +765,12 @@ info.forEach((item, index) => {
           icon="pi pi-send"
           onClick={submitForm}
           className="
-          rounded-2xl border-0 bg-gradient-to-r from-emerald-400 to-green-500
-          px-5 py-3 text-sm font-semibold text-white
-          shadow-lg shadow-emerald-200 transition-all duration-200
-          hover:-translate-y-0.5 hover:shadow-xl
-          active:translate-y-0 sm:text-base
-        "
+            rounded-2xl border-0 bg-gradient-to-r from-emerald-400 to-green-500
+            px-5 py-3 text-sm font-semibold text-white
+            shadow-lg shadow-emerald-200 transition-all duration-200
+            hover:-translate-y-0.5 hover:shadow-xl
+            active:translate-y-0 sm:text-base
+          "
         />
       </div>
     </div>
