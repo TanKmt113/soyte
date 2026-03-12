@@ -57,7 +57,7 @@ const App = () => {
           element={<HealthRecordsDetail />}
         />
         <Route path="/schedule" element={<WorkSchedule />} />
-        <Route path="/forms" element={<FormList />} />
+        <Route path="/formsList/:type?" element={<FormList />} />
         <Route path="/forms/:id" element={<FormDetail />} />
         <Route path="/policy" element={<PolicyHealthInsurance />} />
         <Route path="/news/:categoryId" element={<NewsCategory />} />

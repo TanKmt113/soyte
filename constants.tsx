@@ -65,7 +65,7 @@ export const SERVICE_CATEGORIES = [
   {
     id: 4,
     title: "Phản ánh - Y Tế",
-    path: "",
+    path: "/formsList/phuluc",
     icon: ShieldPlus,
     containerClass:
       "bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-50 border-emerald-200 hover:shadow-emerald-300",
@@ -145,7 +145,7 @@ export const SERVICE_CATEGORIES = [
   {
     id: 12,
     title: "Giám sát chất lượng dịch vụ y tế",
-    path: "",
+    path: "/formsList/bieumau",
     icon: Award,
     containerClass:
       "bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-50 border-yellow-200 hover:shadow-yellow-300",
@@ -336,12 +336,12 @@ export const MAIN_MENU: MenuItem[] = [
         path: "/schedule",
         icon: CalendarDays,
       },
-      {
-        id: "form-list",
-        title: "Danh sách biểu mẫu",
-        path: "/forms",
-        icon: FileText,
-      },
+      // {
+      //   id: "form-list",
+      //   title: "Danh sách biểu mẫu",
+      //   path: "/formsList",
+      //   icon: FileText,
+      // },
       {
         id: "guide-exam",
         title: "Quy trình khám bệnh",
