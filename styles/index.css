@@ -9,7 +9,7 @@
 /* ── Facility MultiSelect Panel ── */
 .facility-ms-panel {
   border-radius: 12px !important;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(99,102,241,0.08) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(99, 102, 241, 0.08) !important;
   border: 1px solid #e0e7ff !important;
   overflow: hidden !important;
   max-width: 600px !important;
@@ -34,7 +34,7 @@
 
 .facility-ms-panel .p-multiselect-filter:focus {
   border-color: #6366f1 !important;
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
   outline: none !important;
 }
 
@@ -71,7 +71,7 @@
   border: 2px solid #94a3b8 !important;
   background: #fff !important;
   transition: all 0.15s ease !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -79,7 +79,7 @@
 
 .facility-ms-panel .p-multiselect-item:hover .p-checkbox .p-checkbox-box {
   border-color: #6366f1 !important;
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
 }
 
 /* ── Checkbox SELECTED – PrimeReact v10 dùng data-p-highlight thay vì .p-highlight ── */
@@ -87,7 +87,7 @@
 .facility-ms-panel .p-checkbox[data-p-highlight="true"] .p-checkbox-box {
   background: #6366f1 !important;
   border-color: #6366f1 !important;
-  box-shadow: 0 2px 8px rgba(99,102,241,0.35) !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35) !important;
 }
 
 /* Icon checkmark bên trong (SVG dùng fill="currentColor") */

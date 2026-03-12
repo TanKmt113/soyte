@@ -8,6 +8,7 @@ import { Dropdown } from "primereact/dropdown";
 import { MultiSelect } from "primereact/multiselect";
 import { Toast } from "@/components/prime";
 import { useNavigate, useParams } from "react-router-dom";
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { formService } from "../services/formService";
 import { ALL_FACILITIES } from "../constants";
 
@@ -112,12 +113,38 @@ const TemplateCreate: React.FC = () => {
     }
   }, [id]);
 
-  const handleSave = async () => {
+  const validateTemplate = () => {
+    if (!template.name || template.name.trim() === "") {
+      toast.current?.show({
+        severity: 'warn',
+        summary: 'Thiếu thông tin',
+        detail: 'Vui lòng nhập tên biểu mẫu để tiếp tục',
+        life: 3000
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const saveAction = async () => {
     try {
       setLoading(true);
 
+      // Filter out empty options and groups with no valid options/name
+      const cleanedData = template.data
+        .map(group => ({
+          ...group,
+          option: group.option.filter(opt => opt.content && opt.content.trim() !== "")
+        }))
+        .filter(group => (group.option && group.option.length > 0) || (group.name && group.name.trim() !== ""));
+
+      // Filter out empty info fields
+      const cleanedInfo = (template.info || []).filter(info => info.title && info.title.trim() !== "");
+
       const payload = {
         ...template,
+        data: cleanedData,
+        info: cleanedInfo,
         status: template.status ? 'active' : 'inactive'
       };
 
@@ -137,6 +164,21 @@ const TemplateCreate: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSave = () => {
+    if (!validateTemplate()) return;
+
+    confirmDialog({
+      header: 'Xác nhận lưu biểu mẫu',
+      message: 'Bạn có chắc chắn muốn lưu tất cả các nội dung và thiết lập này không?',
+      icon: 'pi pi-question-circle',
+      acceptLabel: 'Đồng ý lưu',
+      acceptClassName: 'p-button-primary px-4 py-2 border-round-lg shadow-1 ml-2 text-white bg-primary-600',
+      rejectLabel: 'Quay lại',
+      rejectClassName: 'p-button-text text-slate-500 px-4 py-2 border-round-lg',
+      accept: () => saveAction()
+    });
   };
 
   const handleCancel = () => {
@@ -489,12 +531,14 @@ const TemplateCreate: React.FC = () => {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-slate-700 font-bold mb-2">Tiêu đề biểu mẫu</label>
+                <label className="block text-slate-700 font-bold mb-2">
+                  Tên biểu mẫu <span className="text-red-500">*</span>
+                </label>
                 <InputText
                   value={template.name}
                   onChange={(e) => setTemplate({ ...template, name: e.target.value })}
-                  className="w-full border-slate-300 focus:border-primary-500 shadow-sm p-3 text-base"
-                  placeholder="Nhập tiêu đề bảng biểu..."
+                  className={`w-full bg-white border-slate-300 focus:border-primary-500 shadow-sm p-4 rounded-xl ${!template.name && 'border-orange-200'}`}
+                  placeholder="Nhập tên biểu mẫu/phiếu đánh giá..."
                 />
               </div>
               <div className="md:col-span-2">

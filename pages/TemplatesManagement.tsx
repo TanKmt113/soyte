@@ -117,6 +117,10 @@ const TemplatesManagement: React.FC = () => {
   //   });
   // };
 
+  const sttBodyTemplate = (rowData: any, options: { rowIndex: number }) => {
+    return options.rowIndex + lazyParams.first + 1;
+  };
+
   const actionBodyTemplate = (rowData: any) => {
     return (
       <div className="flex gap-2">
@@ -179,7 +183,6 @@ const TemplatesManagement: React.FC = () => {
   return (
     <AdminLayout title="Quản lý biểu mẫu">
       <Toast ref={toast} />
-      <ConfirmDialog />
       <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden p-6 relative">
         {/* Header */}
         <div className="flex justify-between items-center mb-5">
@@ -317,7 +320,7 @@ const TemplatesManagement: React.FC = () => {
             tableStyle={{ minWidth: '50rem' }}
             emptyMessage="Không có dữ liệu phù hợp"
           >
-            <Column field="id" header="STT" sortable style={{ width: '5rem' }}></Column>
+            <Column header="STT" body={sttBodyTemplate} style={{ width: '5rem' }}></Column>
             <Column field="name" header="Tên biểu mẫu" sortable style={{ width: '20rem' }}></Column>
             <Column field="description" header="Mô tả" body={descriptionBodyTemplate}></Column>
             <Column field="status" header="Trạng thái" body={statusBodyTemplate} sortable style={{ width: '10rem' }}></Column>
