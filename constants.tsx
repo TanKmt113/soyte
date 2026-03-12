@@ -64,7 +64,7 @@ export const SERVICE_CATEGORIES = [
   },
   {
     id: 4,
-    title: "Phản ánh - Y Tế",
+    title: "Phản ánh Y Tế",
     path: "/formsList/phuluc",
     icon: ShieldPlus,
     containerClass:

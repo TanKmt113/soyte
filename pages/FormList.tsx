@@ -33,6 +33,9 @@ const FormList: React.FC = () => {
   const filteredForms = forms.filter(
     (form) => form.status === "active" && (!type || form.type === type),
   );
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Breadcrumb */}
@@ -60,9 +63,12 @@ const FormList: React.FC = () => {
               <span className="bg-secondary-500 text-white text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest mb-4 inline-block shadow-lg">
                 Dịch vụ công trực tuyến
               </span>
+              {
+
               <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-tight mb-4">
                 Phản ánh y tế
               </h1>
+              }
               <p className="text-primary-100 text-lg font-medium max-w-xl">
                 Gửi phản ánh và ý kiến của bạn về chất lượng dịch vụ y tế, thái
                 độ phục vụ và các vấn đề liên quan đến khám chữa bệnh để cơ quan
