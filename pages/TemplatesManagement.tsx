@@ -365,9 +365,9 @@ const TemplatesManagement: React.FC = () => {
             emptyMessage="Không có dữ liệu phù hợp"
           >
             <Column header="STT" body={sttBodyTemplate} style={{ width: '5rem' }}></Column>
-            <Column field="name" header="Tên biểu mẫu" sortable style={{ width: '20rem' }}></Column>
+            <Column field="name" header="Tên biểu mẫu" style={{ width: '25rem' }}></Column>
             <Column field="description" header="Mô tả" body={descriptionBodyTemplate}></Column>
-            <Column field="status" header="Trạng thái" body={statusBodyTemplate} sortable style={{ width: '10rem' }}></Column>
+            <Column field="status" header="Trạng thái" body={statusBodyTemplate} style={{ width: '10rem' }}></Column>
             <Column body={actionBodyTemplate} exportable={false} style={{ width: '8rem' }} header="Thao tác"></Column>
           </DataTable>
         </div>

@@ -8,4 +8,8 @@ export const feedBacksSevice = {
     async fetchFeedBackById(id: string) {
         return api.get(`/feedbacks/${id}`);
     },
+
+    async fetchStats(payload: { startDate: string, endDate: string }) {
+        return api.get('/feedbacks/stats', payload);
+    },
 };
