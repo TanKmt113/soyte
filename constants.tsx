@@ -1084,6 +1084,266 @@ export const capcuu = [
 
 export const ALL_FACILITIES = [
   {
+    id: "bv-dk-16a-ha-dong",
+    name: "Bệnh viện Đa khoa 16A Hà Đông", // [cite: 438]
+    type: "BV",
+    category: "Cơ sở y tế tư nhân", // [cite: 438]
+    address: "Lô 150, Nguyễn Sơn Hà, phường Hà Đông, thành phố Hà Nội", // [cite: 438]
+    phone: "",
+    coords: [20.969063, 105.787485], // [cite: 438]
+    description: ""
+  },
+  {
+    id: "bv-hong-ngoc-yen-ninh",
+    name: "BVĐK Hồng Ngọc", // [cite: 439]
+    type: "BV",
+    category: "Cơ sở y tế tư nhân", // [cite: 438]
+    address: "Số 55 Phố Yên Ninh, Phường Ba Đình, Thành phố Hà Nội, Việt Nam", // [cite: 439]
+    phone: "",
+    coords: [21.042482, 105.844177], // [cite: 439]
+    description: ""
+  },
+  {
+    id: "bv-hong-ngoc-phuc-truong-minh",
+    name: "BVĐK Hồng Ngọc - Phúc Trường Minh", // [cite: 439]
+    type: "BV",
+    category: "Cơ sở y tế tư nhân", // [cite: 438]
+    address: "Số 8 đường Châu Văn Liêm, Phường Từ Liêm, Thành phố Hà Nội, Việt Nam", // [cite: 439]
+    phone: "",
+    coords: [21.008998, 105.769454], // [cite: 439]
+    description: "Cơ sở 2 của BVĐK Hồng Ngọc"
+  },
+  {
+    id: "bv-vinmec-smart-city",
+    name: "Bệnh viện Đa khoa Quốc tế Vinmec Smart City", // [cite: 439]
+    type: "BV",
+    category: "Cơ sở y tế tư nhân", // [cite: 438]
+    address: "Số 2A, đường Tây Mỗ, phường Tây Mỗ, Hà Nội", // [cite: 439]
+    phone: "",
+    coords: [21.007557, 105.748198], // [cite: 439]
+    description: ""
+  },
+  {
+    id: "bv-phu-san-thien-an",
+    name: "Bệnh viện Phụ sản Thiện An", // [cite: 439]
+    type: "BV",
+    category: "Cơ sở y tế tư nhân", // [cite: 438]
+    address: "Số 27, ngõ 603 phố Lạc Long Quân, phường Tây Hồ, Thành phố Hà Nội, Việt Nam", // [cite: 439]
+    phone: "",
+    coords: [21.067478, 105.809661], // [cite: 439]
+    description: ""
+  },
+  {
+    id: "bv-phoi-tw",
+    name: "Bệnh viện Phổi Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 463 Hoàng Hoa Thám, Hà Nội",
+    phone: "",
+    coords: [21.040616, 105.811568],
+    description: "Quy mô: 1.046 giường bệnh"
+  },
+  {
+    id: "bv-e",
+    name: "Bệnh viện E",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 89 Đường Trần Cung, Hà Nội",
+    phone: "",
+    coords: [21.046816, 105.787687],
+    description: "Quy mô: 1.279 giường bệnh"
+  },
+  {
+    id: "tt-tim-mach-bve",
+    name: "Trung tâm Tim mạch - Bệnh viện E",
+    type: "TT",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 89 Đường Trần Cung, Hà Nội",
+    phone: "",
+    coords: [21.046816, 105.787687],
+    description: "Quy mô: 202 giường bệnh"
+  },
+  {
+    id: "vien-huyet-hoc-tw",
+    name: "Viện Huyết học - Truyền máu Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Phạm Văn Bạch, Hà Nội",
+    phone: "",
+    coords: [21.025287, 105.791557],
+    description: "Quy mô: 819 giường bệnh"
+  },
+  {
+    id: "bv-tai-mui-hong-tw",
+    name: "Bệnh viện Tai Mũi Họng Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 78 Giải Phóng, Hà Nội",
+    phone: "",
+    coords: [21.004229, 105.841571],
+    description: "Quy mô: 370 giường bệnh"
+  },
+  {
+    id: "bv-cham-cuu-tw",
+    name: "Bệnh viện Châm cứu Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 49 Thái Thịnh, Hà Nội",
+    phone: "",
+    coords: [21.013580, 105.817730],
+    description: "Quy mô: 585 giường bệnh"
+  },
+  {
+    id: "bv-noi-tiet-tw",
+    name: "Bệnh viện Nội tiết Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 80 Ngõ 82 Yên Lãng, Hà Nội",
+    phone: "",
+    coords: [21.011685, 105.818451],
+    description: "Quy mô: 1.142 giường bệnh"
+  },
+  {
+    id: "bv-nhi-tw",
+    name: "Bệnh viện Nhi Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 18/879 La Thành, Hà Nội",
+    phone: "",
+    coords: [21.024564, 105.807865],
+    description: "Quy mô: 2.196 giường bệnh"
+  },
+  {
+    id: "bv-da-lieu-tw",
+    name: "Bệnh viện Da liễu Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 15A, Phương Mai, Hà Nội",
+    phone: "",
+    coords: [21.002871, 105.839801],
+    description: "Quy mô: 110 giường bệnh"
+  },
+  {
+    id: "bv-lao-khoa-tw",
+    name: "Bệnh viện Lão khoa Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 1A Phương Mai, Hà Nội",
+    phone: "",
+    coords: [21.002821, 105.840243],
+    description: "Quy mô: 345 giường bệnh"
+  },
+  {
+    id: "bv-bach-mai",
+    name: "Bệnh viện Bạch Mai",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 78 Giải Phóng, Hà Nội",
+    phone: "",
+    coords: [21.000645, 105.842345],
+    description: "Quy mô: 3.464 giường bệnh"
+  },
+  {
+    id: "bv-dai-hoc-y-hn",
+    name: "Bệnh viện Đại học Y Hà Nội",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 1 Tôn Thất Tùng, Hà Nội",
+    phone: "",
+    coords: [21.001632, 105.829377],
+    description: "Quy mô: 677 giường bệnh"
+  },
+  {
+    id: "bv-huu-nghi-viet-xo",
+    name: "Bệnh viện Hữu nghị Việt Xô",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 1 đường Trần Khánh Dư, Hà Nội",
+    phone: "",
+    coords: [21.016377, 105.861783],
+    description: "Quy mô: 918 giường bệnh"
+  },
+  {
+    id: "bv-yhct-tw",
+    name: "Bệnh viện YHCT Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 29 Nguyễn Bỉnh Khiêm, Hà Nôi",
+    phone: "",
+    coords: [21.016075, 105.846571],
+    description: "Quy mô: 688 giường bệnh"
+  },
+  {
+    id: "bv-mat-tw",
+    name: "Bệnh viện Mắt Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 85 Bà Triệu, Hà Nội",
+    phone: "",
+    coords: [21.018939, 105.849182],
+    description: "Quy mô: 406 giường bệnh"
+  },
+  {
+    id: "bv-huu-nghi-viet-duc",
+    name: "Bệnh viện Hữu nghị Việt Đức",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 40 Tràng Thi, Hà Nội",
+    phone: "",
+    coords: [21.028574, 105.846467],
+    description: "Quy mô: 1.768 giường bệnh"
+  },
+  {
+    id: "bv-phu-san-tw",
+    name: "Bệnh viện Phụ sản Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 43 Tràng Thi, Hà Nội",
+    phone: "",
+    coords: [21.027878, 105.845942],
+    description: "Quy mô: 907 giường bệnh"
+  },
+  {
+    id: "bv-k",
+    name: "Bệnh viện K",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 43 Quán Sứ, Hà Nội",
+    phone: "",
+    coords: [21.026046, 105.845171],
+    description: "Quy mô: 3.569 giường bệnh"
+  },
+  {
+    id: "bv-rhm-tw",
+    name: "Bệnh viện Răng Hàm Mặt Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 40B Tràng Thi, Hà Nội",
+    phone: "",
+    coords: [21.028442, 105.846059],
+    description: "Quy mô: 131 giường bệnh"
+  },
+  {
+    id: "bv-benh-nhiet-doi-tw",
+    name: "Bệnh viện bệnh nhiệt đới Trung ương",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Thôn Bầu, xã Kim Chung, Hà Nội",
+    phone: "",
+    coords: [21.144577, 105.787702],
+    description: "Quy mô: 1.718 giường bệnh"
+  },
+  {
+    id: "bv-tam-than-tw1",
+    name: "Bệnh viện tâm thần Trung ương 1",
+    type: "BV",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "ĐT427B, Hoà Bình, Hà Nội",
+    phone: "",
+    coords: [20.874136, 105.831518],
+    description: "Quy mô: 620 giường bệnh"
+  },
+  {
     id: "cc-atvstp-hn",
     name: "Chi cục An toàn vệ sinh thực phẩm Hà Nội",
     type: "CC",
