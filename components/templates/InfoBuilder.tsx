@@ -1,0 +1,176 @@
+import React from "react";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { MultiSelect } from "primereact/multiselect";
+import { InputSwitch } from "primereact/inputswitch";
+import { InfoNode } from "../../types/templates";
+import { ALL_FACILITIES } from "../../constants";
+
+interface InfoBuilderProps {
+  info: InfoNode[];
+  updateInfoField: (index: number, field: keyof InfoNode, val: any) => void;
+  removeInfoField: (index: number) => void;
+  addInfoField: () => void;
+  setTemplate: any; // Using any for brevity in this complex object update
+}
+
+export const InfoBuilder: React.FC<InfoBuilderProps> = ({
+  info,
+  updateInfoField,
+  removeInfoField,
+  addInfoField,
+  setTemplate,
+}) => {
+  const addInfoOption = (infoIndex: number) => {
+    setTemplate((prev: any) => {
+      const newInfo = [...(prev.info || [])];
+      const newOptions = [...(newInfo[infoIndex].option || [])];
+      const nextKey = newOptions.length > 0
+        ? Math.max(...newOptions.map(o => Number(o.key) || 0)) + 1
+        : 1;
+      newOptions.push({ key: nextKey, value: "" });
+      newInfo[infoIndex] = { ...newInfo[infoIndex], option: newOptions };
+      return { ...prev, info: newInfo };
+    });
+  };
+
+  const updateInfoOption = (infoIndex: number, optIndex: number, val: string) => {
+    setTemplate((prev: any) => {
+      const newInfo = [...(prev.info || [])];
+      const newOptions = [...newInfo[infoIndex].option];
+      newOptions[optIndex] = { ...newOptions[optIndex], value: val };
+      newInfo[infoIndex] = { ...newInfo[infoIndex], option: newOptions };
+      return { ...prev, info: newInfo };
+    });
+  };
+
+  const removeInfoOption = (infoIndex: number, optIndex: number) => {
+    setTemplate((prev: any) => {
+      const newInfo = [...(prev.info || [])];
+      const newOptions = [...newInfo[infoIndex].option];
+      newOptions.splice(optIndex, 1);
+      newInfo[infoIndex] = { ...newInfo[infoIndex], option: newOptions };
+      return { ...prev, info: newInfo };
+    });
+  };
+
+  return (
+    <div className="p-6 border-b border-slate-100 bg-white flex-shrink-0">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h3 className="text-primary-900 font-bold text-base">Cấu trúc thông tin chung (Info)</h3>
+          <p className="text-slate-500 text-xs mt-1">Quản lý các trường thông tin chung của người điền biểu mẫu</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-4">
+        {info.map((field, idx) => (
+          <div key={idx} className="border border-slate-200 p-4 rounded-xl relative bg-slate-50">
+            <Button icon="pi pi-times" rounded text severity="danger" onClick={() => removeInfoField(idx)} className="absolute top-2 right-2 w-8 h-8 p-0" />
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mr-8 mt-4">
+              <div className="md:col-span-5">
+                <label className="block text-slate-700 font-bold mb-2 text-sm">Tiêu đề thông tin</label>
+                <InputText value={field.title} onChange={(e) => updateInfoField(idx, 'title', e.target.value)} className="w-full bg-white border-slate-300 focus:border-primary-500 shadow-sm p-3 text-base" placeholder="VD: Tên bệnh viện, Họ và tên..." />
+              </div>
+              <div className="md:col-span-6">
+                <label className="block text-slate-700 font-bold mb-2 text-sm">Loại dữ liệu</label>
+                <Dropdown value={field.type} options={[
+                  { label: 'Văn bản (Text)', value: 'text' },
+                  { label: 'Số (Number)', value: 'number' },
+                  { label: 'Ngày tháng (Date)', value: 'date' },
+                  { label: 'Lựa chọn (Select)', value: 'select' },
+                  { label: 'Cơ sở y tế (Multi)', value: 'facility_multiselect' },
+                ]} onChange={(e) => updateInfoField(idx, 'type', e.value)} className="w-full bg-white border-slate-300 focus:border-primary-500 shadow-sm flex items-center h-[46px]" />
+              </div>
+              <div className="md:col-span-1 flex flex-col items-center">
+                <label className="block text-slate-700 font-bold mb-3 text-sm">Hiển thị</label>
+                <InputSwitch
+                  checked={field.status !== false}
+                  onChange={(e) => updateInfoField(idx, 'status', e.value)}
+                />
+              </div>
+            </div>
+
+            {field.type === 'select' && (
+              <div className="mt-5 pt-4 border-t border-slate-200">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-slate-700 font-bold text-sm">Các tùy chọn lựa chọn:</span>
+                  <Button label="Thêm tùy chọn" icon="pi pi-plus" size="small" text onClick={() => addInfoOption(idx)} className="text-primary-600 hover:bg-primary-50 py-2 px-3" />
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {field.option?.map((opt, optIdx) => (
+                    <div key={optIdx} className="flex items-center bg-white border border-slate-300 rounded-lg overflow-hidden shadow-sm hover:border-primary-400 transition-colors">
+                      <InputText value={opt.value} onChange={(e) => updateInfoOption(idx, optIdx, e.target.value)} className="w-40 border-none p-2 text-sm focus:ring-0" placeholder="Nhập tên tùy chọn..." />
+                      <Button icon="pi pi-times" rounded text severity="danger" onClick={() => removeInfoOption(idx, optIdx)} className="w-10 h-10 p-0 flex-shrink-0 hover:bg-red-50 text-red-500 rounded-none border-l border-slate-200" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {field.type === 'facility_multiselect' && (() => {
+              const facilityTypeOptions = [
+                ...Array.from(new Set(ALL_FACILITIES.map(f => f.type))).map(t => ({
+                  label: `${t} (${ALL_FACILITIES.filter(f => f.type === t).length})`,
+                  value: t,
+                }))
+              ];
+              const selectedTypes: string[] = field.facilityTypeFilter || [];
+              const filteredFacilities = ALL_FACILITIES.filter(f =>
+                selectedTypes.length === 0 || selectedTypes.includes(f.type)
+              );
+              const facilityOptions = filteredFacilities.map(f => ({ label: f.name, value: f.id }));
+              return (
+                <div className="mt-5 pt-4 border-t border-indigo-200 bg-indigo-50 rounded-xl p-4 space-y-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <i className="pi pi-building text-indigo-500" style={{ fontSize: '14px' }} />
+                    <span className="text-sm font-bold text-indigo-700">Cấu hình danh sách cơ sở y tế</span>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-indigo-700 mb-1">
+                      <i className="pi pi-filter" style={{ fontSize: '10px' }} /> Lọc theo loại cơ sở:
+                    </label>
+                    <MultiSelect
+                      value={selectedTypes}
+                      options={facilityTypeOptions}
+                      onChange={(e) => updateInfoField(idx, 'facilityTypeFilter', e.value)}
+                      placeholder="Tất cả loại cơ sở"
+                      className="w-full text-xs bg-white border-indigo-300 rounded-lg shadow-sm"
+                      display="chip"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-indigo-700 mb-1">
+                      <i className="pi pi-check-square" style={{ fontSize: '10px' }} /> Chọn cơ sở được hiển thị:
+                    </label>
+                    <MultiSelect
+                      value={field.option?.map(o => o.key) || []}
+                      options={facilityOptions}
+                      onChange={(e) => {
+                        const selected = e.value as string[];
+                        const newOpts = selected.map(id => {
+                          const f = ALL_FACILITIES.find(x => x.id === id);
+                          return { key: id, value: f?.name || id };
+                        });
+                        updateInfoField(idx, 'option', newOpts);
+                      }}
+                      placeholder="Để trống = cho phép chọn tất cả"
+                      className="w-full text-xs bg-white border-indigo-300 rounded-lg shadow-sm"
+                      filter
+                      filterPlaceholder="Tìm kiếm cơ sở..."
+                      display="chip"
+                      maxSelectedLabels={3}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 flex justify-center">
+        <Button label="Thêm thông tin" icon="pi pi-plus" size="small" onClick={addInfoField} outlined className="bg-white border-primary-300 text-primary-600 hover:bg-primary-50 px-6 py-2 rounded-lg font-bold shadow-sm" />
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,45 @@
+export interface InfoOptionNode {
+  key: number | string;
+  value: string;
+}
+
+export interface InfoNode {
+  key?: string | number;
+  title: string;
+  value: string;
+  type: string;
+  status: boolean;
+  option: InfoOptionNode[];
+  facilityTypeFilter?: string[];
+}
+
+export interface OptionNode {
+  key?: string | number;
+  content: string;
+  method: string;
+  productOut: string;
+  progress: { type: string; value: number };
+  rating: { type: string; value: number };
+  ratingVote?: { type: string; value: number };
+  note?: string;
+  answerType?: 'score1_5' | 'single_choice' | 'percentage' | 'text' | 'facility_multiselect';
+  facilityTypeFilter?: string[];
+  answerOptions?: { key: number | string; value: string }[];
+  status: boolean;
+}
+
+export interface GroupNode {
+  name: string;
+  status: boolean;
+  Roman?: "number" | "roman";
+  option: OptionNode[];
+}
+
+export interface TemplateData {
+  name: string;
+  description: string;
+  status: boolean | string;
+  type?: string;
+  info?: InfoNode[];
+  data: GroupNode[];
+}
