@@ -14,6 +14,7 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  Delete,
 } from "lucide-react";
 import { api } from "../api";
 import { SERVICE_CATEGORIES_FILTER } from "../constants";
@@ -103,7 +104,7 @@ const AdminDashboard = () => {
     confirmDialog({
       message: "Bạn có chắc chắn muốn xóa bài viết này?",
       header: "Xác nhận",
-      icon: "pi pi-exclamation-triangle",
+      icon: Delete,
       accept: async () => {
         try {
           await api.delete(`/posts/${id}`);
@@ -287,18 +288,16 @@ const AdminDashboard = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
-                            post.status === "published"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-500"
-                          }`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${post.status === "published"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-500"
+                            }`}
                         >
                           <div
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              post.status === "published"
-                                ? "bg-green-500"
-                                : "bg-gray-400"
-                            }`}
+                            className={`w-1.5 h-1.5 rounded-full ${post.status === "published"
+                              ? "bg-green-500"
+                              : "bg-gray-400"
+                              }`}
                           ></div>
                           {post.status === "published"
                             ? "Công khai"
