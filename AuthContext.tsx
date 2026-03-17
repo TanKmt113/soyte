@@ -37,8 +37,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const token = localStorage.getItem('auth_token');
         if (token) {
+          const storedUser = localStorage.getItem('user_info');
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+            setLoading(false);
+          }
           const response = await api.get('/auth/me');
           setUser(response.user); // Extract the user object
+          localStorage.setItem('user_info', JSON.stringify(response.user));
         }
       } catch (error) {
         console.error('Failed to fetch user:', error);
@@ -58,6 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
         const response = await api.get('/auth/me');
         setUser(response.user); // Extract the user object
+        localStorage.setItem('user_info', JSON.stringify(response.user));
     } catch(error) {
         console.error('Failed to fetch user after login:', error);
         setUser(null);
@@ -68,6 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_info');
     setUser(null);
     window.location.href = '/login';
   };
