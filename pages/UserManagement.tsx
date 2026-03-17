@@ -178,22 +178,20 @@ const UserManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`text-[10px] font-black uppercase px-2 py-1 rounded border ${
-                          user.role === "admin"
-                            ? "bg-amber-50 text-amber-700 border-amber-100"
-                            : "bg-gray-50 text-gray-600 border-gray-100"
-                        }`}
+                        className={`text-[10px] font-black uppercase px-2 py-1 rounded border ${user.role === "admin"
+                          ? "bg-amber-50 text-amber-700 border-amber-100"
+                          : "bg-gray-50 text-gray-600 border-gray-100"
+                          }`}
                       >
                         {user.role}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
-                          parseInt(user.status) === 1
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${parseInt(user.status) === 1
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                          }`}
                       >
                         <div
                           className={`w-1.5 h-1.5 rounded-full ${parseInt(user.status) === 1 ? "bg-green-500" : "bg-red-500"}`}
