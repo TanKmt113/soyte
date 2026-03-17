@@ -7,6 +7,7 @@ import {
   Building2,
   Stethoscope,
   ShieldCheck,
+  Lock,
 } from "lucide-react";
 
 export type MenuChild = {
@@ -113,5 +114,12 @@ export const adminMenu: MenuItem[] = [
         to: "/admin/feedbacks/evaluate",
       },
     ],
+  },
+  {
+    key: "permissions",
+    label: "Quản lý quyền",
+    icon: Lock,
+    permission: "permissions",
+    to: "/admin/permissions",
   },
 ];

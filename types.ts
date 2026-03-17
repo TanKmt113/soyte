@@ -62,12 +62,19 @@ export interface WorkSchedule {
   attendee_ids: number[];
   status: 'pending' | 'completed' | 'cancelled';
   attachments?: ScheduleAttachment[];
-  createdAt?: string;
-  updatedAt?: string; 
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface User {
   id: number;
   full_name: string;
   permissions?: string[];
+}
+export interface Permission {
+  id: number;
+  name: string;
+  description: string;
+  created_at?: string;
+  updated_at?: string;
 }

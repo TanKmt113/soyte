@@ -68,6 +68,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   };
 
   const checkPermission = (itemPermission?: string) => {
+    if (user?.role === "admin") return true;
     if (!itemPermission) return true;
     return user?.permissions?.includes(itemPermission);
   };

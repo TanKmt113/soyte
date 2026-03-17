@@ -21,6 +21,7 @@ import TemplateCreate from "./pages/TemplateCreate";
 import FeedbacksManagement from "./pages/FeedbacksManagement";
 import AdminRoute from "./components/AdminRoute";
 import SocialFacilitiesManagement from "./pages/SocialFacilitiesManagement";
+import PermissionsManagement from "./pages/PermissionsManagement";
 import { useAuth } from "./AuthContext";
 import { Toast } from "@/components/prime";
 import { useRef } from "react";
@@ -84,6 +85,7 @@ const App = () => {
             path="social-facilities"
             element={<SocialFacilitiesManagement />}
           />{" "}
+          <Route path="permissions" element={<PermissionsManagement />} />{" "}
           {/* New Admin Schedule Route */}
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>
