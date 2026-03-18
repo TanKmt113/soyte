@@ -1,14 +1,20 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { feedBacksSevice } from '../services/feedBacksSevice';
 import { Toast } from 'primereact/toast';
 import { DashboardStats } from '../types/DashboardStats';
 
 export const useFeedbackStats = (type?: string,toastRef?: React.RefObject<Toast | null>) => {
+  const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
+
+  useEffect(() => {
+    setStats(null);
+  }, [type]);
 
   const fetchDashboardStats = useCallback(async (payload: { startDate: string, endDate: string }) => {
     try {
-      const response = await feedBacksSevice.fetchStats(payload,type);
+      setLoading(true);
+      const response = await feedBacksSevice.fetchStats(payload, type);
       const data = response.data?.data || response.data;
       setStats(data);
     } catch (error) {
@@ -18,8 +24,10 @@ export const useFeedbackStats = (type?: string,toastRef?: React.RefObject<Toast 
         summary: 'Lỗi',
         detail: 'Không thể tải dữ liệu thống kê từ máy chủ'
       });
+    } finally {
+      setLoading(false);
     }
-  }, [toastRef]);
+  }, [toastRef, type]);
 
   // Tính toán phần trăm cho biểu đồ
   const totalTiendo = stats && stats.reflect ? (stats.reflect.tiendo.daLam + stats.reflect.tiendo.dangLam + stats.reflect.tiendo.chuaLam) : 0;
@@ -97,6 +105,7 @@ export const useFeedbackStats = (type?: string,toastRef?: React.RefObject<Toast 
 
   return {
     stats,
+    loading,
     fetchDashboardStats,
     tiendoChartData,
     danhgiaChartData,

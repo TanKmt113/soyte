@@ -32,12 +32,13 @@ const FeedbacksManagement: React.FC = () => {
 
   const {
     stats,
+    loading: statsLoading,
     fetchDashboardStats,
     tiendoChartData,
     danhgiaChartData,
     barChartData,
     getPercentValue
-  } = useFeedbackStats(type,toast);
+  } = useFeedbackStats(type, toast);
 
   const handleFilterChange = (newType: string) => {
     setFilterType(newType);
@@ -63,8 +64,8 @@ const FeedbacksManagement: React.FC = () => {
       start = new Date(year, 0, 1);
       end = new Date(year, 5, 30);
     } else if (newType === 'this_year') {
-      start = new Date(year, 0, 1);
-      end = new Date(year, 11, 31);
+      start = new Date(year, now.getMonth() - 11, 1);
+      end = new Date(year, now.getMonth() + 1, 0);
     } else if (newType === 'second_half') {
       start = new Date(year, 6, 1);
       end = new Date(year, 11, 31);
@@ -112,6 +113,7 @@ const FeedbacksManagement: React.FC = () => {
       <FeedbackStatsSection
         type={type}
         stats={stats}
+        loading={statsLoading}
         tiendoChartData={tiendoChartData}
         danhgiaChartData={danhgiaChartData}
         barChartData={barChartData}

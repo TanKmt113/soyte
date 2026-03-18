@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { feedBacksSevice } from '@/services/feedBacksSevice';
+import { formService } from '@/services/formService';
 import { FeedbackItem } from '@/types/feedbacks';
+import { ALL_FACILITIES } from '@/constants';
 
 interface ReportTabContentProps {
     formId: string;
@@ -12,54 +14,102 @@ interface ReportTabContentProps {
 export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feedbacks, dateFilter, filterType }) => {
     const [loading, setLoading] = useState(false);
     const [detailedFeedbacks, setDetailedFeedbacks] = useState<any[]>([]);
-    
+    const [formTemplate, setFormTemplate] = useState<any>(null);
+
+    // Calculate total expected units based on original form template info
+    const totalUnits = useMemo(() => {
+        if (!formTemplate) return 0;
+        console.log(formTemplate);
+        // Form metadata can store info in 'info' or 'data.info' depending on how it was fetched
+        const infoSource = formTemplate.info || formTemplate.data?.info;
+        if (!infoSource) return 0;
+
+        // Find the field that defines which units should report
+        // We look for 'facility_multiselect' type or a title that looks like 'Cơ sở y tế'
+        let facilityField: any = null;
+
+        const findInArray = (arr: any[]) => {
+            return arr.find((i: any) =>
+                i.type === 'facility_multiselect' ||
+                (i.title && (i.title.toLowerCase().includes('cơ sở y tế') || i.title.toLowerCase().includes('đơn vị')))
+            );
+        };
+
+        if (Array.isArray(infoSource)) {
+            facilityField = findInArray(infoSource);
+        } else if (typeof infoSource === 'object') {
+            const values = Object.values(infoSource);
+            facilityField = findInArray(values);
+        }
+
+        if (!facilityField) return 0;
+
+        // 1. If units were manually picked (fixed list)
+        if (facilityField.option && Array.isArray(facilityField.option) && facilityField.option.length > 0) {
+            return facilityField.option.length;
+        }
+
+        // 2. If it's a dynamic list based on type (e.g. all TYTs)
+        const selectedTypes = facilityField.facilityTypeFilter || [];
+        const filteredFacilities = ALL_FACILITIES.filter(f =>
+            selectedTypes.length === 0 || selectedTypes.includes(f.type)
+        );
+        return filteredFacilities.length;
+    }, [formTemplate]);
+
     // Summary Stats
     const summaryStats = [
-        { id: 1, name: 'Đơn vị báo cáo', count: feedbacks.length, rate: '100%' }, // Placeholder
-        { id: 2, name: 'Đơn vị không báo cáo', count: 0, rate: '0%' }, // Placeholder
+        { id: 1, name: 'Đơn vị báo cáo', count: feedbacks.length, rate: totalUnits > 0 ? `${((feedbacks.length / totalUnits) * 100).toFixed(1)}%` : '0%' }, // Placeholder
+        { id: 2, name: 'Đơn vị không báo cáo', count: Math.max(0, totalUnits - feedbacks.length), rate: totalUnits > 0 ? `${(Math.max(0, totalUnits - feedbacks.length) / totalUnits * 100).toFixed(1)}%` : '0%' }, // Placeholder
         { id: 3, name: 'Đơn vị báo cáo đúng hạn', count: 0, rate: '0%' }, // Placeholder
         { id: 4, name: 'Đơn vị báo cáo không đúng hạn', count: 0, rate: '0%' }, // Placeholder
     ];
-
     useEffect(() => {
-        const fetchDetails = async () => {
+        const fetchDetailsAndTemplate = async () => {
             setLoading(true);
             try {
+                // Fetch template metadata to calculate total units
+                if (formId && formId !== 'unknown') {
+                    const tplRes = await formService.fetchFormById(formId);
+                    const tplData = tplRes.data || tplRes;
+                    setFormTemplate(tplData);
+                }
+
                 // Fetch details for all feedbacks in this tab to get the 'sections'
-                const promises = feedbacks.map(async (fb) => {
-                    const id = fb.id || fb._id;
-                    if (!id) return null;
-                    const response = await feedBacksSevice.fetchFeedBackById(id);
-                    const data = response.data || response;
-                    const fbData = data.data || data;
-                    return fbData;
-                });
-                
-                const results = await Promise.all(promises);
-                setDetailedFeedbacks(results.filter(r => r !== null));
+                if (feedbacks.length > 0) {
+                    const promises = feedbacks.map(async (fb) => {
+                        const id = fb.id || fb._id;
+                        if (!id) return null;
+                        const response = await feedBacksSevice.fetchFeedBackById(id);
+                        const data = response.data || response;
+                        const fbData = data.data || data;
+                        return fbData;
+                    });
+
+                    const results = await Promise.all(promises);
+                    setDetailedFeedbacks(results.filter(r => r !== null));
+                } else {
+                    setDetailedFeedbacks([]);
+                }
             } catch (error) {
-                console.error("Error fetching detailed feedbacks:", error);
+                console.error("Error fetching detailed feedbacks and template:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (feedbacks.length > 0) {
-            fetchDetails();
-        } else {
-            setDetailedFeedbacks([]);
-        }
-    }, [feedbacks]);
+        fetchDetailsAndTemplate();
+    }, [feedbacks, formId]);
 
     // Aggregate data from sections to build Table 2
     // We want to count how many units have done, doing, not done each check item
     const aggregatedChecks = React.useMemo(() => {
         if (!detailedFeedbacks || detailedFeedbacks.length === 0) return [];
-        
+
         // Use the first feedback's sections as template structure
         const templateSections = detailedFeedbacks[0].sections;
         if (!templateSections || templateSections.length === 0) return [];
-        
+
         const aggregated = templateSections.map((group: any) => {
             return {
                 name: group.name,
@@ -68,19 +118,19 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
                     let daLam = 0;
                     let dangLam = 0;
                     let chuaLam = 0;
-                    
+
                     detailedFeedbacks.forEach(fb => {
                         if (!fb.sections) return;
                         // Find this group and option in fb
                         const fbGroup = fb.sections.find((g: any) => g.name === group.name);
                         if (fbGroup && fbGroup.option) {
-                           const fbOpt = fbGroup.option.find((o: any) => o.content === optTemplate.content);
-                           if (fbOpt) {
-                               const tiendo = Number(fbOpt.tiendo);
-                               if (tiendo === 1) daLam++;
-                               else if (tiendo === 2) dangLam++;
-                               else if (tiendo === 3) chuaLam++;
-                           }
+                            const fbOpt = fbGroup.option.find((o: any) => o.content === optTemplate.content);
+                            if (fbOpt) {
+                                const tiendo = Number(fbOpt.tiendo);
+                                if (tiendo === 1) daLam++;
+                                else if (tiendo === 2) dangLam++;
+                                else if (tiendo === 3) chuaLam++;
+                            }
                         }
                     });
 
@@ -93,13 +143,18 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
                 })
             };
         });
-        
+
         return aggregated;
     }, [detailedFeedbacks]);
 
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-500">
+            {totalUnits > 0 && (
+                <div className="text-slate-800 font-bold text-lg mb-2">
+                    Tổng số: <span className="text-primary-700">{totalUnits}</span> đơn vị.
+                </div>
+            )}
             {/* Table 1: Summary Statistics */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
@@ -152,9 +207,9 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
                                     <th colSpan={3} className="border border-slate-600 p-2 text-center font-semibold border-b-0">Tình trạng thực hiện</th>
                                 </tr>
                                 <tr>
-                                    <th className="border border-slate-600 p-2 text-center text-sm">Đã thực hiện<br/><span className="text-xs font-normal opacity-80">(số đơn vị)</span></th>
-                                    <th className="border border-slate-600 p-2 text-center text-sm">Đang thực hiện<br/><span className="text-xs font-normal opacity-80">(số đơn vị)</span></th>
-                                    <th className="border border-slate-600 p-2 text-center text-sm">Chưa thực hiện<br/><span className="text-xs font-normal opacity-80">(số đơn vị)</span></th>
+                                    <th className="border border-slate-600 p-2 text-center text-sm">Đã thực hiện<br /><span className="text-xs font-normal opacity-80">(số đơn vị)</span></th>
+                                    <th className="border border-slate-600 p-2 text-center text-sm">Đang thực hiện<br /><span className="text-xs font-normal opacity-80">(số đơn vị)</span></th>
+                                    <th className="border border-slate-600 p-2 text-center text-sm">Chưa thực hiện<br /><span className="text-xs font-normal opacity-80">(số đơn vị)</span></th>
                                 </tr>
                             </thead>
                             <tbody>

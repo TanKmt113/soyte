@@ -7,7 +7,7 @@ import { Toast } from '@/components/prime'
 import { TabView, TabPanel } from 'primereact/tabview'
 import { FeedbackItem } from '@/types/feedbacks'
 
-import { getDefaultDates } from '@/utils/dateUtils'
+import { formatDateVN, getDefaultDates } from '@/utils/dateUtils'
 
 const Report_DCBC = () => {
     const toast = useRef<Toast>(null);
@@ -28,7 +28,6 @@ const Report_DCBC = () => {
             if (data?.items && Array.isArray(data.items)) { list = data.items; }
             else if (data?.data?.items && Array.isArray(data.data.items)) { list = data.data.items; }
             else if (Array.isArray(data)) { list = data; }
-
             setFeedbacks(list);
         } catch (error) {
             console.error(error);
@@ -40,7 +39,7 @@ const Report_DCBC = () => {
 
     useEffect(() => {
         fetchAllFeedbacks();
-    }, [dateFilter.startDate, dateFilter.endDate]); 
+    }, [dateFilter.startDate, dateFilter.endDate]);
 
     const handleFilterChange = (newType: string) => {
         setFilterType(newType);
@@ -66,8 +65,8 @@ const Report_DCBC = () => {
             start = new Date(year, 0, 1);
             end = new Date(year, 5, 30);
         } else if (newType === 'this_year') {
-            start = new Date(year, 0, 1);
-            end = new Date(year, 11, 31);
+            start = new Date(year, now.getMonth() - 11, 1);
+            end = new Date(year, now.getMonth() + 1, 0);
         } else if (newType === 'second_half') {
             start = new Date(year, 6, 1);
             end = new Date(year, 11, 31);
@@ -90,20 +89,12 @@ const Report_DCBC = () => {
         }
     };
 
-    // Filter feedbacks by Date and group by Form
+    // Group feedbacks by Form
     const groupedFeedbacks = useMemo<Record<string, { title: string, items: FeedbackItem[] }>>(() => {
-        // First filter by date
-        const filtered = feedbacks.filter(fb => {
-            const fbDate = new Date(fb.created_at || fb.createdAt || fb.date || new Date());
-            const start = new Date(dateFilter.startDate);
-            const end = new Date(dateFilter.endDate);
-            return fbDate >= start && fbDate <= end;
-        });
-
-        // Group by form_id
+        // We rely on the API for date filtering, so we take all returned feedbacks
         const groups: Record<string, { title: string, items: FeedbackItem[] }> = {};
 
-        filtered.forEach(fb => {
+        feedbacks.forEach(fb => {
             const fId = fb.form_id || 'unknown';
             if (!groups[fId]) {
                 groups[fId] = {
@@ -115,7 +106,18 @@ const Report_DCBC = () => {
         });
 
         return groups;
-    }, [feedbacks, dateFilter]);
+    }, [feedbacks]);
+
+    const reportHeader = (
+        <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center">
+                <i className="pi pi-chart-bar text-primary-600 text-xl"></i>
+            </div>
+            <h2 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">
+                Kết quả tiếp nhận báo cáo từ ngày <span className="text-primary-700">{formatDateVN(dateFilter.startDate)}</span> đến ngày <span className="text-primary-700">{formatDateVN(dateFilter.endDate)}</span>
+            </h2>
+        </div>
+    );
 
     return (
         <AdminLayout title="Đề cương báo cáo (DCBC)" subtitle="Báo cáo tình hình tiếp nhận và xử lý phản ánh, kiến nghị">
@@ -127,6 +129,7 @@ const Report_DCBC = () => {
                     handleFilterChange={handleFilterChange}
                     dateFilter={dateFilter}
                     handleCustomDateChange={handleCustomDateChange}
+                    reportHeader={reportHeader}
                 />
 
                 {loading ? (
@@ -136,9 +139,9 @@ const Report_DCBC = () => {
                     </div>
                 ) : Object.keys(groupedFeedbacks).length > 0 ? (
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                        <TabView className="styled-tabview">
+                        <TabView className="styled-tabview" scrollable>
                             {Object.entries(groupedFeedbacks).map(([formId, group]: [string, any]) => (
-                                <TabPanel key={formId} header={group.title}>
+                                <TabPanel key={formId} header={group.title} headerClassName="max-w-[200px] md:max-w-[300px]">
                                     <div className="p-4 md:p-6 bg-slate-50 min-h-[50vh]">
                                         <ReportTabContent
                                             formId={formId}
@@ -177,6 +180,11 @@ const Report_DCBC = () => {
                     padding: 1rem 1.25rem;
                     transition: all 0.2s;
                     box-shadow: none !important;
+                    display: block;
+                    max-width: 250px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
                 .styled-tabview .p-tabview-nav li:not(.p-highlight):hover .p-tabview-nav-link {
                     color: #475569;

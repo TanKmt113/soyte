@@ -6,6 +6,7 @@ import { DashboardStats } from '../../types/DashboardStats';
 interface FeedbackStatsSectionProps {
   type?: string;
   stats: DashboardStats | null;
+  loading?: boolean;
   tiendoChartData: any;
   danhgiaChartData: any;
   barChartData: any;
@@ -38,11 +39,30 @@ const barChartOptions = {
 export const FeedbackStatsSection: React.FC<FeedbackStatsSectionProps> = ({
   type,
   stats,
+  loading,
   tiendoChartData,
   danhgiaChartData,
   barChartData,
   getPercentValue
 }) => {
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+        {[1, 2].map((i) => (
+          <div key={i} className="rounded-3xl border border-slate-200 bg-[#f8fafc] p-5 shadow-sm animate-pulse">
+            <div className="mb-4">
+              <div className="h-4 w-32 bg-slate-200 rounded mb-2" />
+              <div className="h-3 w-48 bg-slate-100 rounded" />
+            </div>
+            <div className="rounded-[24px] border border-slate-100 bg-white p-4 h-[280px] flex items-center justify-center">
+              <div className="w-40 h-40 rounded-full border-8 border-slate-100" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (!stats) return null;
 
   return (
