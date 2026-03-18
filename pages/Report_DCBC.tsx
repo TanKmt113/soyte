@@ -96,9 +96,21 @@ const Report_DCBC = () => {
 
         feedbacks.forEach(fb => {
             const fId = fb.form_id || 'unknown';
+            let title = "";
+
+            if (fId === 3) {
+                title = "Khối các bệnh viện trực thuộc"
+            }
+            if (fId === 17) {
+                title = "Đơn vị trợ giúp xã hội trực thuộc"
+            }
+            if (fId === 18) {
+                title = "Khối các trạm y tế xã, phường"
+            }
+
             if (!groups[fId]) {
                 groups[fId] = {
-                    title: fb.info?.title || `Mẫu phản ánh (${fId})`,
+                    title: title || fb.info?.title || `Mẫu phản ánh (${fId})`,
                     items: []
                 };
             }
@@ -141,7 +153,14 @@ const Report_DCBC = () => {
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                         <TabView className="styled-tabview" scrollable>
                             {Object.entries(groupedFeedbacks).map(([formId, group]: [string, any]) => (
-                                <TabPanel key={formId} header={group.title} headerClassName="max-w-[200px] md:max-w-[300px]">
+                                <TabPanel
+                                    key={formId}
+                                    header={
+                                        <span title={group.title} className="block font-semibold">
+                                            {group.title}
+                                        </span>
+                                    }
+                                >
                                     <div className="p-4 md:p-6 bg-slate-50 min-h-[50vh]">
                                         <ReportTabContent
                                             formId={formId}
@@ -181,7 +200,7 @@ const Report_DCBC = () => {
                     transition: all 0.2s;
                     box-shadow: none !important;
                     display: block;
-                    max-width: 250px;
+                    max-width: 400px; 
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -192,8 +211,8 @@ const Report_DCBC = () => {
                     background: #f8fafc;
                 }
                 .styled-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-                    color: #1e3a8a; /* primary-900 */
-                    border-color: #1e40af; /* primary-800 */
+                    color: #1e3a8a; 
+                    border-color: #1e40af; 
                     background: #eff6ff;
                 }
                 .styled-tabview .p-tabview-panels {
