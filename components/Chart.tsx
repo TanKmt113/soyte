@@ -164,26 +164,26 @@ const yRange = useMemo(() => {
             },
           },
         },
-        y: {
-          min: yRange.min,
-          max: yRange.max,
-          ticks: {
-            stepSize: yRange.stepSize,
-            color: "#4B5563",
-            padding: 8,
-            callback: function (value: number) {
-              return Number(value).toFixed(1);
-            },
-            font: {
-              size: 11,
-              family: "Inter, sans-serif",
-            },
-          },
-          grid: {
-            color: "#D1D5DB",
-            drawBorder: false,
-          },
-        },
+       y: {
+  min: 0,
+  max: 5,
+  ticks: {
+    stepSize: 0.5,
+    color: "#4B5563",
+    padding: 8,
+    callback: function (value: number) {
+      return Number(value).toFixed(1);
+    },
+    font: {
+      size: 11,
+      family: "Inter, sans-serif",
+    },
+  },
+  grid: {
+    color: "#D1D5DB",
+    drawBorder: false,
+  },
+},
       },
     };
   }, [yRange]);
