@@ -36,10 +36,13 @@ export interface GroupNode {
 }
 
 export interface TemplateData {
+  id?: string;
   name: string;
   description: string;
   status: boolean;
   type?: string;
   info?: InfoNode[];
   data: GroupNode[];
+  startDate?: Date | string | null;
+  endDate?: Date | string | null;
 }

@@ -15,17 +15,19 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
     const [loading, setLoading] = useState(false);
     const [detailedFeedbacks, setDetailedFeedbacks] = useState<any[]>([]);
     const [formTemplate, setFormTemplate] = useState<any>(null);
+    // const [isDetailedTableExpanded, setIsDetailedTableExpanded] = useState(true);
+    const [expandedGroups, setExpandedGroups] = useState<Record<number, boolean>>({});
 
-    // Calculate total expected units based on original form template info
+    // Tính tổng số đơn vị dự kiến dựa trên thông tin biểu mẫu gốc
     const totalUnits = useMemo(() => {
         if (!formTemplate) return 0;
-        console.log(formTemplate);
-        // Form metadata can store info in 'info' or 'data.info' depending on how it was fetched
+
+        // Metadata của biểu mẫu có thể lưu trong 'info' hoặc 'data.info' tùy vào cách lấy dữ liệu
         const infoSource = formTemplate.info || formTemplate.data?.info;
         if (!infoSource) return 0;
 
-        // Find the field that defines which units should report
-        // We look for 'facility_multiselect' type or a title that looks like 'Cơ sở y tế'
+        // Tìm trường thông tin xác định đơn vị nào cần báo cáo
+        // Tìm loại 'facility_multiselect' hoặc tiêu đề có chứa 'Cơ sở y tế' hoặc 'Đơn vị'
         let facilityField: any = null;
 
         const findInArray = (arr: any[]) => {
@@ -44,12 +46,12 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
 
         if (!facilityField) return 0;
 
-        // 1. If units were manually picked (fixed list)
+        // 1. Nếu các đơn vị được chọn thủ công (danh sách cố định)
         if (facilityField.option && Array.isArray(facilityField.option) && facilityField.option.length > 0) {
             return facilityField.option.length;
         }
 
-        // 2. If it's a dynamic list based on type (e.g. all TYTs)
+        // 2. Nếu là danh sách động dựa trên loại đơn vị (VD: tất cả TYT)
         const selectedTypes = facilityField.facilityTypeFilter || [];
         const filteredFacilities = ALL_FACILITIES.filter(f =>
             selectedTypes.length === 0 || selectedTypes.includes(f.type)
@@ -57,25 +59,25 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
         return filteredFacilities.length;
     }, [formTemplate]);
 
-    // Summary Stats
+    // Thống kê tổng hợp
     const summaryStats = [
-        { id: 1, name: 'Đơn vị báo cáo', count: feedbacks.length, rate: totalUnits > 0 ? `${((feedbacks.length / totalUnits) * 100).toFixed(1)}%` : '0%' }, // Placeholder
-        { id: 2, name: 'Đơn vị không báo cáo', count: Math.max(0, totalUnits - feedbacks.length), rate: totalUnits > 0 ? `${(Math.max(0, totalUnits - feedbacks.length) / totalUnits * 100).toFixed(1)}%` : '0%' }, // Placeholder
-        { id: 3, name: 'Đơn vị báo cáo đúng hạn', count: 0, rate: '0%' }, // Placeholder
-        { id: 4, name: 'Đơn vị báo cáo không đúng hạn', count: 0, rate: '0%' }, // Placeholder
+        { id: 1, name: 'Đơn vị báo cáo', count: feedbacks.length, rate: totalUnits > 0 ? `${((feedbacks.length / totalUnits) * 100).toFixed(1)}%` : '0%' }, // Dữ liệu tạm
+        { id: 2, name: 'Đơn vị không báo cáo', count: Math.max(0, totalUnits - feedbacks.length), rate: totalUnits > 0 ? `${(Math.max(0, totalUnits - feedbacks.length) / totalUnits * 100).toFixed(1)}%` : '0%' }, // Dữ liệu tạm
+        { id: 3, name: 'Đơn vị báo cáo đúng hạn', count: 0, rate: '0%' }, // Dữ liệu tạm
+        { id: 4, name: 'Đơn vị báo cáo không đúng hạn', count: 0, rate: '0%' }, // Dữ liệu tạm
     ];
     useEffect(() => {
         const fetchDetailsAndTemplate = async () => {
             setLoading(true);
             try {
-                // Fetch template metadata to calculate total units
+                // Lấy metadata của biểu mẫu để tính tổng số đơn vị
                 if (formId && formId !== 'unknown') {
                     const tplRes = await formService.fetchFormById(formId);
                     const tplData = tplRes.data || tplRes;
                     setFormTemplate(tplData);
                 }
 
-                // Fetch details for all feedbacks in this tab to get the 'sections'
+                // Lấy chi tiết cho tất cả phản hồi trong tab này để lấy dữ liệu 'sections'
                 if (feedbacks.length > 0) {
                     const promises = feedbacks.map(async (fb) => {
                         const id = fb.id || fb._id;
@@ -101,12 +103,12 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
         fetchDetailsAndTemplate();
     }, [feedbacks, formId]);
 
-    // Aggregate data from sections to build Table 2
-    // We want to count how many units have done, doing, not done each check item
+    // Tổng hợp dữ liệu từ các section để xây dựng Bảng 2
+    // Đếm số lượng đơn vị đã làm, đang làm, chưa làm cho mỗi nội dung kiểm tra
     const aggregatedChecks = React.useMemo(() => {
         if (!detailedFeedbacks || detailedFeedbacks.length === 0) return [];
 
-        // Use the first feedback's sections as template structure
+        // Sử dụng các section của phản hồi đầu tiên làm cấu trúc mẫu
         const templateSections = detailedFeedbacks[0].sections;
         if (!templateSections || templateSections.length === 0) return [];
 
@@ -114,14 +116,14 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
             return {
                 name: group.name,
                 options: group.option.map((optTemplate: any) => {
-                    // Find matching options in all feedbacks
+                    // Tìm các tùy chọn tương ứng trong tất cả phản hồi
                     let daLam = 0;
                     let dangLam = 0;
                     let chuaLam = 0;
 
                     detailedFeedbacks.forEach(fb => {
                         if (!fb.sections) return;
-                        // Find this group and option in fb
+                        // Tìm nhóm và tùy chọn này trong phản hồi
                         const fbGroup = fb.sections.find((g: any) => g.name === group.name);
                         if (fbGroup && fbGroup.option) {
                             const fbOpt = fbGroup.option.find((o: any) => o.content === optTemplate.content);
@@ -155,7 +157,7 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
                     Tổng số: <span className="text-primary-700">{totalUnits}</span> đơn vị.
                 </div>
             )}
-            {/* Table 1: Summary Statistics */}
+            {/* Bảng 1: Thống kê tổng hợp */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
                     <h3 className="font-bold text-slate-800 text-lg">Tổng hợp tình hình báo cáo</h3>
@@ -184,13 +186,22 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
                 </div>
             </div>
 
-            {/* Table 2: Detailed Checks */}
+            {/* Bảng 2: Chi tiết các nội dung kiểm tra */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-                    <h3 className="font-bold text-slate-800 text-lg">Chi tiết tình trạng thực hiện các nội dung kiểm tra</h3>
-                    <p className="text-sm text-slate-500 mt-1 italic">(Chỉ phân tích trên {feedbacks.length} đơn vị gửi báo cáo)</p>
+                <div
+                    className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center cursor-pointer hover:bg-slate-100 transition-colors"
+                // onClick={() => setIsDetailedTableExpanded(!isDetailedTableExpanded)}
+                >
+                    <div>
+                        <h3 className="font-bold text-slate-800 text-lg">Chi tiết tình trạng thực hiện các nội dung kiểm tra</h3>
+                        <p className="text-sm text-slate-500 mt-1 italic">(Chỉ phân tích trên {feedbacks.length} đơn vị gửi báo cáo)</p>
+                    </div>
+                    {/* <div className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 shadow-sm hover:text-primary-600 transition-all">
+                        <i className={`pi ${isDetailedTableExpanded ? 'pi-chevron-up' : 'pi-chevron-down'} font-bold`}></i>
+                    </div> */}
                 </div>
-                <div className="overflow-x-auto p-6">
+
+                <div className="overflow-x-auto p-6 animate-in slide-in-from-top-2 duration-300">
                     {loading ? (
                         <div className="flex justify-center items-center py-10">
                             <i className="pi pi-spin pi-spinner text-3xl text-primary-500"></i>
@@ -216,38 +227,47 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
                                 {(() => {
                                     let globalIdx = 0;
                                     const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV"];
-                                    return aggregatedChecks.map((group: any, gi: number) => (
-                                        <React.Fragment key={gi}>
-                                            <tr className="bg-primary-800 text-white">
-                                                <td className="border border-slate-600 p-2 text-center font-bold">
-                                                    {roman[gi] || gi + 1}
-                                                </td>
-                                                <td colSpan={6} className="border border-slate-600 p-3 text-left font-bold text-sm">
-                                                    {group.name || `Nhóm nội dung ${gi + 1}`}
-                                                </td>
-                                            </tr>
-                                            {group.options.map((opt: any, oi: number) => {
-                                                globalIdx++;
-                                                return (
-                                                    <tr key={oi} className="hover:bg-slate-50 border-b border-slate-300">
-                                                        <td className="border border-slate-300 p-3 text-center text-slate-700 font-medium">{globalIdx}</td>
-                                                        <td className="border border-slate-300 p-3 text-sm text-slate-800">
-                                                            <div className="whitespace-pre-wrap">{opt.content}</div>
-                                                        </td>
-                                                        <td className="border border-slate-300 p-3 text-sm text-slate-700">
-                                                            <div className="whitespace-pre-wrap">{opt.method}</div>
-                                                        </td>
-                                                        <td className="border border-slate-300 p-3 text-sm text-slate-700">
-                                                            <div className="whitespace-pre-wrap">{opt.productOut}</div>
-                                                        </td>
-                                                        <td className="border border-slate-300 p-3 text-center font-semibold text-primary-700">{opt.statusCounts.daLam || '---'}</td>
-                                                        <td className="border border-slate-300 p-3 text-center font-semibold text-orange-600">{opt.statusCounts.dangLam || '---'}</td>
-                                                        <td className="border border-slate-300 p-3 text-center font-semibold text-red-600">{opt.statusCounts.chuaLam || '---'}</td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </React.Fragment>
-                                    ));
+                                    return aggregatedChecks.map((group: any, gi: number) => {
+                                        const isGroupExpanded = expandedGroups[gi] !== false;
+                                        return (
+                                            <React.Fragment key={gi}>
+                                                <tr
+                                                    className="bg-primary-800 text-white cursor-pointer hover:bg-primary-700 transition-colors"
+                                                    onClick={() => setExpandedGroups(prev => ({ ...prev, [gi]: !isGroupExpanded }))}
+                                                >
+                                                    <td className="border border-slate-600 p-2 text-center font-bold">
+                                                        {roman[gi] || gi + 1}
+                                                    </td>
+                                                    <td colSpan={6} className="border border-slate-600 p-3 text-left font-bold text-sm">
+                                                        <div className="flex justify-between items-center">
+                                                            <span>{group.name || `Nhóm nội dung ${gi + 1}`}</span>
+                                                            <i className={`pi ${isGroupExpanded ? 'pi-chevron-up' : 'pi-chevron-down'} text-xs ml-2 opacity-80`}></i>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {isGroupExpanded && group.options.map((opt: any, oi: number) => {
+                                                    globalIdx++;
+                                                    return (
+                                                        <tr key={oi} className="hover:bg-slate-50 border-b border-slate-300">
+                                                            <td className="border border-slate-300 p-3 text-center text-slate-700 font-medium">{globalIdx}</td>
+                                                            <td className="border border-slate-300 p-3 text-sm text-slate-800">
+                                                                <div className="whitespace-pre-wrap">{opt.content}</div>
+                                                            </td>
+                                                            <td className="border border-slate-300 p-3 text-sm text-slate-700">
+                                                                <div className="whitespace-pre-wrap">{opt.method}</div>
+                                                            </td>
+                                                            <td className="border border-slate-300 p-3 text-sm text-slate-700">
+                                                                <div className="whitespace-pre-wrap">{opt.productOut}</div>
+                                                            </td>
+                                                            <td className="border border-slate-300 p-3 text-center font-semibold text-primary-700">{opt.statusCounts.daLam || '---'}</td>
+                                                            <td className="border border-slate-300 p-3 text-center font-semibold text-orange-600">{opt.statusCounts.dangLam || '---'}</td>
+                                                            <td className="border border-slate-300 p-3 text-center font-semibold text-red-600">{opt.statusCounts.chuaLam || '---'}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </React.Fragment>
+                                        );
+                                    });
                                 })()}
                             </tbody>
                         </table>

@@ -14,7 +14,7 @@ const Report_DCBC = () => {
     const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Filters
+    // Bộ lọc
     const [filterType, setFilterType] = useState('this_year');
     const [dateFilter, setDateFilter] = useState(getDefaultDates());
 
@@ -89,9 +89,9 @@ const Report_DCBC = () => {
         }
     };
 
-    // Group feedbacks by Form
+    // Nhóm các phản hồi theo Biểu mẫu
     const groupedFeedbacks = useMemo<Record<string, { title: string, items: FeedbackItem[] }>>(() => {
-        // We rely on the API for date filtering, so we take all returned feedbacks
+        // Dựa vào API để lọc theo ngày, nên lấy tất cả các phản hồi trả về
         const groups: Record<string, { title: string, items: FeedbackItem[] }> = {};
 
         feedbacks.forEach(fb => {

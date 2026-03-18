@@ -4,6 +4,7 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
 import { InputSwitch } from "primereact/inputswitch";
+import { Calendar } from "primereact/calendar";
 import { Toast } from "@/components/prime";
 import { useParams } from "react-router-dom";
 import { useTemplateForm } from "../hooks/useTemplateForm";
@@ -206,10 +207,49 @@ const TemplateCreate: React.FC = () => {
                   placeholder="Nhập phụ chú ngắn gọn..."
                 />
               </div>
+              <div className="md:col-span-2">
+                <label className="block text-slate-700 font-bold mb-2">Thời gian áp dụng</label>
+                <div className="flex flex-col md:flex-row items-center gap-3">
+                  {/* Từ ngày */}
+                  <div className="w-full relative">
+                    <Calendar
+                      value={template.startDate}
+                      onChange={(e) => setTemplate({ ...template, startDate: e.value })}
+                      className="w-full"
+                      inputClassName="w-full border border-slate-300 focus:border-primary-500 shadow-sm p-4 rounded-xl text-base transition-colors"
+                      placeholder="Từ ngày (dd/mm/yyyy)..."
+                      showIcon
+                      dateFormat="dd/mm/yy"
+                      iconPos="left"
+                    />
+                  </div>
+
+                  {/* Mũi tên ngăn cách (chỉ hiện trên màn hình lớn) */}
+                  <div className="hidden md:flex text-slate-300 px-2 flex-shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                  </div>
+
+                  {/* Đến ngày */}
+                  <div className="w-full relative">
+                    <Calendar
+                      value={template.endDate}
+                      onChange={(e) => setTemplate({ ...template, endDate: e.value })}
+                      className="w-full"
+                      inputClassName="w-full border border-slate-300 focus:border-primary-500 shadow-sm p-4 rounded-xl text-base transition-colors"
+                      placeholder="Đến ngày (dd/mm/yyyy)..."
+                      showIcon
+                      dateFormat="dd/mm/yy"
+                      iconPos="left"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <InfoBuilder 
+          <InfoBuilder
             info={template.info || []}
             updateInfoField={updateInfoField}
             removeInfoField={removeInfoField}
@@ -222,7 +262,7 @@ const TemplateCreate: React.FC = () => {
           <div className="flex-grow p-6 bg-white flex flex-col">
             <div className="rounded-xl border border-primary-200 overflow-x-auto shadow-sm relative">
               {template.type === 'reflect' ? (
-                <ReflectBuilder 
+                <ReflectBuilder
                   data={template.data}
                   expandedGroups={expandedGroups}
                   groupStartIndices={groupStartIndices}
@@ -234,7 +274,7 @@ const TemplateCreate: React.FC = () => {
                   removeOption={removeOption}
                 />
               ) : (
-                <EvaluateBuilder 
+                <EvaluateBuilder
                   data={template.data}
                   expandedGroups={expandedGroups}
                   groupStartIndices={groupStartIndices}

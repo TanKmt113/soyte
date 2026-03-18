@@ -19,6 +19,8 @@ export const useTemplateForm = (
     status: true,
     type: type || "reflect",
     info: [],
+    startDate: null,
+    endDate: null,
     data: [
       {
         name: "",
@@ -44,7 +46,9 @@ export const useTemplateForm = (
         if (templateData) {
           setTemplate({
             ...templateData,
-            status: templateData.status === 'active' || templateData.status === 'true' || templateData.status === true
+            status: templateData.status === 'active' || templateData.status === 'true' || templateData.status === true,
+            startDate: templateData.startDate ? new Date(templateData.startDate) : null,
+            endDate: templateData.endDate ? new Date(templateData.endDate) : null
           });
         }
       } catch (error) {
@@ -70,6 +74,19 @@ export const useTemplateForm = (
       });
       return false;
     }
+
+    if (template.startDate && template.endDate) {
+      if (new Date(template.startDate) > new Date(template.endDate)) {
+        toastRef.current?.show({
+          severity: 'warn',
+          summary: 'Kiểm tra lại',
+          detail: 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu',
+          life: 3000
+        });
+        return false;
+      }
+    }
+
     return true;
   };
 
