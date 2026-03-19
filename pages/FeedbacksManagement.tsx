@@ -1,7 +1,7 @@
 import AdminLayout from "../components/AdminLayout";
 import React, { useRef, useState, useEffect } from "react";
 import { Toast } from "@/components/prime";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { getDefaultDates } from "../utils/dateUtils";
 import { useFeedbacks } from "../hooks/useFeedbacks";
 import { useFeedbackStats } from "../hooks/useFeedbackStats";
@@ -10,10 +10,19 @@ import { FeedbackStatsSection } from "../components/feedbacks/FeedbackStatsSecti
 import { FeedbackDataTable } from "../components/feedbacks/FeedbackDataTable";
 import { FeedbackDetailsDialog } from "../components/feedbacks/FeedbackDetailsDialog";
 
+const ALLOWED_TYPES = ["evaluate", "reflect"] as const;
+type FormType = (typeof ALLOWED_TYPES)[number];
 const FeedbacksManagement: React.FC = () => {
   const toast = useRef<Toast>(null);
   const { type } = useParams();
 
+  const isValidType =
+    type === undefined || ALLOWED_TYPES.includes(type as FormType);
+
+  if (!isValidType) {
+    //return <Navigate to="/404" replace />;
+    return <Navigate to="/admin" replace />;
+  }
   const [dateFilter, setDateFilter] = useState<{ startDate: string, endDate: string }>(getDefaultDates());
   const [filterType, setFilterType] = useState<string>("this_year");
 

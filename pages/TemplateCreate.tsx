@@ -6,16 +6,25 @@ import { Button } from "primereact/button";
 import { InputSwitch } from "primereact/inputswitch";
 import { Calendar } from "primereact/calendar";
 import { Toast } from "@/components/prime";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useTemplateForm } from "../hooks/useTemplateForm";
 import { InfoBuilder } from "../components/templates/InfoBuilder";
 import { ReflectBuilder } from "../components/templates/ReflectBuilder";
 import { EvaluateBuilder } from "../components/templates/EvaluateBuilder";
 import { ConfirmDialog } from 'primereact/confirmdialog';
-
+const ALLOWED_TYPES = ["evaluate", "reflect"] as const;
+type FormType = (typeof ALLOWED_TYPES)[number];
 const TemplateCreate: React.FC = () => {
   const { id, type } = useParams<{ id?: string; type?: string }>();
   const toast = useRef<Toast>(null);
+
+  const isValidType =
+    type === undefined || ALLOWED_TYPES.includes(type as FormType);
+
+  if (!isValidType) {
+    //return <Navigate to="/404" replace />;
+    return <Navigate to="/admin" replace />;
+  }
 
   const {
     template,

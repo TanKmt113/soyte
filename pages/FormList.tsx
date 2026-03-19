@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { ChevronRight, FileText, Home, PhoneCall, ShieldCheck } from "lucide-react";
 import { api } from "@/api";
-
+const ALLOWED_TYPES = ["evaluate", "reflect"] as const;
+type FormType = (typeof ALLOWED_TYPES)[number];
 const FormList: React.FC = () => {
   const [forms, setForms] = useState([]);
-  const { type } = useParams();
+   const { type } = useParams<{ type?: string }>();
+
+   const isValidType =
+    type === undefined || ALLOWED_TYPES.includes(type as FormType);
+
+  if (!isValidType) {
+    //return <Navigate to="/404" replace />;
+   return <Navigate to="/" replace />;
+  }
+
   useEffect(() => {
     const fetchForms = async () => {
       try {

@@ -4,14 +4,15 @@ import { formService } from "../services/formService";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 
 import { Toast } from "@/components/prime";
 import { Plus } from "lucide-react";
-
+const ALLOWED_TYPES = ["evaluate", "reflect"] as const;
+type FormType = (typeof ALLOWED_TYPES)[number];
 const statusOptions = [
   { label: 'Tất cả', value: 'all' },
   { label: 'Hoạt động', value: 'active' },
@@ -22,6 +23,13 @@ const TemplatesManagement: React.FC = () => {
   const toast = useRef<Toast>(null);
   const navigate = useNavigate();
   const { type } = useParams<{ type?: string }>();
+  const isValidType =
+    type === undefined || ALLOWED_TYPES.includes(type as FormType);
+
+  if (!isValidType) {
+    //return <Navigate to="/404" replace />;
+    return <Navigate to="/admin" replace />;
+  }
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
