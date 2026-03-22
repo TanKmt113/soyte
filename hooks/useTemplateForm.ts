@@ -114,10 +114,10 @@ export const useTemplateForm = (
       } else {
         await formService.createForm(payload);
       }
-
+      console.log(template.type)
       toastRef.current?.show({ severity: 'success', summary: 'Thành công', detail: 'Đã lưu biểu mẫu' });
       setTimeout(() => {
-        navigate(type ? `/admin/templates/${type}` : '/admin/templates');
+        navigate(template.type ? `/admin/templates/${template.type}` : '/admin/templates');
       }, 1000);
     } catch (error) {
       console.error(error);

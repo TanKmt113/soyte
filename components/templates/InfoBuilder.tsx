@@ -39,11 +39,11 @@ export const InfoBuilder: React.FC<InfoBuilderProps> = ({
           <div key={idx} className="border border-slate-200 p-4 rounded-xl relative bg-slate-50">
             <Button icon="pi pi-times" rounded text severity="danger" onClick={() => removeInfoField(idx)} className="absolute top-2 right-2 w-8 h-8 p-0" />
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mr-8 mt-4">
-              <div className="md:col-span-5">
+              <div className="md:col-span-4">
                 <label className="block text-slate-700 font-bold mb-2 text-sm">Tiêu đề thông tin</label>
                 <InputText value={field.title} onChange={(e) => updateInfoField(idx, 'title', e.target.value)} className="w-full bg-white border-slate-300 focus:border-primary-500 shadow-sm p-3 text-base" placeholder="VD: Tên bệnh viện, Họ và tên..." />
               </div>
-              <div className="md:col-span-6">
+              <div className="md:col-span-5">
                 <label className="block text-slate-700 font-bold mb-2 text-sm">Loại dữ liệu</label>
                 <Dropdown value={field.type} options={[
                   { label: 'Văn bản (Text)', value: 'text' },
@@ -52,6 +52,13 @@ export const InfoBuilder: React.FC<InfoBuilderProps> = ({
                   { label: 'Lựa chọn (Select)', value: 'select' },
                   { label: 'Cơ sở y tế (Multi)', value: 'facility_multiselect' },
                 ]} onChange={(e) => updateInfoField(idx, 'type', e.value)} className="w-full bg-white border-slate-300 focus:border-primary-500 shadow-sm flex items-center h-[46px]" />
+              </div>
+              <div className="md:col-span-2 flex flex-col items-center">
+                <label className="block text-slate-700 font-bold mb-3 text-sm">Bắt buộc</label>
+                <InputSwitch
+                  checked={field.isValidate || false}
+                  onChange={(e) => updateInfoField(idx, 'isValidate', e.value)}
+                />
               </div>
               <div className="md:col-span-1 flex flex-col items-center">
                 <label className="block text-slate-700 font-bold mb-3 text-sm">Hiển thị</label>

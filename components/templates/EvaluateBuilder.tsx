@@ -43,6 +43,7 @@ export const EvaluateBuilder: React.FC<EvaluateBuilderProps> = ({
           <th className="border border-primary-900 p-3 w-16 text-center align-middle font-semibold bg-primary-800">STT</th>
           <th className="border border-primary-900 p-3 text-center align-middle font-semibold bg-primary-800">Nội dung câu hỏi / đánh giá</th>
           <th className="border border-primary-900 p-3 w-72 text-center align-middle font-semibold bg-primary-800">Loại trả lời & Cấu hình</th>
+          <th className="border border-primary-900 p-3 w-28 text-center align-middle font-semibold bg-primary-800">Bắt buộc</th>
           <th className="border border-primary-900 p-3 w-28 text-center align-middle font-semibold bg-primary-800">Trạng thái</th>
           <th className="border border-primary-900 p-3 w-16 text-center align-middle font-semibold bg-primary-800">Xóa</th>
         </tr>
@@ -59,6 +60,11 @@ export const EvaluateBuilder: React.FC<EvaluateBuilderProps> = ({
               </td>
               <td colSpan={2} className="border border-primary-200 p-2 font-bold bg-primary-50/60">
                 <InputText value={group.name} onChange={(e) => updateGroup(groupIndex, 'name', e.target.value)} className="w-full font-bold bg-transparent border-none shadow-none text-primary-900 placeholder:font-normal p-1 focus:ring-0 focus:bg-white rounded transition-colors" placeholder="Nhập tên nhóm nội dung (ràng buộc tiêu đề I, II, III)..." />
+              </td>
+              <td className="border border-primary-200 text-center align-middle bg-primary-50/60 p-2">
+                <div className="flex justify-center items-center h-full">
+                  <InputSwitch checked={group.isValidate || false} onChange={(e) => updateGroup(groupIndex, 'isValidate', e.value)} />
+                </div>
               </td>
               <td className="border border-primary-200 text-center align-middle bg-primary-50/60 p-2">
                 <div className="flex justify-center items-center h-full">
@@ -104,6 +110,11 @@ export const EvaluateBuilder: React.FC<EvaluateBuilderProps> = ({
                   </td>
                   <td className="border border-slate-200 p-2 text-center align-middle bg-white">
                     <div className="flex justify-center items-center h-full pt-1">
+                      <InputSwitch checked={opt.isValidate || false} onChange={(e) => updateOption(groupIndex, optIndex, 'isValidate', e.value)} />
+                    </div>
+                  </td>
+                  <td className="border border-slate-200 p-2 text-center align-middle bg-white">
+                    <div className="flex justify-center items-center h-full pt-1">
                       <InputSwitch checked={opt.status} onChange={(e) => updateOption(groupIndex, optIndex, 'status', e.value)} />
                     </div>
                   </td>
@@ -116,7 +127,7 @@ export const EvaluateBuilder: React.FC<EvaluateBuilderProps> = ({
             {expandedGroups[groupIndex] !== false && (
               <tr className="bg-white">
                 <td className="border border-slate-200 p-2"></td>
-                <td colSpan={4} className="border border-slate-200 p-3 bg-slate-50/30">
+                <td colSpan={5} className="border border-slate-200 p-3 bg-slate-50/30">
                   <Button label="Thêm câu hỏi mới" icon="pi pi-plus" size="small" onClick={() => addOption(groupIndex)} className="bg-white text-primary-600 border-primary-200 hover:bg-primary-50 hover:border-primary-400 font-medium shadow-sm w-fit transition-all" />
                 </td>
               </tr>

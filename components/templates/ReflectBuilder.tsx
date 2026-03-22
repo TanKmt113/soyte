@@ -40,6 +40,7 @@ export const ReflectBuilder: React.FC<ReflectBuilderProps> = ({
           <th colSpan={3} className="border border-primary-900 p-2 text-center align-middle font-semibold bg-primary-800">Tiến độ thực hiện</th>
           <th colSpan={2} className="border border-primary-900 p-2 text-center align-middle font-semibold bg-primary-800">Đánh giá</th>
           <th rowSpan={2} className="border border-primary-900 p-3 w-24 text-center align-middle font-semibold bg-primary-800">Ghi chú/<br />Kiến nghị</th>
+          <th rowSpan={2} className="border border-primary-900 p-3 w-28 text-center align-middle font-semibold bg-primary-800">Bắt buộc</th>
           <th rowSpan={2} className="border border-primary-900 p-3 w-28 text-center align-middle font-semibold bg-primary-800">Trạng thái</th>
           <th rowSpan={2} className="border border-primary-900 p-3 w-16 text-center align-middle font-semibold bg-primary-800">Xóa</th>
         </tr>
@@ -75,6 +76,14 @@ export const ReflectBuilder: React.FC<ReflectBuilderProps> = ({
                 />
               </td>
               <td className="border border-primary-200 bg-primary-50/60"></td>
+              <td className="border border-primary-200 text-center align-middle bg-primary-50/60 p-2">
+                <div className="flex justify-center items-center h-full">
+                  <InputSwitch
+                    checked={group.isValidate || false}
+                    onChange={(e) => updateGroup(groupIndex, 'isValidate', e.value)}
+                  />
+                </div>
+              </td>
               <td className="border border-primary-200 text-center align-middle bg-primary-50/60 p-2">
                 <div className="flex justify-center items-center h-full">
                   <InputSwitch
@@ -142,6 +151,14 @@ export const ReflectBuilder: React.FC<ReflectBuilderProps> = ({
                   <td className="border border-slate-200 p-2 text-center align-middle bg-white">
                     <div className="flex justify-center items-center h-full pt-1">
                       <InputSwitch
+                        checked={opt.isValidate || false}
+                        onChange={(e) => updateOption(groupIndex, optIndex, 'isValidate', e.value)}
+                      />
+                    </div>
+                  </td>
+                  <td className="border border-slate-200 p-2 text-center align-middle bg-white">
+                    <div className="flex justify-center items-center h-full pt-1">
+                      <InputSwitch
                         checked={opt.status}
                         onChange={(e) => updateOption(groupIndex, optIndex, 'status', e.value)}
                       />
@@ -157,7 +174,7 @@ export const ReflectBuilder: React.FC<ReflectBuilderProps> = ({
             {expandedGroups[groupIndex] !== false && (
               <tr className="bg-white">
                 <td className="border border-slate-200 p-2"></td>
-                <td colSpan={10} className="border border-slate-200 p-3 bg-slate-50/30">
+                <td colSpan={11} className="border border-slate-200 p-3 bg-slate-50/30">
                   <Button
                     label="Thêm dòng nội dung mới"
                     icon="pi pi-plus"
