@@ -110,12 +110,12 @@ export const EvaluateBuilder: React.FC<EvaluateBuilderProps> = ({
                   </td>
                   <td className="border border-slate-200 p-2 text-center align-middle bg-white">
                     <div className="flex justify-center items-center h-full pt-1">
-                      <InputSwitch checked={opt.isValidate || false} onChange={(e) => updateOption(groupIndex, optIndex, 'isValidate', e.value)} />
+                      <InputSwitch disabled={group.isValidate === false} checked={opt.isValidate || false} onChange={(e) => updateOption(groupIndex, optIndex, 'isValidate', e.value)} />
                     </div>
                   </td>
                   <td className="border border-slate-200 p-2 text-center align-middle bg-white">
                     <div className="flex justify-center items-center h-full pt-1">
-                      <InputSwitch checked={opt.status} onChange={(e) => updateOption(groupIndex, optIndex, 'status', e.value)} />
+                      <InputSwitch disabled={group.status === false} checked={opt.status} onChange={(e) => updateOption(groupIndex, optIndex, 'status', e.value)} />
                     </div>
                   </td>
                   <td className="border border-slate-200 p-2 text-center align-middle bg-white">

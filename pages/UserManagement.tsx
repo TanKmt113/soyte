@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { api } from "../api";
 import AdminLayout from "../components/AdminLayout";
+import UserModal from "../components/UserModal";
 import {
   Loader2,
   Search,
@@ -9,48 +10,37 @@ import {
   Shield,
   Edit3,
   Trash2,
-  X,
-  Save,
 } from "lucide-react";
 import { Toast } from "primereact/toast";
 import { confirmDialog } from "primereact/confirmdialog";
-import { Button, InputText, Checkbox, Tooltip } from "@/components/prime";
+import { Button, Tooltip, InputText } from "@/components/prime";
+import { User } from "../types";
 
-interface User {
-  id: string;
-  full_name: string;
-  email: string;
-  role: "admin" | "user";
-  status: "active" | "inactive";
-  permissions?: string[];
-}
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const toast = useRef<Toast>(null);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<any>(null);
-  const [availablePermissions, setAvailablePermissions] = useState<any[]>([]);
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const response = await api.get("/users");
-      setUsers(response.data || response);
-      setError(null);
+      const data = response.data || response;
+      setUsers(Array.isArray(data) ? data.map((u: any) => ({
+        ...u,
+        status: Number(u.status) as 0 | 1
+      })) : []);
     } catch (err) {
-      setError("Failed to fetch users. Please try again later.");
       console.error(err);
       toast.current?.show({
         severity: "error",
-        summary: "Error",
-        detail: "Failed to fetch users.",
+        summary: "Lỗi",
+        detail: "Không thể tải danh sách người dùng",
       });
     } finally {
       setLoading(false);
@@ -61,64 +51,7 @@ const UserManagement: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const fetchPermissions = async () => {
-    try {
-      const response = await api.getPermissions();
-      const data = response.permissions || response.data || response;
-      setAvailablePermissions(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error fetching permissions:", error);
-    }
-  };
-
-  const handleOpenEditModal = (user: User) => {
-    setEditingUser({ ...user });
-    const perms = Array.isArray(user.permissions)
-      ? user.permissions.map((p: any) => typeof p === 'object' ? p.name : p)
-      : [];
-    setSelectedPermissions(perms);
-    setIsEditModalOpen(true);
-    fetchPermissions();
-  };
-
-  const handleTogglePermission = (permissionName: string) => {
-    setSelectedPermissions((prev) =>
-      prev.includes(permissionName)
-        ? prev.filter((p) => p !== permissionName)
-        : [...prev, permissionName],
-    );
-  };
-
-  const handleSaveUser = async () => {
-    if (!editingUser) return;
-    setIsSaving(true);
-    try {
-      await api.updateUser(editingUser.id, {
-        full_name: editingUser.full_name,
-        role: editingUser.role,
-        status: editingUser.status,
-        permissions: selectedPermissions,
-      });
-      toast.current?.show({
-        severity: "success",
-        summary: "Thành công",
-        detail: "Cập nhật thông tin người dùng thành công",
-      });
-      setIsEditModalOpen(false);
-      fetchUsers();
-    } catch (error) {
-      console.error("Error updating user:", error);
-      toast.current?.show({
-        severity: "error",
-        summary: "Lỗi",
-        detail: "Không thể cập nhật thông tin người dùng",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDeactivate = async (userId: string) => {
+  const handleDeactivate = async (userId: string | number) => {
     confirmDialog({
       message: "Bạn có chắc chắn muốn vô hiệu hóa người dùng này?",
       header: "Xác nhận",
@@ -129,10 +62,10 @@ const UserManagement: React.FC = () => {
       rejectClassName: "!text-gray-600 hover:!bg-gray-50 !px-6 !py-2.5 !rounded-xl !font-black !border-none !transition-all",
       accept: async () => {
         try {
-          await api.updateUser(userId, { status: "inactive" });
+          await api.updateUser(userId, { status: 0 });
           setUsers(
             users?.map((u) =>
-              u.id === userId ? { ...u, status: "inactive" } : u,
+              u.id === userId ? { ...u, status: 0 as 0 | 1 } : u,
             ),
           );
           toast.current?.show({
@@ -152,6 +85,16 @@ const UserManagement: React.FC = () => {
     });
   };
 
+  const handleOpenAddModal = () => {
+    setSelectedUser(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (user: User) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
   const filteredUsers = useMemo(
     () =>
       users.filter(
@@ -165,7 +108,7 @@ const UserManagement: React.FC = () => {
   const stats = useMemo(
     () => ({
       total: users.length,
-      active: users.filter((u) => parseInt(u.status as any) === 1 || u.status === "active").length,
+      active: users.filter((u) => Number(u.status) === 1).length,
       admins: users.filter((u) => u.role === "admin").length,
     }),
     [users],
@@ -174,6 +117,14 @@ const UserManagement: React.FC = () => {
   return (
     <AdminLayout title="Quản lý Người dùng">
       <Toast ref={toast} />
+      
+      <UserModal 
+        visible={isModalOpen}
+        onHide={() => setIsModalOpen(false)}
+        user={selectedUser}
+        onSaveSuccess={fetchUsers}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
         <StatCard
           icon={Users}
@@ -202,14 +153,19 @@ const UserManagement: React.FC = () => {
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
               size={18}
             />
-            <input
-              type="text"
+            <InputText
               placeholder="Tìm kiếm theo tên hoặc email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-100 font-medium text-sm"
             />
           </div>
+          <Button
+            label="THÊM MỚI NGƯỜI DÙNG"
+            icon={<Shield size={18} />}
+            onClick={handleOpenAddModal}
+            className="!px-6 !py-2.5 !bg-primary-600 !text-white !font-black !rounded-xl !shadow-lg !shadow-primary-100 !transition-all hover:!-translate-y-0.5"
+          />
         </div>
 
         <div className="overflow-x-auto">
@@ -267,7 +223,7 @@ const UserManagement: React.FC = () => {
                                 key={idx}
                                 className="px-2 py-0.5 bg-primary-50 text-primary-700 border border-primary-100 rounded text-[9px] font-bold whitespace-nowrap"
                               >
-                                {typeof perm === 'object' ? perm.description : perm}
+                                {typeof perm === 'object' ? (perm.description || perm.name) : perm}
                               </span>
                             ))}
                             {user.permissions.length > 2 && (
@@ -280,7 +236,7 @@ const UserManagement: React.FC = () => {
                                 </span>
                                 <Tooltip
                                   target={`#user-perm-${user.id}`}
-                                  content={user.permissions.slice(2).map((p: any) => typeof p === 'object' ? p.description : p).join(", ")}
+                                  content={user.permissions?.slice(2).map((p: any) => typeof p === 'object' ? (p.description || p.name) : p).join(", ")}
                                   position="top"
                                   className="text-[10px] font-bold"
                                 />
@@ -296,15 +252,15 @@ const UserManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${parseInt(user.status as any) === 1 || user.status === 'active'
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${Number(user.status) === 1
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
                           }`}
                       >
                         <div
-                          className={`w-1.5 h-1.5 rounded-full ${parseInt(user.status as any) === 1 || user.status === 'active' ? "bg-green-500" : "bg-red-500"}`}
+                          className={`w-1.5 h-1.5 rounded-full ${Number(user.status) === 1 ? "bg-green-500" : "bg-red-500"}`}
                         ></div>
-                        {parseInt(user.status as any) === 1 || user.status === 'active'
+                        {Number(user.status) === 1
                           ? "Hoạt động"
                           : "Vô hiệu hóa"}
                       </span>
@@ -323,7 +279,7 @@ const UserManagement: React.FC = () => {
                           rounded
                           severity="danger"
                           onClick={() => handleDeactivate(user.id)}
-                          disabled={parseInt(user.status as any) !== 1 && user.status !== 'active'}
+                          disabled={Number(user.status) !== 1}
                         />
                       </div>
                     </td>
@@ -346,141 +302,6 @@ const UserManagement: React.FC = () => {
           )}
         </div>
       </div>
-
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="bg-primary-700 p-4 flex justify-between items-center text-white">
-              <h3 className="font-bold flex items-center gap-2 text-lg">
-                <Edit3 size={20} />
-                CHỈNH SỬA NGƯỜI DÙNG
-              </h3>
-              <Button
-                icon={<X size={20} />}
-                text
-                rounded
-                onClick={() => setIsEditModalOpen(false)}
-                className="!text-white hover:!bg-white/20"
-              />
-            </div>
-
-            <div className="p-6 overflow-y-auto max-h-[80vh]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-black text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2 mb-4">
-                    <Users size={18} className="text-primary-600" />
-                    THÔNG TIN CƠ BẢN
-                  </h4>
-
-                  <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase mb-1">
-                      Họ và tên
-                    </label>
-                    <InputText
-                      value={editingUser?.full_name || ""}
-                      onChange={(e) =>
-                        setEditingUser({
-                          ...editingUser,
-                          full_name: e.target.value,
-                        })
-                      }
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-100 outline-none font-bold text-gray-700"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase mb-1">
-                      Email
-                    </label>
-                    <InputText
-                      value={editingUser?.email || ""}
-                      disabled
-                      className="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-xl font-bold text-gray-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase mb-1">
-                      Vai trò
-                    </label>
-                    <select
-                      value={editingUser?.role || "user"}
-                      onChange={(e) =>
-                        setEditingUser({
-                          ...editingUser,
-                          role: e.target.value,
-                        })
-                      }
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-100 outline-none font-bold text-gray-700"
-                    >
-                      <option value="user">Người dùng</option>
-                      <option value="admin">Quản trị viên</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-black text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2 mb-4">
-                    <Shield size={18} className="text-primary-600" />
-                    PHÂN QUYỀN TRUY CẬP
-                  </h4>
-
-                  <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 max-h-60 overflow-y-auto">
-                    {availablePermissions.length === 0 ? (
-                      <p className="text-xs text-center text-gray-400 py-4">
-                        Đang tải danh sách quyền...
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-2">
-                        {availablePermissions.map((permission) => (
-                          <div
-                            key={permission.id}
-                            className="flex items-center gap-3 p-2 hover:bg-white rounded-lg transition-colors cursor-pointer group"
-                            onClick={() =>
-                              handleTogglePermission(permission.name)
-                            }
-                          >
-                            <Checkbox
-                              checked={selectedPermissions.includes(
-                                permission.name,
-                              )}
-                              onChange={() =>
-                                handleTogglePermission(permission.name)
-                              }
-                            />
-                            <div>
-                              <p className="text-xs font-bold text-gray-700 group-hover:text-primary-600">
-                                {permission.description}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-gray-100 flex gap-4">
-                <Button
-                  label="HỦY BỎ"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 py-3 border-gray-200 text-gray-500 font-black rounded-xl hover:bg-gray-50 transition-all"
-                  outlined
-                />
-                <Button
-                  label="CẬP NHẬT THÔNG TIN"
-                  icon={<Save size={20} />}
-                  onClick={handleSaveUser}
-                  loading={isSaving}
-                  disabled={isSaving}
-                  className="flex-1 px-2 py-3 bg-primary-600 hover:bg-primary-700 text-white font-black rounded-xl shadow-lg shadow-primary-100 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </AdminLayout>
   );
 };

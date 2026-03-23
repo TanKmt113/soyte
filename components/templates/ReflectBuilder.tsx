@@ -151,6 +151,7 @@ export const ReflectBuilder: React.FC<ReflectBuilderProps> = ({
                   <td className="border border-slate-200 p-2 text-center align-middle bg-white">
                     <div className="flex justify-center items-center h-full pt-1">
                       <InputSwitch
+                        disabled={group.isValidate === false}
                         checked={opt.isValidate || false}
                         onChange={(e) => updateOption(groupIndex, optIndex, 'isValidate', e.value)}
                       />
@@ -159,6 +160,7 @@ export const ReflectBuilder: React.FC<ReflectBuilderProps> = ({
                   <td className="border border-slate-200 p-2 text-center align-middle bg-white">
                     <div className="flex justify-center items-center h-full pt-1">
                       <InputSwitch
+                        disabled={group.status === false}
                         checked={opt.status}
                         onChange={(e) => updateOption(groupIndex, optIndex, 'status', e.value)}
                       />

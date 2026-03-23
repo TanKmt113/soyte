@@ -931,7 +931,7 @@ export const capcuu = [
   },
 ];
 
-export const ALL_FACILITIES = [
+export const FACILITIES_BV = [
   {
     id: "bv-dk-16a-ha-dong",
     name: "Bệnh viện Đa khoa 16A Hà Đông", // [cite: 438]
@@ -1001,16 +1001,6 @@ export const ALL_FACILITIES = [
     phone: "",
     coords: [21.046816, 105.787687],
     description: "Quy mô: 1.279 giường bệnh"
-  },
-  {
-    id: "tt-tim-mach-bve",
-    name: "Trung tâm Tim mạch - Bệnh viện E",
-    type: "TT",
-    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
-    address: "Số 89 Đường Trần Cung, Hà Nội",
-    phone: "",
-    coords: [21.046816, 105.787687],
-    description: "Quy mô: 202 giường bệnh"
   },
   {
     id: "vien-huyet-hoc-tw",
@@ -1191,26 +1181,6 @@ export const ALL_FACILITIES = [
     phone: "",
     coords: [20.874136, 105.831518],
     description: "Quy mô: 620 giường bệnh"
-  },
-  {
-    id: "cc-atvstp-hn",
-    name: "Chi cục An toàn vệ sinh thực phẩm Hà Nội",
-    type: "CC",
-    category: "Chi cục",
-    address: "35 P. Trần Bình, Phường Mai Dịch, Thành phố Hà Nội",
-    phone: "02437684024",
-    coords: [21.0345, 105.7766],
-    description: "Đơn vị quản lý nhà nước trực thuộc Sở Y tế Hà Nội",
-  },
-  {
-    id: "cc-danso-treem",
-    name: "Chi cục Dân số, Trẻ em và Phòng, chống tệ nạn xã hội",
-    type: "CC",
-    category: "Chi cục",
-    address: "18 P. Sơn Tây, Phường Ba Đình, Thành phố Hà Nội",
-    phone: "",
-    coords: [21.033257171372412, 105.832770431185],
-    description: "Đơn vị quản lý nhà nước trực thuộc Sở Y tế Hà Nội",
   },
   {
     id: "bv-hadong",
@@ -1644,6 +1614,19 @@ export const ALL_FACILITIES = [
     coords: [21.103906317504915, 105.5570581048772],
     description: "Bệnh viện đa khoa hạng II tuyến huyện",
   },
+];
+
+export const FACILITIES_TT = [
+  {
+    id: "tt-tim-mach-bve",
+    name: "Trung tâm Tim mạch - Bệnh viện E",
+    type: "TT",
+    category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
+    address: "Số 89 Đường Trần Cung, Hà Nội",
+    phone: "",
+    coords: [21.046816, 105.787687],
+    description: "Quy mô: 202 giường bệnh"
+  },
   {
     id: "tt-1",
     name: "Trung tâm Kiểm soát bệnh tật (CDC) Hà Nội",
@@ -1653,16 +1636,6 @@ export const ALL_FACILITIES = [
     phone: "02438343520",
     coords: [21.018727478832183, 105.8065992957797],
     description: "Đơn vị đầu ngành về y tế dự phòng và kiểm soát dịch bệnh.",
-  },
-  {
-    id: "bt-1",
-    name: "Làng trẻ em SOS Hà Nội",
-    type: "BT",
-    category: "Cơ sở bảo trợ",
-    address: "Số 2 Doãn Kế Thiện, Phường Mai Dịch, Thành phố Hà Nội",
-    phone: "02437644022",
-    coords: [21.042362563429087, 105.77824791963384],
-    description: "Nuôi dưỡng và chăm sóc trẻ em mồ côi, có hoàn cảnh đặc biệt.",
   },
   {
     id: "bt-115-hn",
@@ -1718,6 +1691,19 @@ export const ALL_FACILITIES = [
     coords: [21.0143, 105.7896],
     description: "Trung tâm pháp y phục vụ công tác giám định tư pháp",
     website: "http://phapyhanoi.vn/",
+  },
+];
+
+export const FACILITIES_BT = [
+  {
+    id: "bt-1",
+    name: "Làng trẻ em SOS Hà Nội",
+    type: "BT",
+    category: "Cơ sở bảo trợ",
+    address: "Số 2 Doãn Kế Thiện, Phường Mai Dịch, Thành phố Hà Nội",
+    phone: "02437644022",
+    coords: [21.042362563429087, 105.77824791963384],
+    description: "Nuôi dưỡng và chăm sóc trẻ em mồ côi, có hoàn cảnh đặc biệt.",
   },
   {
     id: "bt-btxh-1",
@@ -1823,6 +1809,9 @@ export const ALL_FACILITIES = [
     description: "Trung tâm công tác xã hội và bảo trợ trẻ em",
     website: "http://ctxhvaqbtte.hanoi.gov.vn/",
   },
+];
+
+export const FACILITIES_TYT = [
   {
     id: "tyt-an-khanh",
     name: "Trạm y tế xã An Khánh",
@@ -7687,4 +7676,35 @@ export const ALL_FACILITIES = [
     coords: [21.036014, 105.738459],
     description: "",
   },
+];
+
+export const FACILITIES_CC = [
+  {
+    id: "cc-atvstp-hn",
+    name: "Chi cục An toàn vệ sinh thực phẩm Hà Nội",
+    type: "CC",
+    category: "Chi cục",
+    address: "35 P. Trần Bình, Phường Mai Dịch, Thành phố Hà Nội",
+    phone: "02437684024",
+    coords: [21.0345, 105.7766],
+    description: "Đơn vị quản lý nhà nước trực thuộc Sở Y tế Hà Nội",
+  },
+  {
+    id: "cc-danso-treem",
+    name: "Chi cục Dân số, Trẻ em và Phòng, chống tệ nạn xã hội",
+    type: "CC",
+    category: "Chi cục",
+    address: "18 P. Sơn Tây, Phường Ba Đình, Thành phố Hà Nội",
+    phone: "",
+    coords: [21.033257171372412, 105.832770431185],
+    description: "Đơn vị quản lý nhà nước trực thuộc Sở Y tế Hà Nội",
+  },
+];
+
+export const ALL_FACILITIES = [
+  ...FACILITIES_BV,
+  ...FACILITIES_TT,
+  ...FACILITIES_BT,
+  ...FACILITIES_TYT,
+  ...FACILITIES_CC,
 ];

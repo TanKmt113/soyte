@@ -121,6 +121,10 @@ export const api = {
     return this.get('/users');
   },
 
+  async getUser(id: number | string) {
+    return this.get(`/users/${id}`);
+  },
+
   async getPermissions(params?: any) {
     return this.get('/permissions', params);
   },
@@ -139,5 +143,9 @@ export const api = {
 
   async updateUser(id: number | string, data: any) {
     return this.put(`/users/${id}`, data);
+  },
+
+  async createUser(data: any) {
+    return this.post('/users', data);
   }
 };

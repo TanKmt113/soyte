@@ -157,6 +157,19 @@ export const useTemplateForm = (
   const updateGroup = (index: number, field: keyof GroupNode, val: any) => {
     const newData = [...template.data];
     newData[index] = { ...newData[index], [field]: val };
+    
+    if (field === 'status') {
+      newData[index].option = newData[index].option.map(opt => ({
+        ...opt,
+        status: val
+      }));
+    } else if (field === 'isValidate') {
+      newData[index].option = newData[index].option.map(opt => ({
+        ...opt,
+        isValidate: val
+      }));
+    }
+    
     setTemplate({ ...template, data: newData });
   };
 

@@ -67,9 +67,15 @@ export interface WorkSchedule {
 }
 
 export interface User {
-  id: number;
+  id: string | number;
   full_name: string;
-  permissions?: string[];
+  email: string;
+  role: "admin" | "user";
+  status: 0 | 1;
+  type?: string;
+  facility_id?: string;
+  unit?: string;
+  permissions?: any[];
 }
 export interface Permission {
   id: number;
