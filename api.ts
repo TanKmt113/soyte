@@ -1,11 +1,5 @@
-<<<<<<< HEAD
 // const BASE_URL = 'https://suckhoethudo.vn:7005/api';
 const BASE_URL = 'https://localhost:7002/api';
-=======
-import { SmtpConfig } from "./types";
-//const BASE_URL = 'https://suckhoethudo.vn:7005/api';
-const BASE_URL = "https://10.10.10.19:7002/api";
->>>>>>> e7dcae0ff972c8dabf569b58852959b9cb9037a4
 
 export const api = {
   async get(endpoint: string, params?: Record<string, any>) {
