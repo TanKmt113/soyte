@@ -138,14 +138,14 @@ export const adminMenu: MenuItem[] = [
     children: [
       {
         key: "report-DCBC",
-        label: "Đề cương báo cáo",
+        label: "Phản ánh y tế",
         to: "/admin/report/DCBC",
       },
       {
         key: "report-KSHL",
-        label: "Khảo sát, đánh giá sự hài lòng của người bệnh",
-        to: "/admin/report/KSHL"
-      }
+        label: "Giám sát chất lượng",
+        to: "/admin/report/KSHL",
+      },
     ],
   },
 ];
