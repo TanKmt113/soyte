@@ -30,10 +30,6 @@ export const exportKSHLToPDF = async (
         const monthYearTitle = `tháng ${endDateObj.getMonth() + 1} năm ${endDateObj.getFullYear()}`;
         const monthYearText = `tháng ${endDateObj.getMonth() + 1}/${endDateObj.getFullYear()}`;
 
-        const qrBvCongLap = data.dataNgoaiTru.find(d => d.id === '1')?.totalQr || '0';
-        const qrBvNgoai = data.dataNgoaiTru.find(d => d.id === '2')?.totalQr || '0';
-        const qrTYT = data.dataNgoaiTru.find(d => d.id === '3')?.totalQr || '0';
-
         let currentY = 20;
 
         const checkPageBreak = (heightNeeded: number) => {
@@ -90,10 +86,8 @@ export const exportKSHLToPDF = async (
 
         printParagraph('II. KẾT QUẢ THỰC HIỆN', true);
         printParagraph('1. Kết quả chung về việc triển khai khảo sát sự hài lòng qua mã QR', true);
-        printParagraph('Thực hiện Kế hoạch của Sở Y tế Hà Nội, các đơn vị đã triển khai hình thức khảo sát trực tuyến thông qua mã QR Code. Các mã QR được dán, niêm yết công khai tại các khu vực dễ tiếp cận như: khu vực đăng ký khám bệnh, phòng khám chuyên khoa, khu vực chờ khám, các khoa điều trị nội trú, khu vực tiêm chủng mở rộng...');
-
-        // --- TEXT ĐỘNG DỰA VÀO BẢNG DỮ LIỆU ---
-        printParagraph(`Tổng số phiếu khảo sát qua mã QR thu về:\n- Tại các Bệnh viện Công lập: ${qrBvCongLap} phiếu\n- Tại các Bệnh viện ngoài Công lập: ${qrBvNgoai} phiếu\n- Tại các Trạm Y tế: ${qrTYT} phiếu`);
+        printParagraph('Thực hiện Kế hoạch của Sở Y tế Hà Nội, các đơn vị đã triển khai hình thức khảo sát trực tuyến thông qua mã QR Code. Tại các cơ sở khám bệnh, chữa bệnh và trạm y tế, mã QR khảo sát được bố trí tại nhiều vị trí khác nhau, trung bình từ 10 - 30 điểm/đơn vị đối với bệnh viện, từ 1-3 điểm/đơn vị đối với trạm y tế đặc biệt là khu vực đón tiếp, khu vực khám bệnh ngoại trú, các khoa lâm sàng đối với người bệnh nội trú, khu vực tiêm chủng mở rộng, bảng thông tin bệnh viện và các vị trí đông người qua lại nhằm tạo điều kiện thuận lợi cho người bệnh và người dân tham gia khảo sát. Số điểm dán mã QR khảo sát:');
+        printParagraph(`    - Tại các Bệnh viện Công lập: ........ điểm khảo sát\n    - Tại các Bệnh viện ngoài Công lập: ........ điểm khảo sát\n    - Tại các Trạm Y tế: ........ điểm khảo sát`);
 
         // --- HÀM VẼ BẢNG ---
         const drawTable = (title: string, data: any[], isAppendix: boolean = false, type1: string = '', type2: string = '', unitLabel: string = 'Đơn vị') => {
@@ -186,8 +180,8 @@ export const exportKSHLToPDF = async (
         currentY += 10;
         doc.setFontSize(11);
 
-        // Cột trái: Nơi nhận (In nghiêng đậm)
-        doc.setFont(FONT, 'bolditalic');
+        // Cột trái: Nơi nhận
+        doc.setFont(FONT, 'bold');
         doc.text('Nơi nhận:', 20, currentY);
 
         // Cột phải: Chữ ký

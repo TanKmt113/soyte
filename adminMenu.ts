@@ -143,7 +143,7 @@ export const adminMenu: MenuItem[] = [
       },
       {
         key: "report-KSHL",
-        label: "Khảo sát, đánh giá sự hài lòng của người bệnh (demo)",
+        label: "Khảo sát, đánh giá sự hài lòng của người bệnh",
         to: "/admin/report/KSHL"
       }
     ],
