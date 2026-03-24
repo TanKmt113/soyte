@@ -45,7 +45,7 @@ export const adminMenu: MenuItem[] = [
     key: "smtp",
     label: "Cấu hình SMTP",
     icon: Settings,
-    permission: "users",
+    permission: "email_confirm",
     to: "/admin/smtp",
   },
   {
@@ -141,6 +141,11 @@ export const adminMenu: MenuItem[] = [
         label: "Đề cương báo cáo",
         to: "/admin/report/DCBC",
       },
+      {
+        key: "report-KSHL",
+        label: "Khảo sát, đánh giá sự hài lòng của người bệnh (demo)",
+        to: "/admin/report/KSHL"
+      }
     ],
   },
 ];

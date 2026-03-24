@@ -170,7 +170,7 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
       const { ...restOfFormData } = formData;
       const dataToSubmit = {
         ...restOfFormData,
-        permissions: selectedPermissions,
+        permissions: formData.role === "user" ? [] : selectedPermissions,
       };
 
       if (isEdit && user) {
@@ -206,7 +206,7 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <Toast ref={toast} />
-      <div className="bg-white w-full max-w-[60vw] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+      <div className={`bg-white w-full ${formData.role === 'user' ? 'max-w-[40vw]' : 'max-w-[60vw]'} rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] transition-all duration-300`}>
         <div className="bg-primary-700 p-4 flex justify-between items-center text-white shrink-0">
           <h3 className="font-bold flex items-center gap-2 text-lg uppercase tracking-tight">
             {isEdit ? <Edit3Icon size={20} /> : <PlusIcon size={20} />}
@@ -222,7 +222,7 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
         </div>
 
         <div className="p-8 overflow-y-auto custom-scrollbar">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className={`grid grid-cols-1 ${formData.role !== 'user' ? 'md:grid-cols-2' : ''} gap-8`}>
             <div className="space-y-6">
               <h4 className="font-black text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2">
                 <Users size={18} className="text-primary-600" />
@@ -270,7 +270,7 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className={isEdit ? "grid grid-cols-2 gap-4" : "block"}>
                   <div>
                     <label className="block text-[10px] font-black text-gray-400 uppercase mb-1.5 ml-1">
                       Vai trò hệ thống
@@ -285,20 +285,22 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                       className="w-full !bg-gray-50 !border-gray-200 !rounded-xl outline-none font-bold text-gray-700"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-black text-gray-400 uppercase mb-1.5 ml-1">
-                      Trạng thái
-                    </label>
-                    <Dropdown
-                      value={formData.status}
-                      options={[
-                        { label: "Hoạt động", value: 1 },
-                        { label: "Vô hiệu hóa", value: 0 },
-                      ]}
-                      onChange={(e) => setFormData({ ...formData, status: e.value })}
-                      className="w-full !bg-gray-50 !border-gray-200 !rounded-xl outline-none font-bold text-gray-700"
-                    />
-                  </div>
+                  {isEdit && (
+                    <div>
+                      <label className="block text-[10px] font-black text-gray-400 uppercase mb-1.5 ml-1">
+                        Trạng thái
+                      </label>
+                      <Dropdown
+                        value={formData.status}
+                        options={[
+                          { label: "Hoạt động", value: 1 },
+                          { label: "Vô hiệu hóa", value: 0 },
+                        ]}
+                        onChange={(e) => setFormData({ ...formData, status: e.value })}
+                        className="w-full !bg-gray-50 !border-gray-200 !rounded-xl outline-none font-bold text-gray-700"
+                      />
+                    </div>
+                  )}
                 </div>
                 {formData.role === "user" && (
                   <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-4 animate-in slide-in-from-top-2">
@@ -341,43 +343,44 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                 )}
               </div>
             </div>
+            {formData.role !== "user" && (
+              <div className="space-y-6">
+                <h4 className="font-black text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2 uppercase">
+                  <Shield size={18} className="text-primary-600" />
+                  PHÂN QUYỀN TRUY CẬP ({selectedPermissions.length})
+                </h4>
 
-            <div className="space-y-6">
-              <h4 className="font-black text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2 uppercase">
-                <Shield size={18} className="text-primary-600" />
-                PHÂN QUYỀN TRUY CẬP ({selectedPermissions.length})
-              </h4>
+                <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 max-h-[400px] overflow-y-auto custom-scrollbar">
+                  {availablePermissions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                      <Loader2 className="animate-spin mb-2" size={24} />
+                      <p className="text-xs font-bold uppercase tracking-widest">Đang tải quyền...</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2">
+                      {availablePermissions.map((permission) => (
+                        <div
+                          key={permission.id}
+                          className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer border ${selectedPermissions.includes(permission.name)
+                            ? "bg-primary-50 border-primary-100"
+                            : "bg-white border-transparent hover:border-gray-200"
+                            }`}
+                          onClick={() => handleTogglePermission(permission.name)}
+                        >
 
-              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 max-h-[400px] overflow-y-auto custom-scrollbar">
-                {availablePermissions.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-                    <Loader2 className="animate-spin mb-2" size={24} />
-                    <p className="text-xs font-bold uppercase tracking-widest">Đang tải quyền...</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-2">
-                    {availablePermissions.map((permission) => (
-                      <div
-                        key={permission.id}
-                        className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer border ${selectedPermissions.includes(permission.name)
-                          ? "bg-primary-50 border-primary-100"
-                          : "bg-white border-transparent hover:border-gray-200"
-                          }`}
-                        onClick={() => handleTogglePermission(permission.name)}
-                      >
-
-                        <div className={`text-xs font-black leading-tight ${selectedPermissions.includes(permission.name)
-                          ? "text-primary-700"
-                          : "text-gray-700"
-                          }`}>
-                          {permission.description}
+                          <div className={`text-xs font-black leading-tight ${selectedPermissions.includes(permission.name)
+                            ? "text-primary-700"
+                            : "text-gray-700"
+                            }`}>
+                            {permission.description}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

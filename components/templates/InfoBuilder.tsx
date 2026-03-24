@@ -85,9 +85,17 @@ export const InfoBuilder: React.FC<InfoBuilderProps> = ({
               </div>
             )}
             {field.type === 'facility_multiselect' && (() => {
+              const typeMapping: Record<string, string> = {
+                BV: "Bệnh viện",
+                TT: "Trung tâm Y tế",
+                BT: "Cơ sở Bảo trợ",
+                CC: "Chi cục",
+                TYT: "Trạm Y tế",
+                PB: "Phòng/Chi cục",
+              };
               const facilityTypeOptions = [
                 ...Array.from(new Set(ALL_FACILITIES.map(f => f.type))).map(t => ({
-                  label: `${t} (${ALL_FACILITIES.filter(f => f.type === t).length})`,
+                  label: `${typeMapping[t] || t} (${ALL_FACILITIES.filter(f => f.type === t).length})`,
                   value: t,
                 }))
               ];

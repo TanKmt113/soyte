@@ -19,7 +19,7 @@ export const exportReportToWord = async (
         const mainRomanNumerals = ["I", "II", "III", "IV", "V"];
 
         const formEntries = Object.entries(groupedFeedbacks) as [string, { title: string, items: FeedbackItem[] }][];
-        
+
         const children: any[] = [];
 
         // Headers
@@ -62,7 +62,7 @@ export const exportReportToWord = async (
 
         // Add Header
         children.push(createHeader());
-        
+
         // Add Title
         children.push(new Paragraph({ spacing: { before: 400, after: 400 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: "ĐỀ CƯƠNG BÁO CÁO", font: "Times New Roman", size: 28, bold: true })] }));
 
@@ -129,13 +129,13 @@ export const exportReportToWord = async (
                 spacing: { after: 200 },
                 children: [new TextRun({ text: `Tổng số: ${totalUnits} đơn vị.`, font: "Times New Roman", size: 22 })]
             }));
-            
+
             const mkCell = (text: string, bold = false, align: any = AlignmentType.LEFT, colSpan = 1, rowSpan = 1) => {
                 const textRuns = text.split('\n').map((t, idx, arr) => {
                     if (idx < arr.length - 1) return [new TextRun({ text: t, font: "Times New Roman", size: 22, bold }), new TextRun({ break: 1 })];
                     return [new TextRun({ text: t, font: "Times New Roman", size: 22, bold })];
                 }).flat();
-                
+
                 return new TableCell({
                     columnSpan: colSpan,
                     rowSpan: rowSpan,
@@ -187,7 +187,7 @@ export const exportReportToWord = async (
 
                 if (detailedFeedbacks[0]?.sections) {
                     const templateSections = detailedFeedbacks[0].sections;
-                    
+
                     const table2Rows: TableRow[] = [];
                     table2Rows.push(new TableRow({
                         children: [
@@ -225,7 +225,7 @@ export const exportReportToWord = async (
                                     else if (tiendo === 3) chuaLam++;
                                 }
                             });
-                            
+
                             secDaLam += daLam;
                             secDangLam += dangLam;
                             secChuaLam += chuaLam;
@@ -236,9 +236,9 @@ export const exportReportToWord = async (
                                     mkCell(opt.content || ''),
                                     mkCell(opt.method || ''),
                                     mkCell(opt.productOut || ''),
-                                    mkCell(daLam ? String(daLam) : '---', false, AlignmentType.CENTER),
-                                    mkCell(dangLam ? String(dangLam) : '---', false, AlignmentType.CENTER),
-                                    mkCell(chuaLam ? String(chuaLam) : '---', false, AlignmentType.CENTER)
+                                    mkCell(daLam ? String(daLam) : '0', false, AlignmentType.CENTER),
+                                    mkCell(dangLam ? String(dangLam) : '0', false, AlignmentType.CENTER),
+                                    mkCell(chuaLam ? String(chuaLam) : '0', false, AlignmentType.CENTER)
                                 ]
                             }));
                         });
@@ -247,9 +247,9 @@ export const exportReportToWord = async (
                             children: [
                                 mkCell(sectionRoman[si] || String(si + 1), true, AlignmentType.CENTER),
                                 mkCell(sec.name, true, AlignmentType.LEFT, 3),
-                                mkCell(secDaLam ? String(secDaLam) : '---', true, AlignmentType.CENTER),
-                                mkCell(secDangLam ? String(secDangLam) : '---', true, AlignmentType.CENTER),
-                                mkCell(secChuaLam ? String(secChuaLam) : '---', true, AlignmentType.CENTER)
+                                mkCell('', true, AlignmentType.CENTER),
+                                mkCell('', true, AlignmentType.CENTER),
+                                mkCell('', true, AlignmentType.CENTER)
                             ]
                         }));
 
@@ -301,7 +301,7 @@ export const exportReportToWord = async (
         });
 
         children.push(footerTable);
-        
+
         docSections.push({
             properties: {},
             children

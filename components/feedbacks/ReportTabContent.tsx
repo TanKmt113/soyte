@@ -273,7 +273,7 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
                                         }, { daLam: 0, dangLam: 0, chuaLam: 0 });
 
                                         const formatStats = (total: number) => {
-                                            return total === 0 ? '---' : total.toString();
+                                            return total === 0 ? '0' : total.toString();
                                         };
 
                                         return (
@@ -285,21 +285,21 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
                                                     <td className="border border-slate-600 p-2 text-center font-bold">
                                                         {roman[gi] || gi + 1}
                                                     </td>
-                                                     <td colSpan={3} className="border border-slate-600 p-3 text-left font-bold text-sm">
-                                                         <div className="flex justify-between items-center">
-                                                             <span>{group.name || `Nhóm nội dung ${gi + 1}`}</span>
-                                                             <i className={`pi ${isGroupExpanded ? 'pi-chevron-up' : 'pi-chevron-down'} text-xs ml-2 opacity-80`}></i>
-                                                         </div>
-                                                     </td>
-                                                     <td className="border border-slate-600 p-2 text-center font-bold text-xs">
-                                                         {formatStats(groupStats.daLam)}
-                                                     </td>
-                                                     <td className="border border-slate-600 p-2 text-center font-bold text-xs">
-                                                         {formatStats(groupStats.dangLam)}
-                                                     </td>
-                                                     <td className="border border-slate-600 p-2 text-center font-bold text-xs">
-                                                         {formatStats(groupStats.chuaLam)}
-                                                     </td>
+                                                    <td colSpan={3} className="border border-slate-600 p-3 text-left font-bold text-sm">
+                                                        <div className="flex justify-between items-center">
+                                                            <span>{group.name || `Nhóm nội dung ${gi + 1}`}</span>
+                                                            <i className={`pi ${isGroupExpanded ? 'pi-chevron-up' : 'pi-chevron-down'} text-xs ml-2 opacity-80`}></i>
+                                                        </div>
+                                                    </td>
+                                                    <td className="border border-slate-600 p-2 text-center font-bold text-xs">
+                                                        {formatStats(groupStats.daLam)}
+                                                    </td>
+                                                    <td className="border border-slate-600 p-2 text-center font-bold text-xs">
+                                                        {formatStats(groupStats.dangLam)}
+                                                    </td>
+                                                    <td className="border border-slate-600 p-2 text-center font-bold text-xs">
+                                                        {formatStats(groupStats.chuaLam)}
+                                                    </td>
                                                 </tr>
                                                 {isGroupExpanded && group.options.map((opt: any, oi: number) => {
                                                     globalIdx++;
@@ -315,9 +315,9 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({ formId, feed
                                                             <td className="border border-slate-300 p-3 text-sm text-slate-700">
                                                                 <div className="whitespace-pre-wrap">{opt.productOut}</div>
                                                             </td>
-                                                            <td className="border border-slate-300 p-3 text-center font-semibold text-primary-700">{opt.statusCounts.daLam || '---'}</td>
-                                                            <td className="border border-slate-300 p-3 text-center font-semibold text-orange-600">{opt.statusCounts.dangLam || '---'}</td>
-                                                            <td className="border border-slate-300 p-3 text-center font-semibold text-red-600">{opt.statusCounts.chuaLam || '---'}</td>
+                                                            <td className="border border-slate-300 p-3 text-center font-semibold text-primary-700">{opt.statusCounts.daLam || '0'}</td>
+                                                            <td className="border border-slate-300 p-3 text-center font-semibold text-orange-600">{opt.statusCounts.dangLam || '0'}</td>
+                                                            <td className="border border-slate-300 p-3 text-center font-semibold text-red-600">{opt.statusCounts.chuaLam || '0'}</td>
                                                         </tr>
                                                     );
                                                 })}

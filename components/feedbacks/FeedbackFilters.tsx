@@ -14,7 +14,7 @@ interface FeedbackFiltersProps {
 const filterOptions = [
   { label: 'Tháng này', value: 'this_month' },
   { label: 'Tháng trước', value: 'last_month' },
-  { label: 'Năm này', value: 'this_year' },
+  { label: '12 tháng', value: 'this_year' },
   { label: '6 tháng đầu năm', value: 'first_half' },
   { label: '6 tháng cuối năm', value: 'second_half' },
   { label: 'Tùy chọn', value: 'custom' }

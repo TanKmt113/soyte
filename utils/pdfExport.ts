@@ -190,7 +190,7 @@ export const exportReportToPDF = async (
                                     else if (tiendo === 3) chuaLam++;
                                 }
                             });
-                            
+
                             secDaLam += daLam;
                             secDangLam += dangLam;
                             secChuaLam += chuaLam;
@@ -200,19 +200,19 @@ export const exportReportToPDF = async (
                                 opt.content,
                                 opt.method || '',
                                 opt.productOut || '',
-                                daLam || '---',
-                                dangLam || '---',
-                                chuaLam || '---'
+                                daLam || '0',
+                                dangLam || '0',
+                                chuaLam || '0'
                             ]);
                         });
 
-                        // Thêm dòng tiêu đề mục (I, II, III...) kèm theo tổng số
+                        // Thêm dòng tiêu đề mục (I, II, III...)
                         table2Body.push([
                             { content: sectionRoman[si] || si + 1, styles: { halign: 'center', fontStyle: 'bold' } },
                             { content: sec.name, colSpan: 3, styles: { fontStyle: 'bold' } },
-                            { content: secDaLam || '---', styles: { halign: 'center', fontStyle: 'bold' } },
-                            { content: secDangLam || '---', styles: { halign: 'center', fontStyle: 'bold' } },
-                            { content: secChuaLam || '---', styles: { halign: 'center', fontStyle: 'bold' } }
+                            { content: '', styles: { halign: 'center', fontStyle: 'bold' } },
+                            { content: '', styles: { halign: 'center', fontStyle: 'bold' } },
+                            { content: '', styles: { halign: 'center', fontStyle: 'bold' } }
                         ]);
 
                         // Thêm các dòng nội dung của mục đó

@@ -82,33 +82,10 @@ const SmtpSettings: React.FC = () => {
     }
   };
 
-  const testConnection = async () => {
-     toast.current?.show({
-        severity: "info",
-        summary: "Thông báo",
-        detail: "Đang kiểm tra kết nối tới máy chủ SMTP...",
-      });
-      // This would ideally be a dedicated API endpoint like api.post('/smtp-config/test', config)
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.current?.show({
-            severity: "success",
-            summary: "Thành công",
-            detail: "Kết nối tới máy chủ SMTP ổn định",
-          });
-      } catch (err) {
-        toast.current?.show({
-            severity: "error",
-            summary: "Lỗi",
-            detail: "Không thể kết nối tới máy chủ SMTP",
-          });
-      }
-  };
-
   return (
     <AdminLayout title="Cấu hình SMTP Hệ thống">
       <Toast ref={toast} />
-      
+
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
@@ -122,13 +99,6 @@ const SmtpSettings: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-3">
-               <Button
-                label="KIỂM TRA KẾT NỐI"
-                icon={<RefreshCw size={18} />}
-                onClick={testConnection}
-                disabled={loading || isSaving}
-                className="!px-6 !py-2.5 !bg-white !text-gray-600 !border-gray-200 !font-black !rounded-xl !shadow-sm hover:!bg-gray-50 !transition-all"
-              />
               <Button
                 label="LƯU THAY ĐỔI"
                 icon={isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
@@ -140,22 +110,22 @@ const SmtpSettings: React.FC = () => {
           </div>
 
           {loading ? (
-             <div className="p-20 text-center">
-                <Loader2 size={40} className="animate-spin text-primary-600 mx-auto mb-4" />
-                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Đang tải cấu hình...</p>
-             </div>
+            <div className="p-20 text-center">
+              <Loader2 size={40} className="animate-spin text-primary-600 mx-auto mb-4" />
+              <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Đang tải cấu hình...</p>
+            </div>
           ) : (
             <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-8">
                 <SectionHeader icon={Server} title="THÔNG TIN MÁY CHỦ" />
-                
+
                 <div className="space-y-6">
                   <div>
                     <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1 tracking-widest">SMTP HOST (MÁY CHỦ) <span className="text-red-500">*</span></label>
                     <div className="relative">
-                      <InputText 
+                      <InputText
                         value={config.smtp_host}
-                        onChange={(e) => setConfig({...config, smtp_host: e.target.value})}
+                        onChange={(e) => setConfig({ ...config, smtp_host: e.target.value })}
                         placeholder="e.g. smtp.gmail.com"
                         className="w-full !px-4 !py-3.5 !bg-gray-50 !border-gray-200 !rounded-2xl outline-none focus:!ring-2 focus:!ring-primary-100 !font-bold !text-gray-700 !transition-all"
                       />
@@ -165,25 +135,25 @@ const SmtpSettings: React.FC = () => {
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1 tracking-widest">CỔNG (PORT) <span className="text-red-500">*</span></label>
-                       <InputNumber 
+                      <InputNumber
                         value={config.smtp_port}
-                        onValueChange={(e) => setConfig({...config, smtp_port: e.value || 587})}
+                        onValueChange={(e) => setConfig({ ...config, smtp_port: e.value || 587 })}
                         useGrouping={false}
                         className="w-full"
                         inputClassName="w-full !px-4 !py-3.5 !bg-gray-50 !border-gray-200 !rounded-2xl outline-none focus:!ring-2 focus:!ring-primary-100 !font-bold !text-gray-700 !transition-all"
                       />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1 tracking-widest text-center">BẢO MẬT (SSL/TLS)</label>
-                        <div className="flex items-center justify-center p-3 bg-gray-50 border border-gray-200 rounded-2xl h-[52px]">
-                             <InputSwitch 
-                                checked={config.smtp_secure}
-                                onChange={(e) => setConfig({...config, smtp_secure: e.value})}
-                             />
-                             <span className="ml-3 font-black text-[10px] text-gray-600 uppercase tracking-widest">
-                                {config.smtp_secure ? "Bật" : "Tắt"}
-                             </span>
-                        </div>
+                      <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1 tracking-widest text-center">BẢO MẬT (SSL/TLS)</label>
+                      <div className="flex items-center justify-center p-3 bg-gray-50 border border-gray-200 rounded-2xl h-[52px]">
+                        <InputSwitch
+                          checked={config.smtp_secure}
+                          onChange={(e) => setConfig({ ...config, smtp_secure: e.value })}
+                        />
+                        <span className="ml-3 font-black text-[10px] text-gray-600 uppercase tracking-widest">
+                          {config.smtp_secure ? "Bật" : "Tắt"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -196,10 +166,10 @@ const SmtpSettings: React.FC = () => {
                   <div>
                     <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1 tracking-widest">TÀI KHOẢN (USER) <span className="text-red-500">*</span></label>
                     <div className="relative">
-                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                       <InputText 
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <InputText
                         value={config.smtp_user}
-                        onChange={(e) => setConfig({...config, smtp_user: e.target.value})}
+                        onChange={(e) => setConfig({ ...config, smtp_user: e.target.value })}
                         placeholder="your-email@gmail.com"
                         className="w-full !pl-12 !pr-4 !py-3.5 !bg-gray-50 !border-gray-200 !rounded-2xl outline-none focus:!ring-2 focus:!ring-primary-100 !font-bold !text-gray-700 !transition-all"
                       />
@@ -209,15 +179,15 @@ const SmtpSettings: React.FC = () => {
                   <div>
                     <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1 tracking-widest">MẬT KHẨU (PASSWORD) <span className="text-red-500">*</span></label>
                     <div className="relative">
-                       <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                       <InputText 
+                      <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <InputText
                         type={showPassword ? "text" : "password"}
                         value={config.smtp_pass}
-                        onChange={(e) => setConfig({...config, smtp_pass: e.target.value})}
+                        onChange={(e) => setConfig({ ...config, smtp_pass: e.target.value })}
                         placeholder="••••••••••••"
                         className="w-full !pl-12 !pr-12 !py-3.5 !bg-gray-50 !border-gray-200 !rounded-2xl outline-none focus:!ring-2 focus:!ring-primary-100 !font-bold !text-gray-700 !transition-all"
                       />
-                      <button 
+                      <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -229,10 +199,10 @@ const SmtpSettings: React.FC = () => {
                 </div>
 
                 <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex gap-3 animate-in zoom-in-95 duration-500 delay-200">
-                    <Lock className="text-amber-600 shrink-0" size={20} />
-                    <p className="text-[11px] text-amber-800 font-medium leading-relaxed">
-                        <span className="font-bold underline uppercase tracking-tight">Lưu ý:</span> Nếu sử dụng Gmail, vui lòng đảm bảo bạn đã tạo và sử dụng <strong>App Password</strong> (Mật khẩu ứng dụng) thay vì mật khẩu chính của tài khoản để đảm bảo tính bảo mật.
-                    </p>
+                  <Lock className="text-amber-600 shrink-0" size={20} />
+                  <p className="text-[11px] text-amber-800 font-medium leading-relaxed">
+                    <span className="font-bold underline uppercase tracking-tight">Lưu ý:</span> Nếu sử dụng Gmail, vui lòng đảm bảo bạn đã tạo và sử dụng <strong>App Password</strong> (Mật khẩu ứng dụng) thay vì mật khẩu chính của tài khoản để đảm bảo tính bảo mật.
+                  </p>
                 </div>
               </div>
             </div>
