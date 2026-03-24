@@ -81,6 +81,8 @@ const App = () => {
         <Route path="/emergency" element={<EmergencyCenter />} />
         <Route path="/consulting" element={<HealthConsultation />} />
         <Route path="/data-lookup" element={<DataLookup />} />
+        {/* Public QR View */}
+        <Route path="/admin/templates/qr/:id" element={<TemplateQrView />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminRoute />}>
@@ -91,7 +93,6 @@ const App = () => {
           <Route path="templates/:type?" element={<TemplatesManagement />} />{" "}
           <Route path="templates/create/:type?" element={<TemplateCreate />} />{" "}
           <Route path="templates/edit/:id" element={<TemplateCreate />} />{" "}
-          <Route path="templates/qr/:id" element={<TemplateQrView />} />{" "}
           <Route path="feedbacks/:type?" element={<FeedbacksManagement />} />{" "}
           <Route
             path="social-facilities"
