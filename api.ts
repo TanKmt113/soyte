@@ -1,8 +1,6 @@
 import { SmtpConfig } from "./types";
 
-const BASE_URL = "https://suckhoethudo.vn:7005/api";
-//const BASE_URL = "https://localhost:7002/api";
-//const BASE_URL = "https://10.10.10.19:7002/api";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const api = {
   async get(endpoint: string, params?: Record<string, any>) {
@@ -183,6 +181,10 @@ export const api = {
 
   async forgotPassword(email: string) {
     return this.post("/auth/forgot-password", { email });
+  },
+
+  async resendVerification(email: string) {
+    return this.post("/auth/resend-confirmation", { email });
   },
 
   async changePassword(data: any) {

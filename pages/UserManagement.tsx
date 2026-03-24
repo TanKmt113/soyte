@@ -11,6 +11,7 @@ import {
   Shield,
   Edit3,
   Trash2,
+  Mail,
 } from "lucide-react";
 import { Toast } from "primereact/toast";
 import { confirmDialog } from "primereact/confirmdialog";
@@ -84,6 +85,25 @@ const UserManagement: React.FC = () => {
         }
       },
     });
+  };
+
+  const handleResendEmail = async (user: User) => {
+    try {
+      if (!user.email) return;
+      await api.resendVerification(user.email);
+      toast.current?.show({
+        severity: "success",
+        summary: "Thành công",
+        detail: "Đã gửi lại email xác thực mật khẩu.",
+      });
+    } catch (err) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Không thể gửi lại email.",
+      });
+      console.error(err);
+    }
   };
 
   const handleOpenAddModal = () => {
@@ -282,21 +302,36 @@ const UserManagement: React.FC = () => {
                       }
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-center justify-center gap-1">
                         <Button
                           icon={<Edit3 size={18} />}
                           text
                           rounded
+                          className="w-8 h-8"
                           onClick={() => handleOpenEditModal(user)}
                         />
-                        <Button
+                        {Number(user.status) === 1 && user.is_verified === true && (<Button
                           icon={<Trash2 size={18} />}
                           text
                           rounded
                           severity="danger"
+                          className="w-8 h-8"
                           onClick={() => handleDeactivate(user.id)}
                           disabled={Number(user.status) !== 1}
                         />
+                        )}
+                        {Number(user.status) === 0 && user.is_verified === false && (
+                          <Button
+                            icon={<Mail size={18} />}
+                            text
+                            rounded
+                            severity="info"
+                            className="w-8 h-8"
+                            tooltip="Gửi lại mail xác thực"
+                            tooltipOptions={{ position: 'top' }}
+                            onClick={() => handleResendEmail(user)}
+                          />
+                        )}
                       </div>
                     </td>
                   </tr>
