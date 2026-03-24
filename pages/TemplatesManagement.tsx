@@ -5,7 +5,7 @@ import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 
@@ -14,9 +14,9 @@ import { Plus, QrCode } from "lucide-react";
 const ALLOWED_TYPES = ["evaluate", "reflect"] as const;
 type FormType = (typeof ALLOWED_TYPES)[number];
 const statusOptions = [
-  { label: 'Tất cả', value: 'all' },
-  { label: 'Hoạt động', value: 'active' },
-  { label: 'Đang tắt', value: 'inactive' },
+  { label: "Tất cả", value: "all" },
+  { label: "Hoạt động", value: "active" },
+  { label: "Đang tắt", value: "inactive" },
 ];
 
 const TemplatesManagement: React.FC = () => {
@@ -40,8 +40,8 @@ const TemplatesManagement: React.FC = () => {
   });
 
   // Filter states
-  const [searchText, setSearchText] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const fetchTemplates = async () => {
     try {
@@ -71,7 +71,11 @@ const TemplatesManagement: React.FC = () => {
       setTotalRecords(type ? list.length : total);
     } catch (error) {
       console.error(error);
-      toast.current?.show({ severity: 'error', summary: 'Lỗi', detail: 'Không thể tải danh sách biểu mẫu' });
+      toast.current?.show({
+        severity: "error",
+        summary: "Lỗi",
+        detail: "Không thể tải danh sách biểu mẫu",
+      });
     } finally {
       setLoading(false);
     }
@@ -138,27 +142,46 @@ const TemplatesManagement: React.FC = () => {
 
   const showQr = (rowData: any) => {
     const formId = rowData.id || rowData._id;
-    navigate(`/admin/templates/qr/${formId}`);
+    navigate(`/templates/qr/${formId}`);
   };
 
   const actionBodyTemplate = (rowData: any) => {
     return (
       <div className="flex gap-2">
-        <Button icon="pi pi-pencil" rounded outlined className="w-8 h-8 p-0 text-primary-600 border-primary-600 hover:bg-primary-50" onClick={() => editTemplate(rowData)} />
-        <Button icon={<QrCode size={14} />} rounded outlined className="w-8 h-8 p-0 text-secondary-600 border-secondary-600 hover:bg-secondary-50" onClick={() => showQr(rowData)} title="Xem mã QR" />
+        <Button
+          icon="pi pi-pencil"
+          rounded
+          outlined
+          className="w-8 h-8 p-0 text-primary-600 border-primary-600 hover:bg-primary-50"
+          onClick={() => editTemplate(rowData)}
+        />
+        <Button
+          icon={<QrCode size={14} />}
+          rounded
+          outlined
+          className="w-8 h-8 p-0 text-secondary-600 border-secondary-600 hover:bg-secondary-50"
+          onClick={() => showQr(rowData)}
+          title="Xem mã QR"
+        />
         {/* <Button icon="pi pi-trash" rounded outlined severity="danger" className="w-8 h-8 p-0 hover:bg-red-50" onClick={() => confirmDeleteTemplate(rowData)} /> */}
       </div>
     );
   };
 
   const statusBodyTemplate = (rowData: any) => {
-    const isActive = rowData.status === true || rowData.status === 'active' || rowData.status === 'true';
+    const isActive =
+      rowData.status === true ||
+      rowData.status === "active" ||
+      rowData.status === "true";
     return (
-      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${isActive
-        ? 'bg-green-100 text-green-800 border border-green-200'
-        : 'bg-slate-100 text-slate-800 border border-slate-200'
-        }`}>
-        {isActive ? 'Hoạt động' : 'Đang tắt'}
+      <span
+        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+          isActive
+            ? "bg-green-100 text-green-800 border border-green-200"
+            : "bg-slate-100 text-slate-800 border border-slate-200"
+        }`}
+      >
+        {isActive ? "Hoạt động" : "Đang tắt"}
       </span>
     );
   };
@@ -168,16 +191,16 @@ const TemplatesManagement: React.FC = () => {
       <div
         title={rowData.description}
         style={{
-          display: '-webkit-box',
+          display: "-webkit-box",
           WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          lineHeight: '1.5em',
-          maxHeight: '3em',
-          wordBreak: 'break-word',
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          lineHeight: "1.5em",
+          maxHeight: "3em",
+          wordBreak: "break-word",
         }}
       >
-        {rowData.description || '—'}
+        {rowData.description || "—"}
       </div>
     );
   };
@@ -189,8 +212,9 @@ const TemplatesManagement: React.FC = () => {
     let active = 0;
     let inactive = 0;
 
-    templates.forEach(t => {
-      const isA = t.status === true || t.status === 'active' || t.status === 'true';
+    templates.forEach((t) => {
+      const isA =
+        t.status === true || t.status === "active" || t.status === "true";
       if (isA) active++;
       else inactive++;
     });
@@ -201,20 +225,22 @@ const TemplatesManagement: React.FC = () => {
   // Client-side filter on top of fetched data
   const filteredTemplates = templates.filter((t) => {
     const matchesName = searchText
-      ? (t.name || '').toLowerCase().includes(searchText.toLowerCase())
+      ? (t.name || "").toLowerCase().includes(searchText.toLowerCase())
       : true;
-    const isActive = t.status === true || t.status === 'active' || t.status === 'true';
-    const matchesStatus = statusFilter === 'all'
-      ? true
-      : statusFilter === 'active'
-        ? isActive
-        : !isActive;
+    const isActive =
+      t.status === true || t.status === "active" || t.status === "true";
+    const matchesStatus =
+      statusFilter === "all"
+        ? true
+        : statusFilter === "active"
+          ? isActive
+          : !isActive;
     return matchesName && matchesStatus;
   });
 
   const handleResetFilter = () => {
-    setSearchText('');
-    setStatusFilter('all');
+    setSearchText("");
+    setStatusFilter("all");
   };
 
   return (
@@ -227,8 +253,12 @@ const TemplatesManagement: React.FC = () => {
             <i className="pi pi-file text-lg"></i>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tổng biểu mẫu</p>
-            <h3 className="text-2xl font-black text-slate-800 leading-none">{stats.total}</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              Tổng biểu mẫu
+            </p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">
+              {stats.total}
+            </h3>
           </div>
         </div>
 
@@ -238,8 +268,12 @@ const TemplatesManagement: React.FC = () => {
             <i className="pi pi-check-circle text-lg"></i>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hoạt động</p>
-            <h3 className="text-2xl font-black text-slate-800 leading-none">{stats.active}</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              Hoạt động
+            </p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">
+              {stats.active}
+            </h3>
           </div>
         </div>
 
@@ -249,8 +283,12 @@ const TemplatesManagement: React.FC = () => {
             <i className="pi pi-eye-slash text-lg"></i>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Đang ẩn</p>
-            <h3 className="text-2xl font-black text-slate-800 leading-none">{stats.inactive}</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+              Đang ẩn
+            </p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none">
+              {stats.inactive}
+            </h3>
           </div>
         </div>
         <div className="flex items-center justify-center">
@@ -266,34 +304,43 @@ const TemplatesManagement: React.FC = () => {
       <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden p-6 relative">
         {/* Header */}
         <div className="flex justify-between items-center mb-5">
-          <h2 className="text-xl font-bold text-primary-900">Danh sách biểu mẫu</h2>
+          <h2 className="text-xl font-bold text-primary-900">
+            Danh sách biểu mẫu
+          </h2>
         </div>
 
         {/* Filter bar */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'flex-end',
-          gap: '12px',
-          marginBottom: '20px',
-          padding: '16px 20px',
-          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-          borderRadius: '16px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-        }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "flex-end",
+            gap: "12px",
+            marginBottom: "20px",
+            padding: "16px 20px",
+            background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+            borderRadius: "16px",
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+          }}
+        >
           {/* Search input */}
-          <div style={{ flex: 1, minWidth: '220px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '11px',
-              fontWeight: 600,
-              color: '#64748b',
-              marginBottom: '6px',
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-            }}>
-              <i className="pi pi-search" style={{ marginRight: '5px', fontSize: '10px' }} />
+          <div style={{ flex: 1, minWidth: "220px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "#64748b",
+                marginBottom: "6px",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+              }}
+            >
+              <i
+                className="pi pi-search"
+                style={{ marginRight: "5px", fontSize: "10px" }}
+              />
               Tìm kiếm theo tên
             </label>
             <InputText
@@ -301,32 +348,37 @@ const TemplatesManagement: React.FC = () => {
               onChange={(e) => setSearchText(e.target.value)}
               placeholder="Nhập tên biểu mẫu..."
               style={{
-                width: '100%',
-                fontSize: '13.5px',
-                borderRadius: '10px',
-                border: '1.5px solid #e2e8f0',
-                padding: '9px 14px',
-                background: '#fff',
-                color: '#1e293b',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                outline: 'none',
-                transition: 'border-color 0.2s',
+                width: "100%",
+                fontSize: "13.5px",
+                borderRadius: "10px",
+                border: "1.5px solid #e2e8f0",
+                padding: "9px 14px",
+                background: "#fff",
+                color: "#1e293b",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                outline: "none",
+                transition: "border-color 0.2s",
               }}
             />
           </div>
 
           {/* Status dropdown */}
-          <div style={{ minWidth: '200px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '11px',
-              fontWeight: 600,
-              color: '#64748b',
-              marginBottom: '6px',
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-            }}>
-              <i className="pi pi-filter" style={{ marginRight: '5px', fontSize: '10px' }} />
+          <div style={{ minWidth: "200px" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "#64748b",
+                marginBottom: "6px",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+              }}
+            >
+              <i
+                className="pi pi-filter"
+                style={{ marginRight: "5px", fontSize: "10px" }}
+              />
               Trạng thái
             </label>
             <Dropdown
@@ -335,12 +387,12 @@ const TemplatesManagement: React.FC = () => {
               onChange={(e) => setStatusFilter(e.value)}
               placeholder="Tất cả"
               style={{
-                width: '100%',
-                fontSize: '13.5px',
-                borderRadius: '10px',
-                border: '1.5px solid #e2e8f0',
-                background: '#fff',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                width: "100%",
+                fontSize: "13.5px",
+                borderRadius: "10px",
+                border: "1.5px solid #e2e8f0",
+                background: "#fff",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
               }}
             />
           </div>
@@ -351,20 +403,20 @@ const TemplatesManagement: React.FC = () => {
             icon="pi pi-refresh"
             onClick={handleResetFilter}
             style={{
-              fontSize: '13px',
+              fontSize: "13px",
               fontWeight: 500,
-              color: '#475569',
-              background: '#fff',
-              border: '1.5px solid #e2e8f0',
-              borderRadius: '10px',
-              padding: '9px 18px',
-              cursor: 'pointer',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.15s ease',
-              whiteSpace: 'nowrap',
+              color: "#475569",
+              background: "#fff",
+              border: "1.5px solid #e2e8f0",
+              borderRadius: "10px",
+              padding: "9px 18px",
+              cursor: "pointer",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              transition: "all 0.15s ease",
+              whiteSpace: "nowrap",
             }}
           />
         </div>
@@ -381,14 +433,36 @@ const TemplatesManagement: React.FC = () => {
             totalRecords={totalRecords}
             onPage={onPage}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            tableStyle={{ minWidth: '50rem' }}
+            tableStyle={{ minWidth: "50rem" }}
             emptyMessage="Không có dữ liệu phù hợp"
           >
-            <Column header="STT" body={sttBodyTemplate} style={{ width: '5rem' }}></Column>
-            <Column field="name" header="Tên biểu mẫu" style={{ width: '25rem' }}></Column>
-            <Column field="description" header="Mô tả" body={descriptionBodyTemplate}></Column>
-            <Column field="status" header="Trạng thái" body={statusBodyTemplate} style={{ width: '10rem' }}></Column>
-            <Column body={actionBodyTemplate} exportable={false} style={{ width: '8rem' }} header="Thao tác"></Column>
+            <Column
+              header="STT"
+              body={sttBodyTemplate}
+              style={{ width: "5rem" }}
+            ></Column>
+            <Column
+              field="name"
+              header="Tên biểu mẫu"
+              style={{ width: "25rem" }}
+            ></Column>
+            <Column
+              field="description"
+              header="Mô tả"
+              body={descriptionBodyTemplate}
+            ></Column>
+            <Column
+              field="status"
+              header="Trạng thái"
+              body={statusBodyTemplate}
+              style={{ width: "10rem" }}
+            ></Column>
+            <Column
+              body={actionBodyTemplate}
+              exportable={false}
+              style={{ width: "8rem" }}
+              header="Thao tác"
+            ></Column>
           </DataTable>
         </div>
       </div>

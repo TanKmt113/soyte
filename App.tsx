@@ -82,7 +82,7 @@ const App = () => {
         <Route path="/consulting" element={<HealthConsultation />} />
         <Route path="/data-lookup" element={<DataLookup />} />
         {/* Public QR View */}
-        <Route path="/admin/templates/qr/:id" element={<TemplateQrView />} />
+        <Route path="/templates/qr/:id" element={<TemplateQrView />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminRoute />}>
