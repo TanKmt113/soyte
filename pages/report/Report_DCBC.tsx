@@ -13,8 +13,10 @@ import { ReportAppendix } from '@/components/feedbacks/ReportAppendix'
 import { ReportHeader } from '@/components/feedbacks/ReportHeader'
 import { ReportLoadingState, ReportEmptyState, StyledTabViewCSS } from '@/components/feedbacks/ReportStates'
 import { useReportFilter } from '@/hooks/useReportFilter'
+import { useFacilities } from '@/hooks/useFacilities'
 
 const Report_DCBC = () => {
+    const { facilities } = useFacilities();
     const toast = useRef<Toast>(null);
     const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
     const [formTemplates, setFormTemplates] = useState<Record<string, any>>({});
@@ -100,7 +102,7 @@ const Report_DCBC = () => {
 
     const exportToPDF = async () => {
         await exportReportToPDF(
-            groupedFeedbacks, formTemplates, dateFilter, setLoading,
+            groupedFeedbacks, formTemplates, facilities, dateFilter, setLoading,
             (msg) => toast.current?.show({ severity: 'success', summary: 'Thành công', detail: msg }),
             (msg) => toast.current?.show({ severity: 'error', summary: 'Lỗi', detail: msg })
         );
@@ -108,7 +110,7 @@ const Report_DCBC = () => {
 
     const exportToWord = async () => {
         await exportReportToWord(
-            groupedFeedbacks, formTemplates, dateFilter, setLoading,
+            groupedFeedbacks, formTemplates, facilities, dateFilter, setLoading,
             (msg) => toast.current?.show({ severity: 'success', summary: 'Thành công', detail: msg }),
             (msg) => toast.current?.show({ severity: 'error', summary: 'Lỗi', detail: msg })
         );

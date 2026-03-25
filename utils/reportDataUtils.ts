@@ -1,10 +1,9 @@
 import { FeedbackItem } from '@/types/feedbacks';
-import { ALL_FACILITIES } from '@/constants';
 
 /**
  * Tính toán tổng số đơn vị dự kiến báo cáo dựa trên template
  */
-export const calculateTotalUnits = (template: any): number => {
+export const calculateTotalUnits = (template: any, facilities: any[] = []): number => {
     if (!template) return 0;
     const infoSource = template.info || template.data?.info;
     let facilityField: any = null;
@@ -23,7 +22,7 @@ export const calculateTotalUnits = (template: any): number => {
     }
 
     const selectedTypes = facilityField.facilityTypeFilter || [];
-    return ALL_FACILITIES.filter(f => selectedTypes.length === 0 || selectedTypes.includes(f.type)).length;
+    return (facilities || []).filter(f => selectedTypes.length === 0 || selectedTypes.includes(f.type)).length;
 };
 
 /**

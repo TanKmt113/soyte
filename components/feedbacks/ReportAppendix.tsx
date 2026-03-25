@@ -1,12 +1,13 @@
 import React from 'react';
 import { FeedbackItem } from '@/types/feedbacks';
-import { ALL_FACILITIES } from '@/constants';
+import { useFacilities } from '@/hooks/useFacilities'
 
 interface ReportAppendixProps {
     groupedFeedbacks: Record<string, { title: string, items: FeedbackItem[] }>;
 }
 
 export const ReportAppendix: React.FC<ReportAppendixProps> = ({ groupedFeedbacks }) => {
+    const { facilities } = useFacilities();
     const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
     const sortedEntries = Object.entries(groupedFeedbacks).sort((a, b) => {
@@ -25,7 +26,7 @@ export const ReportAppendix: React.FC<ReportAppendixProps> = ({ groupedFeedbacks
                 .filter((k): k is string => !!k);
 
             for (const key of candidateKeys) {
-                const facility = ALL_FACILITIES.find((f: any) => f.id === key);
+                const facility = facilities.find((f: any) => String(f.id) === String(key));
                 if (facility) return facility.name;
             }
 

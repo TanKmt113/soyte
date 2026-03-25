@@ -1,9 +1,10 @@
-import { ALL_FACILITIES } from "@/constants";
+import { useFacilities } from "@/hooks/useFacilities";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 const PAGE_SIZE = 10;
 export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
+  const { facilities } = useFacilities();
   console.log(info);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -75,13 +76,13 @@ export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
 
     if (!info.facilityTypeFilter?.length) return [];
 
-    return ALL_FACILITIES.filter(({ type }) =>
+    return facilities.filter(({ type }) =>
       info.facilityTypeFilter.includes(type),
     ).map(({ id, name }) => ({
       key: id,
       value: name,
     }));
-  }, [info.option, info.facilityTypeFilter]);
+  }, [info.option, info.facilityTypeFilter, facilities]);
 
   const filteredOptions = useMemo(() => {
     const keyword = searchText.trim().toLowerCase();

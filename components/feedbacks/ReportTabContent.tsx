@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { formService } from '@/services/formService';
 import { FeedbackItem } from '@/types/feedbacks';
-import { ALL_FACILITIES } from '@/constants';
+import { useFacilities } from '@/hooks/useFacilities';
 
 interface ReportTabContentProps {
     formId: string;
@@ -18,6 +18,7 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({
     dateFilter,
     formTemplate: propTemplate
 }) => {
+    const { facilities } = useFacilities();
     const [detailedFeedbacks, setDetailedFeedbacks] = useState<any[]>([]);
     const [formTemplate, setFormTemplate] = useState<any>(propTemplate || null);
     // const [isDetailedTableExpanded, setIsDetailedTableExpanded] = useState(true);
@@ -58,11 +59,11 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({
 
         // 2. Nếu là danh sách động dựa trên loại đơn vị (VD: tất cả TYT)
         const selectedTypes = facilityField.facilityTypeFilter || [];
-        const filteredFacilities = ALL_FACILITIES.filter(f =>
+        const filteredFacilities = facilities.filter(f =>
             selectedTypes.length === 0 || selectedTypes.includes(f.type)
         );
         return filteredFacilities.length;
-    }, [formTemplate]);
+    }, [formTemplate, facilities]);
 
     // Thống kê tổng hợp tình hình báo cáo 
     const summaryStats = useMemo(() => {

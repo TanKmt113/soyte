@@ -1,6 +1,5 @@
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, WidthType, BorderStyle, VerticalAlign } from 'docx';
 import { saveAs } from 'file-saver';
-import { ALL_FACILITIES } from '@/constants';
 import { formatDateVN } from '@/utils/dateUtils';
 import { FeedbackItem } from '@/types/feedbacks';
 import { calculateTotalUnits, calculateOnTimeStats } from '@/utils/reportDataUtils';
@@ -8,6 +7,7 @@ import { calculateTotalUnits, calculateOnTimeStats } from '@/utils/reportDataUti
 export const exportReportToWord = async (
     groupedFeedbacks: Record<string, { title: string, items: FeedbackItem[] }>,
     formTemplates: Record<string, any>,
+    facilities: any[],
     dateFilter: { startDate: string, endDate: string },
     setLoading: (val: boolean) => void,
     onSuccess: (msg: string) => void,
@@ -87,7 +87,7 @@ export const exportReportToWord = async (
             const formTemplate = formTemplates[formId];
             if (!formTemplate) continue;
 
-            const totalUnits = calculateTotalUnits(formTemplate);
+            const totalUnits = calculateTotalUnits(formTemplate, facilities);
             const reportedCount = group.items.length;
             const unReportingCount = Math.max(0, totalUnits - reportedCount);
             const { onTimeCount, lateCount } = calculateOnTimeStats(group.items, formTemplate);
@@ -253,7 +253,7 @@ export const exportReportToWord = async (
                     )
                     .filter((k): k is string => !!k);
                 for (const key of candidateKeys) {
-                    const facility = ALL_FACILITIES.find((f: any) => f.id === key);
+                    const facility = (facilities || []).find((f: any) => String(f.id) === String(key));
                     if (facility) return facility.name;
                 }
                 const firstMatchedField = Object.entries(item.info)

@@ -5,7 +5,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputSwitch } from 'primereact/inputswitch';
 import { MultiSelect } from 'primereact/multiselect';
 import { InfoNode } from '../../types/templates';
-import { ALL_FACILITIES } from '../../constants';
+import { useFacilities } from '@/hooks/useFacilities';
 
 interface InfoBuilderProps {
   info: InfoNode[];
@@ -26,6 +26,7 @@ export const InfoBuilder: React.FC<InfoBuilderProps> = ({
   removeInfoOption,
   addInfoField
 }) => {
+  const { facilities } = useFacilities();
   return (
     <div className="p-6 border-b border-slate-100 bg-white flex-shrink-0">
       <div className="flex justify-between items-center mb-4">
@@ -101,13 +102,13 @@ export const InfoBuilder: React.FC<InfoBuilderProps> = ({
                 PB: "Phòng/Chi cục",
               };
               const facilityTypeOptions = [
-                ...Array.from(new Set(ALL_FACILITIES.map(f => f.type))).map(t => ({
-                  label: `${typeMapping[t] || t} (${ALL_FACILITIES.filter(f => f.type === t).length})`,
+                ...Array.from(new Set(facilities.map(f => f.type))).map((t: any) => ({
+                  label: `${(typeMapping as any)[t] || t} (${facilities.filter(f => f.type === t).length})`,
                   value: t,
                 }))
               ];
               const selectedTypes: string[] = field.facilityTypeFilter || [];
-              const filteredFacilities = ALL_FACILITIES.filter(f =>
+              const filteredFacilities = facilities.filter(f =>
                 selectedTypes.length === 0 || selectedTypes.includes(f.type)
               );
               const facilityOptions = filteredFacilities.map(f => ({ label: f.name, value: f.id }));
@@ -150,7 +151,7 @@ export const InfoBuilder: React.FC<InfoBuilderProps> = ({
                       onChange={(e) => {
                         const selected = e.value as string[];
                         const newOpts = selected.map(id => {
-                          const f = ALL_FACILITIES.find(x => x.id === id);
+                          const f = facilities.find(x => x.id === id);
                           return { key: id, value: f?.name || id };
                         });
                         updateInfoField(idx, 'option', newOpts);

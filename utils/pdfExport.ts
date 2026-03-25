@@ -1,6 +1,5 @@
 import { jsPDF } from "jspdf"
 import autoTable from 'jspdf-autotable'
-import { ALL_FACILITIES } from '@/constants'
 import { TIMES_REGULAR_BASE64, TIMES_BOLD_BASE64 } from '@/utils/pdfFonts'
 import { formatDateVN } from '@/utils/dateUtils'
 import { FeedbackItem } from '@/types/feedbacks'
@@ -9,6 +8,7 @@ import { calculateTotalUnits, calculateOnTimeStats } from '@/utils/reportDataUti
 export const exportReportToPDF = async (
     groupedFeedbacks: Record<string, { title: string, items: FeedbackItem[] }>,
     formTemplates: Record<string, any>,
+    facilities: any[],
     dateFilter: { startDate: string, endDate: string },
     setLoading: (val: boolean) => void,
     onSuccess: (msg: string) => void,
@@ -69,7 +69,7 @@ export const exportReportToPDF = async (
             const formTemplate = formTemplates[formId];
             if (!formTemplate) continue;
 
-            const totalUnits = calculateTotalUnits(formTemplate);
+            const totalUnits = calculateTotalUnits(formTemplate, facilities);
             const reportedCount = group.items.length;
             const unReportingCount = Math.max(0, totalUnits - reportedCount);
             const { onTimeCount, lateCount } = calculateOnTimeStats(group.items, formTemplate);
@@ -239,7 +239,7 @@ export const exportReportToPDF = async (
                     )
                     .filter((k): k is string => !!k);
                 for (const key of candidateKeys) {
-                    const facility = ALL_FACILITIES.find((f: any) => f.id === key);
+                    const facility = (facilities || []).find((f: any) => String(f.id) === String(key));
                     if (facility) return facility.name;
                 }
                 const firstMatchedField = Object.entries(item.info)

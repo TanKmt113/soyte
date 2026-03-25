@@ -8,7 +8,7 @@ import { exportTCT01ToWord } from '@/utils/wordExportTCT01'
 import { exportTCT01ToPDF } from '@/utils/pdfExportTCT01'
 import { feedBacksSevice } from '@/services/feedBacksSevice'
 import { formService } from '@/services/formService'
-import { ALL_FACILITIES } from '@/constants'
+import { useFacilities } from '@/hooks/useFacilities'
 import { FeedbackItem } from '@/types/feedbacks'
 import { ReportAppendix } from '@/components/feedbacks/ReportAppendix'
 import { TCT01TabContent } from '@/components/feedbacks/TCT01TabContent'
@@ -19,6 +19,7 @@ import { useReportFilter } from '@/hooks/useReportFilter'
 
 const Report_TCT01 = () => {
     const toast = useRef<Toast>(null);
+    const { facilities } = useFacilities();
     const [loading, setLoading] = useState(false);
     const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
     const [formTemplates, setFormTemplates] = useState<Record<string, any>>({});
@@ -115,7 +116,7 @@ const Report_TCT01 = () => {
             const items = group?.items || [];
             const template = formTemplates[cat.id];
 
-            const totalUnits = calculateTotalUnits(template);
+            const totalUnits = calculateTotalUnits(template, facilities);
             const reportedCount = items.length;
             const notReportedCount = Math.max(0, totalUnits - reportedCount);
             const { onTimeCount, lateCount } = calculateOnTimeStats(items, template);
@@ -145,7 +146,7 @@ const Report_TCT01 = () => {
                             .filter((k): k is string => !!k);
 
                         for (const key of candidateKeys) {
-                            const facility = ALL_FACILITIES.find((f: any) => String(f.id) === String(key));
+                            const facility = facilities.find((f: any) => String(f.id) === String(key));
                             if (facility) return facility.name;
                         }
 
@@ -158,7 +159,7 @@ const Report_TCT01 = () => {
                         }
                     }
                     const facilityId = fb.info?.facility_id || fb.facility_id;
-                    const facility = ALL_FACILITIES.find((f: any) => String(f.id) === String(facilityId));
+                    const facility = facilities.find((f: any) => String(f.id) === String(facilityId));
                     return facility ? facility.name : (fb.fullName || fb.name || `Đơn vị (${facilityId || '?'})`);
                 });
                 data.phuLuc.push({
@@ -169,7 +170,7 @@ const Report_TCT01 = () => {
         });
 
         return data;
-    }, [feedbacks, formTemplates, groupedFeedbacks]);
+    }, [feedbacks, formTemplates, groupedFeedbacks, facilities]);
 
     const exportToWord = async () => {
         await exportTCT01ToWord(

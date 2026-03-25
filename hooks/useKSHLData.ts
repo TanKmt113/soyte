@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { feedBacksSevice } from '@/services/feedBacksSevice'
 import { formService } from '@/services/formService'
-import { FACILITIES_BV, FACILITIES_TYT, FACILITIES_TT, FACILITIES_BT } from '@/constants'
+import { useFacilities } from '@/hooks/useFacilities';
 
 export interface DateFilter {
     startDate: string;
@@ -14,7 +14,8 @@ export function useKSHLData(dateFilter: DateFilter) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const allUnits = useMemo(() => [...FACILITIES_BV, ...FACILITIES_TYT, ...FACILITIES_TT, ...FACILITIES_BT], []);
+    const { facilities } = useFacilities();
+    const allUnits = facilities;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -177,9 +178,9 @@ export function useKSHLData(dateFilter: DateFilter) {
         const displayRate = (val: number) => val > 0 ? val.toFixed(2) : "0";
         const formatNumber = (n: number) => n.toLocaleString('vi-VN');
 
-        const publicHospitals = FACILITIES_BV.filter(u => u.category !== "Cơ sở y tế tư nhân");
-        const privateHospitals = FACILITIES_BV.filter(u => u.category === "Cơ sở y tế tư nhân");
-        const tytUnits = FACILITIES_TYT;
+        const publicHospitals = facilities.filter(u => u.type === 'BV' && u.category !== "Cơ sở y tế tư nhân");
+        const privateHospitals = facilities.filter(u => u.type === 'BV' && u.category === "Cơ sở y tế tư nhân");
+        const tytUnits = facilities.filter(u => u.type === 'TYT');
 
         // Tạo dữ liệu bảng tổng hợp (8 cột)
         const createSummaryData = (units: any[], surveyType: string, label: string) => {
@@ -243,7 +244,7 @@ export function useKSHLData(dateFilter: DateFilter) {
         lastRowNoiTru.col5 = formatNumber(parseInt(lastRowNoiTru.col5.replace(/\./g, '')) + unmappedFeedbacks.noi_tru.qr.length + unmappedFeedbacks.unknown.qr.length);
 
         const summaryTiemChung = [
-            { id: '1', ...createSummaryData(FACILITIES_BV, 'tiem_chung', 'Khối Bệnh viện') },
+            { id: '1', ...createSummaryData(facilities.filter(f => f.type === 'BV'), 'tiem_chung', 'Khối Bệnh viện') },
             { id: '2', ...createSummaryData(tytUnits, 'tiem_chung', 'Khối TYT') },
             {
                 id: '3', type: 'Không ghi địa chỉ', col1: '',
@@ -253,7 +254,7 @@ export function useKSHLData(dateFilter: DateFilter) {
                 col5: formatNumber(unmappedFeedbacks.tiem_chung.qr.length + unmappedFeedbacks.unknown.qr.length),
                 col6: displayRate(calcRate([...unmappedFeedbacks.tiem_chung.qr, ...unmappedFeedbacks.unknown.qr]))
             },
-            { id: '', type: 'Tổng', isTotal: true, ...createSummaryData([...FACILITIES_BV, ...tytUnits], 'tiem_chung', 'Tổng') }
+            { id: '', type: 'Tổng', isTotal: true, ...createSummaryData([...facilities.filter(f => f.type === 'BV'), ...tytUnits], 'tiem_chung', 'Tổng') }
         ];
         const lastRowTiemChung = summaryTiemChung[summaryTiemChung.length - 1];
         lastRowTiemChung.col2 = formatNumber(parseInt(lastRowTiemChung.col2.replace(/\./g, '')) + unmappedFeedbacks.tiem_chung.self.length + unmappedFeedbacks.unknown.self.length);
