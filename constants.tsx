@@ -22,7 +22,7 @@ import {
   Search,
 } from "lucide-react";
 
-export const users: Omit<User, "role">[] = [
+export const users: Partial<User>[] = [
   { full_name: "TS.BS Nguyễn Trọng Diện – Giám đốc", id: 1 },
   { full_name: "TS. Nguyễn Đình Hưng – Phó Giám đốc", id: 2 },
   { full_name: "TS. Trần Văn Chung – Phó Giám đốc", id: 3 },
@@ -428,12 +428,12 @@ export const CATEGORIES = [
   // },
 ];
 
-export const capcuu = [
+export const capcuu: any[] = [
   {
     id: "AMB-1",
     plateNumber: "29A-11501",
     status: "BUSY",
-    coords: [20.937454983400016, 106.02177631564803],
+    coords: [20.937454983400016, 106.02177631564803] as [number, number],
     driver: "Nguyễn Văn 1",
     phone: "098.xxx.xxx",
     hospital: "BV Bạch Mai",

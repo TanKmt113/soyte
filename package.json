@@ -5,8 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:dev": "vite build --mode dev",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:golive": "vite build --mode golive",
+    "preview": "vite preview",
+    "preview:golive": "vite preview --mode golive",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "chart.js": "^4.5.1",

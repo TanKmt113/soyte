@@ -200,7 +200,7 @@ const EmergencyCenter = () => {
             {capcuu.map((amb) => (
               <Marker
                 key={amb.id}
-                position={amb.coords}
+                position={amb.coords as [number, number]}
                 icon={createAmbulanceIcon(amb.status, 0)}
                 eventHandlers={{ click: () => setSelectedUnit(amb) }}
               />

@@ -57,9 +57,9 @@ const Report_DCBC = () => {
             const fId = fb.form_id || 'unknown';
             let title = "";
 
-            if (fId === 3) { title = "Khối các bệnh viện trực thuộc" }
-            if (fId === 17) { title = "Đơn vị trợ giúp xã hội trực thuộc" }
-            if (fId === 18) { title = "Khối các trạm y tế xã, phường" }
+            if (Number(fId) === 3) { title = "Khối các bệnh viện trực thuộc" }
+            if (Number(fId) === 17) { title = "Đơn vị trợ giúp xã hội trực thuộc" }
+            if (Number(fId) === 18) { title = "Khối các trạm y tế xã, phường" }
 
             if (!groups[fId]) {
                 groups[fId] = {

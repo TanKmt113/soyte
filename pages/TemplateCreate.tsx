@@ -223,7 +223,7 @@ const TemplateCreate: React.FC = () => {
                   <div className="w-full relative">
                     <i className="pi pi-calendar absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none text-lg"></i>
                     <Calendar
-                      value={template.startDate}
+                      value={template.startDate ? new Date(template.startDate) : null}
                       onChange={(e) => setTemplate({ ...template, startDate: e.value })}
                       className="w-full"
                       inputClassName="w-full bg-white border border-slate-300 focus:border-primary-500 shadow-sm p-4 pl-12 rounded-xl text-base transition-colors"
@@ -243,7 +243,7 @@ const TemplateCreate: React.FC = () => {
                   <div className="w-full relative">
                     <i className="pi pi-calendar absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none text-lg"></i>
                     <Calendar
-                      value={template.endDate}
+                      value={template.endDate ? new Date(template.endDate) : null}
                       onChange={(e) => setTemplate({ ...template, endDate: e.value })}
                       className="w-full"
                       inputClassName="w-full bg-white border border-slate-300 focus:border-primary-500 shadow-sm p-4 pl-12 rounded-xl text-base transition-colors"
