@@ -103,6 +103,11 @@ export const adminMenu: MenuItem[] = [
         label: "Danh sách phản hồi",
         to: "/admin/feedbacks/reflect",
       },
+      {
+        key: "feedback-report",
+        label: "Cuộc khảo sát",
+        to: "/admin/surveys/reflect",
+      },
     ],
   },
   {
@@ -120,6 +125,11 @@ export const adminMenu: MenuItem[] = [
         key: "feedback-statistics",
         label: "Danh sách phản hồi",
         to: "/admin/feedbacks/evaluate",
+      },
+      {
+        key: "feedback-report",
+        label: "Cuộc khảo sát",
+        to: "/admin/surveys/evaluate",
       },
     ],
   },

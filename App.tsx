@@ -24,6 +24,7 @@ import TemplatesManagement from "./pages/TemplatesManagement";
 import TemplateCreate from "./pages/TemplateCreate";
 import TemplateQrView from "./pages/TemplateQrView";
 import FeedbacksManagement from "./pages/FeedbacksManagement";
+import SurveysManagement from "./pages/SurveysManagement";
 import AdminRoute from "./components/AdminRoute";
 import SocialFacilitiesManagement from "./pages/SocialFacilitiesManagement";
 import PermissionsManagement from "./pages/PermissionsManagement";
@@ -95,6 +96,7 @@ const App = () => {
           <Route path="templates/create/:type?" element={<TemplateCreate />} />{" "}
           <Route path="templates/edit/:id" element={<TemplateCreate />} />{" "}
           <Route path="feedbacks/:type?" element={<FeedbacksManagement />} />{" "}
+          <Route path="surveys/:type?" element={<SurveysManagement />} />{" "}
           <Route
             path="social-facilities"
             element={<SocialFacilitiesManagement />}
