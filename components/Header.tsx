@@ -11,7 +11,7 @@ import {
   LayoutDashboard,
   ChevronLeft,
   ChevronRight,
-  Key
+  Key,
 } from "lucide-react";
 import { TieredMenu } from "primereact/tieredmenu";
 import UserInfoModal from "./UserInfoModal";
@@ -39,13 +39,15 @@ const Header = () => {
         item.danger ? "text-red-600 hover:bg-red-50" : "text-slate-700"
       }`}
     >
-      <span className={`${item.danger ? "text-red-400 group-hover:text-red-600" : "text-slate-400 group-hover:text-primary-600"} transition-colors`}>
+      <span
+        className={`${item.danger ? "text-red-400 group-hover:text-red-600" : "text-slate-400 group-hover:text-primary-600"} transition-colors`}
+      >
         {item.icon}
       </span>
       <span className="flex flex-col items-start gap-0.5">
         <span className="text-sm font-bold tracking-tight">{item.label}</span>
         {item.description && (
-          <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider line-clamp-1">
+          <span className="text-[10px] text-slate-400 font-medium uppercase">
             {item.description}
           </span>
         )}
@@ -103,20 +105,20 @@ const Header = () => {
   };
 
   const MobileMenu = () => {
-    const activeMenuItem = MAIN_MENU.find(item => item.id === openSubMenu);
+    const activeMenuItem = MAIN_MENU.find((item) => item.id === openSubMenu);
 
     return (
       <div className="lg:hidden">
         {openSubMenu && activeMenuItem ? (
           // Sub-menu view
           <div className="animate-in slide-in-from-right-5 duration-300">
-             <Button 
-                onClick={() => setOpenSubMenu(null)}
-                className="flex items-center gap-2 px-3 py-3.5 text-left font-bold text-gray-100 hover:bg-white/10 w-full"
-              >
-                <ChevronLeft size={16} />
-                <span>{activeMenuItem.title}</span>
-              </Button>
+            <Button
+              onClick={() => setOpenSubMenu(null)}
+              className="flex items-center gap-2 px-3 py-3.5 text-left font-bold text-gray-100 hover:bg-white/10 w-full"
+            >
+              <ChevronLeft size={16} />
+              <span>{activeMenuItem.title}</span>
+            </Button>
             <ul className="flex flex-col">
               {activeMenuItem.children?.map((child: any) => (
                 <li key={child.id}>
@@ -138,7 +140,7 @@ const Header = () => {
               return (
                 <li key={item.id}>
                   {hasChildren ? (
-                     <button
+                    <button
                       onClick={() => setOpenSubMenu(item.id)}
                       className="flex items-center justify-between w-full px-3 py-3.5 text-left text-[13px] uppercase font-bold text-gray-100 hover:bg-white/10"
                     >
@@ -162,7 +164,6 @@ const Header = () => {
     );
   };
 
-
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md font-sans">
       {/* Top Bar */}
@@ -181,14 +182,14 @@ const Header = () => {
           <div className="flex items-center space-x-3 md:space-x-4 font-medium">
             {user ? (
               <div className="relative flex items-center gap-3">
-                <TieredMenu 
-                  model={profileMenuItems} 
-                  popup 
-                  ref={menu} 
-                  breakpoint="767px" 
-                  className="rounded-2xl shadow-2xl border-none ring-1 ring-black/5 p-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-200" 
+                <TieredMenu
+                  model={profileMenuItems}
+                  popup
+                  ref={menu}
+                  breakpoint="767px"
+                  className="rounded-2xl shadow-2xl border-none ring-1 ring-black/5 p-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                 />
-                
+
                 <button
                   onClick={(e) => menu.current?.toggle(e)}
                   className="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full text-white transition-all border border-white/10 group shadow-inner"
@@ -196,8 +197,13 @@ const Header = () => {
                   <div className="w-6 h-6 rounded-full bg-secondary-500 flex items-center justify-center text-[10px] font-black group-hover:scale-110 transition-transform">
                     {user.full_name?.charAt(0) || "A"}
                   </div>
-                  <span className="text-xs font-bold tracking-tight">{user.full_name || "Quản trị viên"}</span>
-                  <ChevronDown size={12} className="opacity-50 group-hover:rotate-180 transition-transform" />
+                  <span className="text-xs font-bold tracking-tight">
+                    {user.full_name || "Quản trị viên"}
+                  </span>
+                  <ChevronDown
+                    size={12}
+                    className="opacity-50 group-hover:rotate-180 transition-transform"
+                  />
                 </button>
 
                 {user?.role === "admin" && (
@@ -226,7 +232,7 @@ const Header = () => {
           </div>
         </div>
       </div>
- 
+
       <div className="bg-white py-6 md:py-8 shadow-sm relative z-20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -323,7 +329,7 @@ const Header = () => {
 
                       <div className="hidden lg:group-hover:block absolute left-0 top-full bg-white shadow-2xl rounded-b-lg w-72 z-50 animate-in fade-in slide-in-from-top-2 duration-200 border-t-4 border-secondary-500 ring-1 ring-black/5">
                         <ul className="py-2">
-                          {item.children?.map((child:any) => (
+                          {item.children?.map((child: any) => (
                             <li key={child.id}>
                               <Link
                                 to={!child.linkUrl ? child.path : child.linkUrl}
@@ -354,15 +360,15 @@ const Header = () => {
               );
             })}
           </ul>
-           {/* Mobile Menu */}
-           <MobileMenu />
+          {/* Mobile Menu */}
+          <MobileMenu />
         </div>
       </nav>
       {/* Modals */}
-      <UserInfoModal 
-        visible={showUserInfo} 
-        onHide={() => setShowUserInfo(false)} 
-        user={user} 
+      <UserInfoModal
+        visible={showUserInfo}
+        onHide={() => setShowUserInfo(false)}
+        user={user}
       />
     </header>
   );

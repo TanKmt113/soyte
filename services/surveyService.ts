@@ -1,9 +1,28 @@
 import { api } from '../api';
 
+const fetchCache = new Map<string, Promise<any>>();
+
 export const surveyService = {
-    async fetchSurveys(page: number = 1, limit: number = 10, type?: string) {
-        return api.get('/surveys', { page, limit, ...(type ? { type } : {}) });
-    },
+  async fetchSurveys(page: number = 1, limit: number = 10, type?: string, status?: boolean) {
+    const cacheKey = `${page}-${limit}-${type || ""}-${status || ""}`;
+
+    if (fetchCache.has(cacheKey)) {
+      return fetchCache.get(cacheKey);
+    }
+
+    const promise = api
+      .get("/surveys", { page, limit, ...(type ? { type } : {}), ...(status !== undefined ? { status } : {}) })
+      .then((res) => res.data);
+
+    fetchCache.set(cacheKey, promise);
+
+    // Xóa cache sau 2 giây để tránh dữ liệu cũ
+    setTimeout(() => {
+      fetchCache.delete(cacheKey);
+    }, 2000);
+
+    return promise;
+  },
 
     async fetchSurveyById(id: string) {
         return api.get(`/surveys/${id}`);

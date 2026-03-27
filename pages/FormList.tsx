@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ChevronRight, FileText, Home, PhoneCall, ShieldCheck } from "lucide-react";
 import { api } from "@/api";
+import { surveyService } from "@/services/surveyService";
 const ALLOWED_TYPES = ["evaluate", "reflect"] as const;
 type FormType = (typeof ALLOWED_TYPES)[number];
 const FormList: React.FC = () => {
@@ -20,9 +21,9 @@ const FormList: React.FC = () => {
     const fetchSurveys = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/surveys", { type, status: true });
-        // The BE might return items in data.items or just data
-        const surveyList = res.data?.items || res.data || [];
+        // Using surveyService which has a promise cache for deduplication
+        const data = await surveyService.fetchSurveys(1, 1000, type, true);
+        const surveyList = data?.items || data || [];
         setSurveys(surveyList);
       } catch (error) {
         console.error("Fetch surveys error:", error);
@@ -139,7 +140,7 @@ const FormList: React.FC = () => {
                 {(survey.form_ids || []).map((form: any) => (
                   <Link
                     key={form.form_id || form.id}
-                    to={`/forms/${form.form_id || form.id}`}
+                    to={`/forms/${form.form_id || form.id}?survey_key=${survey.key || survey.id}`}
                     className="group block p-6 bg-white rounded-[2rem] shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col items-center text-center relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-primary-50 rounded-bl-[4rem] -mr-8 -mt-8 transition-all group-hover:scale-110"></div>

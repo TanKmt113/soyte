@@ -57,9 +57,9 @@ const SurveysManagement: React.FC = () => {
         lazyParams.rows,
         type,
       );
-      let list = data.data?.items || data.data || [];
+      let list = data?.items || data || [];
       setSurveys(list);
-      setTotalRecords(data.total || data.data?.total || list.length);
+      setTotalRecords(data?.total || list.length);
     } catch (error) {
       console.error(error);
       toast.current?.show({
@@ -529,7 +529,6 @@ const SurveysManagement: React.FC = () => {
                   className="px-4 py-3 font-medium text-slate-700"
                   body={(rowData) => (
                     <div className="flex items-center gap-2">
-                      <i className="pi pi-file text-slate-300"></i>
                       <span className="leading-relaxed">{rowData.name}</span>
                     </div>
                   )}

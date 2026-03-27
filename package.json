@@ -4,9 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:dev": "vite build --mode dev",
-    "build": "vite build",
+    "dev": "vite --mode dev",
+    "build:dev": "vite build --mode dev",
     "build:golive": "vite build --mode golive",
     "preview": "vite preview",
     "preview:golive": "vite preview --mode golive",

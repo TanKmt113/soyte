@@ -111,3 +111,35 @@
 .facility-ms-panel .p-checkbox[data-p-highlight="true"] .p-checkbox-box svg path {
   fill: currentColor !important;
 }
+
+/* ── Survey Form Table Checkbox ── */
+.survey-form-table .p-checkbox .p-checkbox-box {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 6px !important;
+  border: 2px solid #cbd5e1 !important; /* light slate border */
+  background: #fff !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.survey-form-table .p-checkbox .p-checkbox-box:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+.survey-form-table .p-checkbox .p-checkbox-box[data-p-highlight="true"],
+.survey-form-table .p-checkbox[data-p-highlight="true"] .p-checkbox-box {
+  background: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3) !important;
+}
+
+.survey-form-table .p-checkbox .p-checkbox-box .p-checkbox-icon,
+.survey-form-table .p-checkbox .p-checkbox-box svg {
+  color: #fff !important;
+}
+
+.survey-form-table .p-checkbox .p-checkbox-box svg path {
+  fill: currentColor !important;
+}

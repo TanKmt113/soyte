@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { api } from "@/api";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 import BieuMau1Table from "../components/formDetail/Form1";
 import SurveyForm from "../components/formDetail/Form2";
 
 export default function EvaluationTable() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const survey_key = searchParams.get("survey_key");
 
   const [formType, setFormType] = useState("");
   const [formData, setFormData] = useState(null);
@@ -29,13 +31,25 @@ export default function EvaluationTable() {
   if (!formData) return null;
 
   if (formType === "reflect") {
-    return <BieuMau1Table id={id} type={formType} formJson={formData} />;
+    return (
+      <BieuMau1Table
+        id={id}
+        type={formType}
+        formJson={formData}
+        survey_key={survey_key}
+      />
+    );
   }
 
   if (formType === "evaluate") {
     return (
       <div className="bg-[radial-gradient(circle_at_top,_#f8fbff,_#eef4ff_45%,_#f8fafc_100%)]">
-        <SurveyForm id={id} type={formType} formJson={formData} />
+        <SurveyForm
+          id={id}
+          type={formType}
+          formJson={formData}
+          survey_key={survey_key}
+        />
       </div>
     );
   }

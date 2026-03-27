@@ -270,7 +270,7 @@ const QuestionCard = memo(function QuestionCard({
   );
 });
 
-export default function SurveyForm({ id, type, formJson }: any) {
+export default function SurveyForm({ id, type, formJson, survey_key }: any) {
   const toast = useRef<Toast>(null);
   const navigate = useNavigate();
   const { info = [], data = [], name, description } = formJson || {};
@@ -467,6 +467,7 @@ export default function SurveyForm({ id, type, formJson }: any) {
       const payload = {
         user_id: userId,
         form_id: Number(id),
+        survey_key: survey_key,
         creator_name: customerName,
         info: {
           title: name,

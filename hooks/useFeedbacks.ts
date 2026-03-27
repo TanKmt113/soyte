@@ -4,7 +4,7 @@ import { formService } from '../services/formService';
 import { Toast } from 'primereact/toast';
 import { FeedbackItem } from '../types/feedbacks';
 
-export const useFeedbacks = (type?: string, toastRef?: React.RefObject<Toast | null>) => {
+export const useFeedbacks = (type?: string, toastRef?: React.RefObject<Toast | null>, surveyKey?: string) => {
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -16,7 +16,7 @@ export const useFeedbacks = (type?: string, toastRef?: React.RefObject<Toast | n
   const fetchFeedbacks = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await feedBacksSevice.fetchFeedBacks(lazyParams.page, lazyParams.rows, type);
+      const response = await feedBacksSevice.fetchFeedBacks(lazyParams.page, lazyParams.rows, type, surveyKey);
       const data = response.data || response;
       let list: any[] = [];
       let total = 0;
@@ -33,7 +33,7 @@ export const useFeedbacks = (type?: string, toastRef?: React.RefObject<Toast | n
     } finally {
       setLoading(false);
     }
-  }, [lazyParams.page, lazyParams.rows, type, toastRef]);
+  }, [lazyParams.page, lazyParams.rows, type, toastRef, surveyKey]);
 
   useEffect(() => {
     fetchFeedbacks();

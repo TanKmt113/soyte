@@ -9,6 +9,7 @@ import { ReportFilters } from "../components/report/ReportFilters";
 import { FeedbackStatsSection } from "../components/feedbacks/FeedbackStatsSection";
 import { FeedbackDataTable } from "../components/feedbacks/FeedbackDataTable";
 import { FeedbackDetailsDialog } from "../components/feedbacks/FeedbackDetailsDialog";
+import { surveyService } from "@/services/surveyService";
 
 const ALLOWED_TYPES = ["evaluate", "reflect"] as const;
 type FormType = (typeof ALLOWED_TYPES)[number];
@@ -25,6 +26,8 @@ const FeedbacksManagement: React.FC = () => {
   }
   const [dateFilter, setDateFilter] = useState<{ startDate: string, endDate: string }>(getDefaultDates());
   const [filterType, setFilterType] = useState<string>("this_year");
+  const [surveys, setSurveys] = useState<any[]>([]);
+  const [selectedSurveyKey, setSelectedSurveyKey] = useState<string>("");
 
   const {
     feedbacks,
@@ -36,8 +39,8 @@ const FeedbacksManagement: React.FC = () => {
     infoLabels,
     onPage,
     viewDetails,
-    setDialogVisible
-  } = useFeedbacks(type, toast);
+    setDialogVisible,
+  } = useFeedbacks(type, toast, selectedSurveyKey);
 
   const {
     stats,
@@ -46,8 +49,8 @@ const FeedbacksManagement: React.FC = () => {
     tiendoChartData,
     danhgiaChartData,
     barChartData,
-    getPercentValue
-  } = useFeedbackStats(type, toast);
+    getPercentValue,
+  } = useFeedbackStats(type, toast, selectedSurveyKey);
 
   const handleFilterChange = (newType: string) => {
     setFilterType(newType);
@@ -105,8 +108,22 @@ const FeedbacksManagement: React.FC = () => {
   };
 
   useEffect(() => {
+    const fetchSurveys = async () => {
+      try {
+        const data = await surveyService.fetchSurveys(1, 1000, type);
+        // Ensure list is always an array
+        const list = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []);
+        setSurveys(list);
+      } catch (err) {
+        console.error("Lỗi khi tải danh sách khảo sát:", err);
+      }
+    };
+    fetchSurveys();
+  }, [type]);
+
+  useEffect(() => {
     fetchDashboardStats(dateFilter);
-  }, [dateFilter, type, fetchDashboardStats]);
+  }, [dateFilter, type, fetchDashboardStats, selectedSurveyKey]);
 
   return (
     <AdminLayout title="Quản lý góp ý - phản hồi">
@@ -118,6 +135,9 @@ const FeedbacksManagement: React.FC = () => {
         dateFilter={dateFilter}
         handleCustomDateChange={handleCustomDateChange}
         reportHeader={null}
+        surveys={surveys}
+        selectedSurveyKey={selectedSurveyKey}
+        onSurveyChange={(val) => setSelectedSurveyKey(typeof val === 'string' ? val : '')}
       />
 
       <FeedbackStatsSection

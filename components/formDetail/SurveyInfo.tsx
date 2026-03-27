@@ -1,15 +1,16 @@
-import { useFacilities } from "@/hooks/useFacilities";
+import { socialFacilitiesService } from "@/services/socialFacilitiesService";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 const PAGE_SIZE = 10;
 export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
-  const { facilities } = useFacilities();
-  console.log(info);
+
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const [searchText, setSearchText] = useState("");
   const panelRef = useRef(null);
+  const [apiOptions, setApiOptions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const handlePanelScroll = (e) => {
     const el = e.target;
     const isNearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
@@ -71,18 +72,40 @@ export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
         "w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100",
     },
   };
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      if (info.type !== "select" && info.type !== "facility_multiselect") return;
+
+      if (!info.facilityTypeFilter?.length) return;
+
+      try {
+        setLoading(true);
+        // Pass all items in facilityTypeFilter joined by comma
+        const typeFilter = Array.isArray(info.facilityTypeFilter)
+          ? info.facilityTypeFilter.join(",")
+          : info.facilityTypeFilter;
+
+        const response = await socialFacilitiesService.getAll(1, 1000, typeFilter);
+        const data = response.items || response || [];
+        setApiOptions(data.map((f: any) => ({ key: f.id, value: f.name })));
+      } catch (err) {
+        console.error("Failed to fetch filtered facilities:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOptions();
+  }, [info.type, info.facilityTypeFilter]);
+
   const selectOptions = useMemo(() => {
     if (info.option?.length) return info.option;
 
-    if (!info.facilityTypeFilter?.length) return [];
+    if (apiOptions.length > 0) return apiOptions;
 
-    return facilities.filter(({ type }) =>
-      info.facilityTypeFilter.includes(type),
-    ).map(({ id, name }) => ({
-      key: id,
-      value: name,
-    }));
-  }, [info.option, info.facilityTypeFilter, facilities]);
+    return [];
+  }, [info.option, apiOptions]);
 
   const filteredOptions = useMemo(() => {
     const keyword = searchText.trim().toLowerCase();
