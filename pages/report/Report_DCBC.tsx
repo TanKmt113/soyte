@@ -253,7 +253,11 @@ const Report_DCBC = () => {
             </div>
 
             {/* Phụ lục danh sách các đơn vị */}
-            <ReportAppendix groupedFeedbacks={groupedFeedbacks} />
+            <ReportAppendix 
+              groupedFeedbacks={groupedFeedbacks} 
+              formTemplates={formTemplates} 
+              type="DCBC" 
+            />
           </>
         ) : (
           <ReportEmptyState message="Không tìm thấy phản ánh nào trong khoảng thời gian đã chọn." />
