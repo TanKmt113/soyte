@@ -12,8 +12,9 @@ interface TCT01TabContentProps {
 }
 
 export const TCT01TabContent: React.FC<TCT01TabContentProps> = ({ data, dateRange }) => {
+    if (!data) return null;
     const { tongSo, tiepNhan, deCuong } = data;
-    const reportedCount = tiepNhan.find(i => i.stt === 1)?.soLuong || 0;
+    const reportedCount = tiepNhan?.find(i => i.stt === 1)?.soLuong || 0;
 
     return (
         <div className="p-4 md:p-6 bg-slate-50 min-h-[50vh] space-y-6">

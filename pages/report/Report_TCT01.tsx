@@ -283,20 +283,20 @@ const Report_TCT01 = () => {
                             <TabView className="styled-tabview" scrollable>
                                 <TabPanel header={reportData.benhVien.title}>
                                     <TCT01TabContent
-                                        feedbacks={groupedFeedbacks['3']?.items || []}
-                                        formTemplate={formTemplates['3']}
+                                        data={reportData.benhVien}
+                                        dateRange={dateFilter}
                                     />
                                 </TabPanel>
                                 <TabPanel header={reportData.troGiupXaHoi.title}>
                                     <TCT01TabContent
-                                        feedbacks={groupedFeedbacks['17']?.items || []}
-                                        formTemplate={formTemplates['17']}
+                                        data={reportData.troGiupXaHoi}
+                                        dateRange={dateFilter}
                                     />
                                 </TabPanel>
                                 <TabPanel header={reportData.tramYTe.title}>
                                     <TCT01TabContent
-                                        feedbacks={groupedFeedbacks['18']?.items || []}
-                                        formTemplate={formTemplates['18']}
+                                        data={reportData.tramYTe}
+                                        dateRange={dateFilter}
                                     />
                                 </TabPanel>
                             </TabView>
