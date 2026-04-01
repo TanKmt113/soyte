@@ -51,6 +51,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const response = await api.get("/auth/me");
           setUser(response.user); // Extract the user object
           localStorage.setItem("user_info", JSON.stringify(response.user));
+          if (response.user.unit) {
+            localStorage.setItem("unit_id", response.user.unit);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch user:", error);
@@ -83,6 +86,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("user_info");
+    localStorage.removeItem("unit_id");
     setUser(null);
     window.location.href = "/login";
   };

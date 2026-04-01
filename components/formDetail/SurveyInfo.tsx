@@ -2,8 +2,10 @@ import { socialFacilitiesService } from "@/services/socialFacilitiesService";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "@/AuthContext";
 const PAGE_SIZE = 10;
 export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
+  const { user } = useAuth();
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -77,14 +79,13 @@ export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
     const fetchOptions = async () => {
       if (info.type !== "select" && info.type !== "facility_multiselect") return;
 
-      if (!info.facilityTypeFilter?.length) return;
-
       try {
         setLoading(true);
-        // Pass all items in facilityTypeFilter joined by comma
-        const typeFilter = Array.isArray(info.facilityTypeFilter)
-          ? info.facilityTypeFilter.join(",")
-          : info.facilityTypeFilter;
+        const typeFilter = info.facilityTypeFilter?.length
+          ? (Array.isArray(info.facilityTypeFilter)
+              ? info.facilityTypeFilter.join(",")
+              : info.facilityTypeFilter)
+          : "";
 
         const response = await socialFacilitiesService.getAll(1, 1000, typeFilter);
         const data = response.items || response || [];
@@ -100,12 +101,18 @@ export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
   }, [info.type, info.facilityTypeFilter]);
 
   const selectOptions = useMemo(() => {
-    if (info.option?.length) return info.option;
+    let options = [];
+    if (info.option?.length) options = info.option;
+    else if (apiOptions.length > 0) options = apiOptions;
 
-    if (apiOptions.length > 0) return apiOptions;
-
-    return [];
-  }, [info.option, apiOptions]);
+    const unitId = localStorage.getItem("unit_id");
+    if (unitId && (info.type === "select" || info.type === "facility_multiselect")) {
+        const matchedOption = options.find(opt => String(opt.key) === String(unitId));
+        if (matchedOption) return [matchedOption];
+    }
+    
+    return options;
+  }, [info.option, apiOptions, info.type]);
 
   const filteredOptions = useMemo(() => {
     const keyword = searchText.trim().toLowerCase();
@@ -135,7 +142,7 @@ export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
         });
         initializedKey.current = fieldKey;
       } else if (info.type === "select" || info.type === "facility_multiselect") {
-        const unitId = localStorage.getItem("unit_id");
+        const unitId = user?.unit;
         if (unitId) {
           const matchedOption = selectOptions.find(
             (opt) => String(opt.key) === String(unitId),
@@ -150,12 +157,14 @@ export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
         initializedKey.current = fieldKey;
       }
     }
-  }, [info.type, info.key, fieldKey, value?.value, onChange, selectOptions]);
+  }, [info.type, info.key, fieldKey, value?.value, onChange, selectOptions, user]);
 
   const isReadOnly = 
     info.title?.toLowerCase().includes("ngày điền") || 
     info.value === "ngay_ien" || 
     info.key === "ngay_ien";
+
+  const isLockedToUnit = !!user && user.role !== "admin" && (info.type === "select" || info.type === "facility_multiselect");
 
   const renderField = () => {
     switch (info.type) {
@@ -224,8 +233,9 @@ export default function SurveyInfo({ info, fieldKey, value, onChange, error }) {
             optionValue="key"
             placeholder="Chọn"
             filter
+            disabled={isReadOnly || isLockedToUnit}
             filterPlaceholder="Tìm kiếm..."
-            className="w-full"
+            className={`w-full ${isLockedToUnit ? "opacity-90 bg-slate-50 cursor-not-allowed" : ""}`}
             pt={dropdownPt}
             onFilter={(e) => setSearchText(e.filter)}
             onChange={(e) => {
