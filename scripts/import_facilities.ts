@@ -1,4 +1,4 @@
-const API_URL = "https://suckhoethudo.vn:7005/api/social-facilities";
+const API_URL = "https://suckhoethudo.vn:7006/api/social-facilities";
 const AUTH_TOKEN =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Niwicm9sZSI6ImFkbWluIiwicGVybWlzc2lvbnMiOlsiZW1haWxfY29uZmlybSIsImV2YWx1YXRlIiwiZmVlZGJhY2siLCJmb3JtcyIsInBlcm1pc3Npb25zIiwicG9zdHMiLCJyZWZsZWN0IiwicmVwb3J0Iiwic29jaWFsX2ZhY2lsaXRpZXMiLCJ1c2VycyIsIndvcmtfc2NoZWR1bGUiXSwiaWF0IjoxNzc0OTI3MjEzLCJleHAiOjE3NzUwMTM2MTN9.TkK5Xl4BYKguG7xbIkT3IQKTnnrHqWIrJgMkJ5xzsV8"; // PASTE YOUR TOKEN HERE
 

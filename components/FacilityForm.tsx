@@ -31,6 +31,11 @@ const FACILITY_TYPES = [
   { id: "TYT", title: "Trạm y tế" },
 ];
 
+const CATEGORY_OPTIONS_BV = [
+  { id: "Cơ sở y tế tư nhân", title: "Cơ sở y tế tư nhân" },
+  { id: "Cơ sở y tế thuộc Trung ương và Bộ Ngành", title: "Cơ sở y tế thuộc Trung ương và Bộ Ngành" },
+];
+
 const FacilityForm: React.FC<FacilityFormProps> = ({
   initialData,
   onClose,
@@ -51,6 +56,15 @@ const FacilityForm: React.FC<FacilityFormProps> = ({
   const toast = useRef<Toast>(null);
 
   useEffect(() => {
+    if (formData.type && formData.type !== "BV") {
+      const selectedType = FACILITY_TYPES.find((t) => t.id === formData.type);
+      if (selectedType) {
+        setFormData((prev) => ({ ...prev, category: selectedType.title }));
+      }
+    }
+  }, [formData.type]);
+
+  useEffect(() => {
     if (initialData) {
       setFormData({
         name: initialData.name || "",
@@ -69,6 +83,7 @@ const FacilityForm: React.FC<FacilityFormProps> = ({
     const newErrors: any = {};
     if (!formData.name.trim()) newErrors.name = "Tên cơ sở không được để trống";
     if (!formData.type) newErrors.type = "Vui lòng chọn loại cơ sở";
+    if (!formData.category) newErrors.category = "Vui lòng chọn danh mục";
     if (!formData.address.trim()) newErrors.address = "Địa chỉ không được để trống";
     
     setErrors(newErrors);
@@ -150,7 +165,7 @@ const FacilityForm: React.FC<FacilityFormProps> = ({
             {errors.name && <p className="text-red-500 text-[10px] mt-1 font-bold">{errors.name}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`grid ${formData.type === "BV" ? "grid-cols-2" : "grid-cols-1"} gap-4`}>
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
                 Loại cơ sở <span className="text-red-500">*</span>
@@ -160,11 +175,48 @@ const FacilityForm: React.FC<FacilityFormProps> = ({
                 options={FACILITY_TYPES}
                 optionLabel="title"
                 optionValue="id"
-                onChange={(e) => setFormData({ ...formData, type: e.value })}
+                onChange={(e) => setFormData({ ...formData, type: e.value, category: e.value === 'BV' ? "" : formData.category })}
                 placeholder="Chọn loại"
                 className={`w-full ${errors.type ? "p-invalid" : ""}`}
               />
               {errors.type && <p className="text-red-500 text-[10px] mt-1 font-bold">{errors.type}</p>}
+            </div>
+            {formData.type === "BV" && (
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  Loại hình bệnh viện <span className="text-red-500">*</span>
+                </label>
+                <Dropdown
+                  value={formData.category}
+                  options={CATEGORY_OPTIONS_BV}
+                  optionLabel="title"
+                  optionValue="id"
+                  onChange={(e) => setFormData({ ...formData, category: e.value })}
+                  placeholder="Chọn loại hình"
+                  className={`w-full ${errors.category ? "p-invalid" : ""}`}
+                />
+                {errors.category && <p className="text-red-500 text-[10px] mt-1 font-bold">{errors.category}</p>}
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                Địa chỉ <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <MapPin size={14} />
+                </span>
+                <InputText
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Địa chỉ cụ thể..."
+                  className={`w-full pl-10 p-3 bg-gray-50 border ${errors.address ? "border-red-500" : "border-gray-200"} rounded-lg text-sm focus:ring-2 focus:ring-primary-100 outline-none`}
+                />
+              </div>
+              {errors.address && <p className="text-red-500 text-[10px] mt-1 font-bold">{errors.address}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
@@ -182,24 +234,6 @@ const FacilityForm: React.FC<FacilityFormProps> = ({
                 />
               </div>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
-              Địa chỉ <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <MapPin size={14} />
-              </span>
-              <InputText
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Địa chỉ cụ thể..."
-                className={`w-full pl-10 p-3 bg-gray-50 border ${errors.address ? "border-red-500" : "border-gray-200"} rounded-lg text-sm focus:ring-2 focus:ring-primary-100 outline-none`}
-              />
-            </div>
-            {errors.address && <p className="text-red-500 text-[10px] mt-1 font-bold">{errors.address}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
