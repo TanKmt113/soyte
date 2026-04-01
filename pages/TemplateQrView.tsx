@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronRight,
   FileText,
@@ -18,6 +18,8 @@ const TemplateQrView: React.FC = () => {
   const [form, setForm] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const surveyKey = searchParams.get("survey_key");
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -35,7 +37,7 @@ const TemplateQrView: React.FC = () => {
     if (id) fetchForm();
   }, [id]);
 
-  const publicUrl = `${window.location.origin}/forms/${id}`;
+  const publicUrl = `${window.location.origin}/forms/${id}${surveyKey ? `?survey_key=${surveyKey}` : ''}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(publicUrl)}`;
 
   const handleDownload = async () => {

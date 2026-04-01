@@ -8,6 +8,8 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
+import { Dialog } from "primereact/dialog";
+import { surveyService } from "../services/surveyService";
 
 import { Toast } from "@/components/prime";
 import { Plus, QrCode } from "lucide-react";
@@ -42,6 +44,13 @@ const TemplatesManagement: React.FC = () => {
   // Filter states
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  // QR Dialog states
+  const [qrDialogVisible, setQrDialogVisible] = useState(false);
+  const [selectedFormForQr, setSelectedFormForQr] = useState<any>(null);
+  const [qrSurveys, setQrSurveys] = useState<any[]>([]);
+  const [selectedSurveyKey, setSelectedSurveyKey] = useState<string | null>(null);
+  const [loadingQrSurveys, setLoadingQrSurveys] = useState(false);
 
   const fetchTemplates = async () => {
     try {
@@ -140,9 +149,51 @@ const TemplatesManagement: React.FC = () => {
     return options.rowIndex + lazyParams.first + 1;
   };
 
-  const showQr = (rowData: any) => {
+  const showQr = async (rowData: any) => {
     const formId = rowData.id || rowData._id;
-    navigate(`/templates/qr/${formId}`);
+    setSelectedFormForQr(rowData);
+    setSelectedSurveyKey(null);
+    setQrDialogVisible(true);
+    
+    try {
+      setLoadingQrSurveys(true);
+      const data = await surveyService.fetchSurveys(1, 1000, type, true);
+      const surveyList = data?.items || data || [];
+      
+      const relatedSurveys = surveyList.filter((survey: any) => {
+        return (survey.form_ids || []).some((f: any) => {
+          const fId = f.form_id || f.id || f;
+          return fId === formId;
+        });
+      });
+      
+      const mappedSurveys = relatedSurveys.map((s: any) => ({
+        label: s.name,
+        value: s.key || s.id
+      }));
+      setQrSurveys(mappedSurveys);
+      if (mappedSurveys.length > 0) {
+          setSelectedSurveyKey(mappedSurveys[0].value);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.current?.show({ severity: "error", summary: "Lỗi", detail: "Không thể lấy danh sách cuộc khảo sát" });
+    } finally {
+      setLoadingQrSurveys(false);
+    }
+  };
+
+  const handleConfirmQr = () => {
+    if (!selectedFormForQr) return;
+    const formId = selectedFormForQr.id || selectedFormForQr._id;
+    
+    let url = `/templates/qr/${formId}`;
+    if (selectedSurveyKey) {
+      url += `?survey_key=${selectedSurveyKey}`;
+    }
+    
+    navigate(url);
+    setQrDialogVisible(false);
   };
 
   const actionBodyTemplate = (rowData: any) => {
@@ -466,6 +517,61 @@ const TemplatesManagement: React.FC = () => {
           </DataTable>
         </div>
       </div>
+
+      <Dialog 
+        header="Sinh mã QR biểu mẫu"
+        visible={qrDialogVisible} 
+        onHide={() => setQrDialogVisible(false)}
+        style={{ width: '450px' }}
+        footer={
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+            <Button 
+              label="Hủy" 
+              className="p-button-text text-slate-500 font-bold px-4 py-2 hover:bg-slate-50 rounded-xl transition-colors" 
+              onClick={() => setQrDialogVisible(false)} 
+            />
+            <Button 
+                label="Sinh mã QR" 
+                icon="pi pi-qrcode"
+                className="bg-primary-600 hover:bg-primary-700 border-none text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-md shadow-primary-200 transition-all" 
+                onClick={handleConfirmQr} 
+                disabled={qrSurveys.length > 0 && !selectedSurveyKey} 
+            />
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-4 py-2 pt-4">
+          <p className="text-sm text-slate-600">
+            Mã QR sinh ra sẽ tự động liên kết với cuộc khảo sát tương ứng (nếu có).
+          </p>
+          
+          {loadingQrSurveys ? (
+            <div className="flex flex-col items-center justify-center my-6 gap-3">
+                <i className="pi pi-spin pi-spinner text-3xl text-primary-500"></i>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Đang tải cuộc khảo sát...</span>
+            </div>
+          ) : qrSurveys.length === 0 ? (
+            <div className="text-sm text-amber-700 bg-amber-50 p-4 rounded-[1rem] border border-amber-100 flex items-start gap-3 shadow-sm">
+              <i className="pi pi-exclamation-triangle mt-0.5 text-lg"></i>
+              <div>
+                <p className="font-bold mb-1">Không tìm thấy cuộc khảo sát</p>
+                <p className="opacity-90 italic">Biểu mẫu này hiện không nằm trong cuộc khảo sát nào đang hoạt động. Bạn vẫn có thể tạo mã QR dùng chung.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+               <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Thuộc cuộc khảo sát <span className="text-red-500">*</span></label>
+               <Dropdown 
+                  value={selectedSurveyKey}
+                  options={qrSurveys}
+                  onChange={(e) => setSelectedSurveyKey(e.value)}
+                  placeholder="-- Chọn cuộc khảo sát --"
+                  className="w-full border-slate-200 rounded-[1rem] shadow-sm"
+               />
+            </div>
+          )}
+        </div>
+      </Dialog>
     </AdminLayout>
   );
 };
