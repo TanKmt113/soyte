@@ -2,6 +2,39 @@ import { SmtpConfig } from "./types";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
+const handleResponse = async (response: Response, method: string) => {
+  let data;
+  try {
+    data = await response.json();
+  } catch (e) {
+    data = {};
+  }
+
+  if (data.message) {
+    const isGet = method.toUpperCase() === "GET";
+    const shouldShowToast = !isGet || !response.ok;
+
+    if (shouldShowToast) {
+      (window as any).$toast?.current?.show({
+        severity: response.ok ? "success" : "error",
+        summary: response.ok ? "Thành công" : "Lỗi",
+        detail: data.message,
+        life: 3000,
+      });
+    }
+  }
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem("auth_token");
+      window.dispatchEvent(new Event("auth-change"));
+    }
+    throw new Error(data.message || `API Error: ${response.status} ${response.statusText}`);
+  }
+
+  return data;
+};
+
 export const api = {
   async get(endpoint: string, params?: Record<string, any>) {
     const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
@@ -27,14 +60,7 @@ export const api = {
           Accept: "application/json",
         },
       });
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem("auth_token");
-          window.dispatchEvent(new Event("auth-change"));
-        }
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      }
-      return response.json();
+      return handleResponse(response, "GET");
     } catch (error) {
       console.warn(`GET ${cleanEndpoint} failed:`, error);
       throw error;
@@ -53,9 +79,7 @@ export const api = {
         },
         body: JSON.stringify(data),
       });
-      if (!response.ok)
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      return response.json();
+      return handleResponse(response, "POST");
     } catch (error) {
       console.warn(`POST ${cleanEndpoint} failed:`, error);
       throw error;
@@ -74,9 +98,7 @@ export const api = {
         },
         body: JSON.stringify(data),
       });
-      if (!response.ok)
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      return response.json();
+      return handleResponse(response, "PUT");
     } catch (error) {
       console.warn(`PUT ${cleanEndpoint} failed:`, error);
       throw error;
@@ -93,9 +115,7 @@ export const api = {
           Accept: "application/json",
         },
       });
-      if (!response.ok)
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      return response.json();
+      return handleResponse(response, "DELETE");
     } catch (error) {
       console.warn(`DELETE ${cleanEndpoint} failed:`, error);
       throw error;
@@ -113,11 +133,7 @@ export const api = {
         },
         body: formData,
       });
-      if (!response.ok)
-        throw new Error(
-          `Upload Error: ${response.status} ${response.statusText}`,
-        );
-      return response.json();
+      return handleResponse(response, "POST");
     } catch (error) {
       console.warn(`Upload failed:`, error);
       throw error;
