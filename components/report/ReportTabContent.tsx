@@ -110,33 +110,45 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({
         let onTimeCount = 0;
         let lateCount = 0;
 
-        // Phân loại "Đúng hạn" và "Không đúng hạn" dựa trên cấu hình thời gian áp dụng của biểu mẫu
-        if (formTemplate && (formTemplate.startDate || formTemplate.endDate)) {
-            const startLimit = formTemplate.startDate ? new Date(formTemplate.startDate) : null;
-            const endLimit = formTemplate.endDate ? new Date(formTemplate.endDate) : null;
+        // Phân loại "Đúng hạn" và "Không đúng hạn" theo ngày giới hạn của cuộc khảo sát (ưu tiên) hoặc biểu mẫu
+        const currentSurvey = selectedSurveyKey ? surveys?.find((s: any) => String(s.key || s.id) === String(selectedSurveyKey)) : null;
 
-            // Thiết lập mốc thời gian so sánh (đầu ngày bắt đầu và cuối ngày kết thúc)
+        feedbacks.forEach(fb => {
+            let activeSurvey = currentSurvey;
+            if (!activeSurvey && surveys && surveys.length > 0) {
+                const fbSurveyId = fb.survey_id || fb.surveyId || fb.info?.survey_id;
+                if (fbSurveyId) {
+                    activeSurvey = surveys.find(s => String(s.key || s.id) === String(fbSurveyId));
+                }
+                if (!activeSurvey) {
+                    activeSurvey = surveys.find((s: any) => (s.form_ids || []).some((f: any) => String(f.form_id || f.id || f) === String(formId)));
+                }
+            }
+
+            let startLimit = null;
+            let endLimit = null;
+
+            if (activeSurvey && (activeSurvey.dateFrom || activeSurvey.dateTo)) {
+                startLimit = activeSurvey.dateFrom ? new Date(activeSurvey.dateFrom) : null;
+                endLimit = activeSurvey.dateTo ? new Date(activeSurvey.dateTo) : null;
+            } else if (formTemplate && (formTemplate.startDate || formTemplate.endDate)) {
+                startLimit = formTemplate.startDate ? new Date(formTemplate.startDate) : null;
+                endLimit = formTemplate.endDate ? new Date(formTemplate.endDate) : null;
+            }
+
             if (startLimit) startLimit.setHours(0, 0, 0, 0);
             if (endLimit) endLimit.setHours(23, 59, 59, 999);
 
-            feedbacks.forEach(fb => {
-                // Ưu tiên các trường thời gian có sẵn: createdAt, created_at hoặc date
-                const submissionDate = new Date(fb.createdAt || fb.created_at || fb.date || Date.now());
+            const submissionDate = new Date(fb.createdAt || fb.created_at || fb.date || Date.now());
+            const isAfterStart = !startLimit || submissionDate >= startLimit;
+            const isBeforeEnd = !endLimit || submissionDate <= endLimit;
 
-                // Điều kiện đúng hạn: Sau (hoặc bằng) ngày bắt đầu VÀ Trước (hoặc bằng) ngày kết thúc
-                const isAfterStart = !startLimit || submissionDate >= startLimit;
-                const isBeforeEnd = !endLimit || submissionDate <= endLimit;
-
-                if (isAfterStart && isBeforeEnd) {
-                    onTimeCount++;
-                } else {
-                    lateCount++;
-                }
-            });
-        } else {
-            // Nếu biểu mẫu không quy định thời gian, coi như tất cả báo cáo gửi lên là đúng hạn
-            onTimeCount = reportedCount;
-        }
+            if (isAfterStart && isBeforeEnd) {
+                onTimeCount++;
+            } else {
+                lateCount++;
+            }
+        });
 
         return [
             { id: 1, name: 'Đơn vị báo cáo', count: reportedCount, rate: totalUnits > 0 ? `${((reportedCount / totalUnits) * 100).toFixed(1)}%` : '0%' },
@@ -144,7 +156,7 @@ export const ReportTabContent: React.FC<ReportTabContentProps> = ({
             { id: 3, name: 'Đơn vị báo cáo đúng hạn', count: onTimeCount, rate: totalUnits > 0 ? `${((onTimeCount / totalUnits) * 100).toFixed(1)}%` : '0%' },
             { id: 4, name: 'Đơn vị báo cáo không đúng hạn', count: lateCount, rate: totalUnits > 0 ? `${((lateCount / totalUnits) * 100).toFixed(1)}%` : '0%' },
         ];
-    }, [feedbacks, totalUnits, formTemplate]);
+    }, [feedbacks, totalUnits, formTemplate, surveys, selectedSurveyKey, formId]);
 
     useEffect(() => {
         // Luôn cập nhật template khi dữ liệu từ cha (propTemplate) thay đổi
