@@ -218,8 +218,13 @@ const UserModal: React.FC<UserModalProps> = ({
   };
 
   const hierarchicalPermissions = useMemo(() => {
-    // Recursive function to filter out granular actions from all levels
-    const filterActionsRecursive = (items: Permission[]): Permission[] => {
+    // Recursive function to filter out granular actions and limit depth
+    const filterActionsRecursive = (
+      items: Permission[],
+      depth = 0,
+    ): Permission[] => {
+      if (depth >= 2) return []; // Stop at Level 2 (0-indexed: 0=root, 1=child)
+
       return items
         .filter((p) => {
           const name = p.name.toLowerCase();
@@ -234,7 +239,9 @@ const UserModal: React.FC<UserModalProps> = ({
         })
         .map((p) => ({
           ...p,
-          children: p.children ? filterActionsRecursive(p.children) : [],
+          children: p.children
+            ? filterActionsRecursive(p.children, depth + 1)
+            : [],
         }));
     };
 

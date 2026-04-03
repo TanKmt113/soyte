@@ -73,12 +73,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(true);
     try {
       const response = await api.get("/auth/me");
-      setUser(response.user); // Extract the user object
-      localStorage.setItem("user_info", JSON.stringify(response.user));
-      localStorage.setItem("unit_id", response.user.unit);
+      const loggedInUser = response.user || response.data || response;
+      setUser(loggedInUser);
+      localStorage.setItem("user_info", JSON.stringify(loggedInUser));
+      if (loggedInUser.unit) {
+        localStorage.setItem("unit_id", loggedInUser.unit);
+      }
+      return loggedInUser;
     } catch (error) {
       console.error("Failed to fetch user after login:", error);
       setUser(null);
+      throw error;
     } finally {
       setLoading(false);
     }

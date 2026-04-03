@@ -12,7 +12,9 @@ const handleResponse = async (response: Response, method: string) => {
 
   if (data.message) {
     const isGet = method.toUpperCase() === "GET";
-    const shouldShowToast = !isGet || !response.ok;
+    // Only show success toast for mutations (POST, PUT, DELETE, etc.)
+    // Always show error toast regardless of method
+    const shouldShowToast = response.ok ? !isGet : true;
 
     if (shouldShowToast) {
       (window as any).$toast?.current?.show({

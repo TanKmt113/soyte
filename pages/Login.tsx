@@ -28,13 +28,8 @@ const Login: React.FC = () => {
       });
 
       if (data && data.token) {
-        await login(data.token);
-        
-        // Re-fetching user info from localStorage if needed since context might not be updated yet
-        const storedUser = localStorage.getItem("user_info");
-        const user = storedUser ? JSON.parse(storedUser) : null;
-        const landingPath = getLandingPath(user);
-        
+        const loggedInUser = await login(data.token);
+        const landingPath = getLandingPath(loggedInUser);
         navigate(landingPath, { replace: true });
       } else {
         throw new Error("Phản hồi từ máy chủ không hợp lệ.");
