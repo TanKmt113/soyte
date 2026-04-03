@@ -15,6 +15,7 @@ export type MenuChild = {
   key: string;
   label: string;
   to: string;
+  permission?: string;
 };
 
 export type MenuItem = {
@@ -45,7 +46,7 @@ export const adminMenu: MenuItem[] = [
     key: "smtp",
     label: "Cấu hình SMTP",
     icon: Settings,
-    permission: "email_confirm",
+    permission: "smtp",
     to: "/admin/smtp",
   },
   {
@@ -55,31 +56,6 @@ export const adminMenu: MenuItem[] = [
     permission: "work_schedule",
     to: "/admin/schedules",
   },
-  // {
-  //   key: "templates",
-  //   label: "Quản lý biểu mẫu",
-  //   icon: NotebookText,
-  //   permission: "forms",
-  //   to: "/admin/templates",
-  // },
-  // {
-  //   key: "feedbacks",
-  //   label: "Quản lý phản hồi",
-  //   icon: MessageSquare,
-  //   permission: "feedback",
-  //   children: [
-  //     {
-  //       key: "feedback-list",
-  //       label: "Danh sách phản hồi",
-  //       to: "/admin/feedbacks/form",
-  //     },
-  //     {
-  //       key: "feedback-statistics",
-  //       label: "Thống kê phản hồi",
-  //       to: "/admin/feedbacks/feedback",
-  //     },
-  //   ],
-  // },
   {
     key: "facilities",
     label: "Quản lý CSYT",
@@ -97,16 +73,19 @@ export const adminMenu: MenuItem[] = [
         key: "feedback-list",
         label: "Biểu mẫu",
         to: "/admin/templates/reflect",
+        permission: "reflect.children.form",
       },
       {
         key: "feedback-statistics",
         label: "Danh sách phản hồi",
         to: "/admin/feedbacks/reflect",
+        permission: "reflect.children.list_feedback",
       },
       {
         key: "feedback-report",
         label: "Cuộc khảo sát",
         to: "/admin/surveys/reflect",
+        permission: "reflect.children.survey",
       },
     ],
   },
@@ -120,16 +99,19 @@ export const adminMenu: MenuItem[] = [
         key: "feedback-list",
         label: "Biểu mẫu",
         to: "/admin/templates/evaluate",
+        permission: "evaluate.children.form",
       },
       {
         key: "feedback-statistics",
         label: "Danh sách phản hồi",
         to: "/admin/feedbacks/evaluate",
+        permission: "evaluate.children.list_feedback",
       },
       {
         key: "feedback-report",
         label: "Cuộc khảo sát",
         to: "/admin/surveys/evaluate",
+        permission: "evaluate.children.survey",
       },
     ],
   },
@@ -150,17 +132,20 @@ export const adminMenu: MenuItem[] = [
         key: "report-DCBC",
         label: "Phản ánh y tế",
         to: "/admin/report/DCBC",
+        permission: "report.children.report_1",
       },
       {
         key: "report-KSHL",
         label: "Giám sát chất lượng",
-        to: "/admin/report/KSHL"
+        to: "/admin/report/KSHL",
+        permission: "report.children.report_2",
       },
       {
         key: "report-TCT01",
         label: "Phản ánh y tế - Kết quả thực hiện",
-        to: "/admin/report/TCT01"
-      }
+        to: "/admin/report/TCT01",
+        permission: "report.children.report_3",
+      },
     ],
   },
 ];

@@ -239,38 +239,55 @@ const UserManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
-                        {user.permissions && user.permissions.length > 0 ? (
-                          <>
-                            {user.permissions.slice(0, 2).map((perm: any, idx) => (
-                              <span
-                                key={idx}
-                                className="px-2 py-0.5 bg-primary-50 text-primary-700 border border-primary-100 rounded text-[9px] font-bold whitespace-nowrap"
-                              >
-                                {typeof perm === 'object' ? (perm.description || perm.name) : perm}
-                              </span>
-                            ))}
-                            {user.permissions.length > 2 && (
+                        {(() => {
+                          const perms = user.permissions;
+                          const permList = !perms
+                            ? []
+                            : Array.isArray(perms)
+                              ? perms.map((p: any) =>
+                                  typeof p === "object"
+                                    ? p.description || p.name
+                                    : p,
+                                )
+                              : Object.keys(perms);
+
+                          if (permList.length > 0) {
+                            return (
                               <>
-                                <span
-                                  id={`user-perm-${user.id}`}
-                                  className="px-2 py-0.5 bg-gray-100 text-gray-600 border border-gray-200 rounded text-[9px] font-bold whitespace-nowrap cursor-help hover:bg-gray-200 transition-colors"
-                                >
-                                  +{user.permissions.length - 2}
-                                </span>
-                                <Tooltip
-                                  target={`#user-perm-${user.id}`}
-                                  content={user.permissions?.slice(2).map((p: any) => typeof p === 'object' ? (p.description || p.name) : p).join(", ")}
-                                  position="top"
-                                  className="text-[10px] font-bold"
-                                />
+                                {permList.slice(0, 2).map((perm, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="px-2 py-0.5 bg-primary-50 text-primary-700 border border-primary-100 rounded text-[9px] font-bold whitespace-nowrap uppercase"
+                                  >
+                                    {perm}
+                                  </span>
+                                ))}
+                                {permList.length > 2 && (
+                                  <>
+                                    <span
+                                      id={`user-perm-${user.id}`}
+                                      className="px-2 py-0.5 bg-gray-100 text-gray-600 border border-gray-200 rounded text-[9px] font-bold whitespace-nowrap cursor-help hover:bg-gray-200 transition-colors"
+                                    >
+                                      +{permList.length - 2}
+                                    </span>
+                                    <Tooltip
+                                      target={`#user-perm-${user.id}`}
+                                      content={permList.slice(2).join(", ")}
+                                      position="top"
+                                      className="text-[10px] font-bold uppercase"
+                                    />
+                                  </>
+                                )}
                               </>
-                            )}
-                          </>
-                        ) : (
-                          <span className="text-[10px] text-gray-400 italic">
-                            Chưa phân quyền
-                          </span>
-                        )}
+                            );
+                          }
+
+                          return (
+                            <span className="text-[10px] text-gray-400 italic">
+                              Chưa phân quyền
+                            </span>
+                          );
+                        })()}
                       </div>
                     </td>
                     <td className="px-6 py-4">

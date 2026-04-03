@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, LogOut, LayoutDashboard, User, ChevronDown, Key, Settings } from "lucide-react";
+import {
+  Home,
+  LogOut,
+  LayoutDashboard,
+  User,
+  ChevronDown,
+  Key,
+  Settings,
+} from "lucide-react";
 import { useAuth } from "../AuthContext";
 import { Toast } from "primereact/toast";
 import { ConfirmDialog } from "primereact/confirmdialog";
@@ -40,7 +48,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         item.danger ? "text-red-600 hover:bg-red-50" : "text-slate-700"
       }`}
     >
-      <span className={`${item.danger ? "text-red-400 group-hover:text-red-600" : "text-slate-400 group-hover:text-primary-600"} transition-colors`}>
+      <span
+        className={`${item.danger ? "text-red-400 group-hover:text-red-600" : "text-slate-400 group-hover:text-primary-600"} transition-colors`}
+      >
         {item.icon}
       </span>
       <span className="flex flex-col items-start gap-0.5 text-left">
@@ -154,7 +164,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
               .filter((item) => checkPermission(item.permission))
               .map((item) => {
                 const Icon = item.icon;
+                const authorizedChildren =
+                  item.children?.filter(
+                    (child) =>
+                      !child.permission || checkPermission(child.permission),
+                  ) || [];
                 const hasChildren = Boolean(item.children?.length);
+                const hasAuthorizedChildren = authorizedChildren.length > 0;
+
+                // Skip rendering if item has children but none are authorized, and no direct link
+                if (hasChildren && !hasAuthorizedChildren && !item.to)
+                  return null;
+
                 const isOpen = Boolean(openMenus[item.key]);
                 const parentActive = isParentActive(item);
 
@@ -165,10 +186,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
                         <button
                           type="button"
                           onClick={() => toggleMenu(item.key)}
-                          className={`flex w-full items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm font-bold transition-colors ${parentActive
+                          className={`flex w-full items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm font-bold transition-colors ${
+                            parentActive
                               ? "bg-white/10 text-white"
                               : "text-white hover:bg-white/10"
-                            }`}
+                          }`}
                         >
                           <span className="flex items-center gap-3">
                             <Icon size={18} />
@@ -177,32 +199,34 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
 
                           <ChevronDown
                             size={16}
-                            className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-                              }`}
+                            className={`transition-transform duration-200 ${
+                              isOpen ? "rotate-180" : ""
+                            }`}
                           />
                         </button>
 
                         <div
-                          className={`overflow-hidden transition-all duration-300 ${isOpen
-                              ? "mt-1 max-h-40 opacity-100"
+                          className={`overflow-hidden transition-all duration-300 ${
+                            isOpen
+                              ? "mt-1 max-h-[500px] opacity-100"
                               : "max-h-0 opacity-0"
-                            }`}
+                          }`}
                         >
                           <ul className="ml-6 flex flex-col gap-1">
-                            {item.children?.map((child) => {
+                            {authorizedChildren.map((child) => {
                               const childActive = isActiveLink(child.to);
 
                               return (
                                 <li key={child.key}>
                                   <Link
                                     to={child.to}
-                                    className={`flex items-center gap-3 rounded-lg px-4 py-2 text-sm transition-colors ${childActive
+                                    className={`flex items-center gap-3 rounded-lg px-4 py-2 text-sm transition-colors ${
+                                      childActive
                                         ? "bg-white/10 font-semibold text-white"
                                         : "text-white/90 hover:bg-white/10 hover:text-white"
-                                      }`}
+                                    }`}
                                   >
                                     {child.label}
-
                                   </Link>
                                 </li>
                               );
@@ -213,10 +237,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
                     ) : (
                       <Link
                         to={item.to || "#"}
-                        className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-bold transition-colors ${parentActive
+                        className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-bold transition-colors ${
+                          parentActive
                             ? "bg-white/10 text-white"
                             : "text-white hover:bg-white/10"
-                          }`}
+                        }`}
                       >
                         <Icon size={18} />
                         <span>{item.label}</span>
@@ -245,14 +270,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
               <span>Trang chủ</span>
             </Link>
 
-            <TieredMenu 
-              model={profileMenuItems} 
-              popup 
-              ref={menu} 
-              breakpoint="767px" 
-              className="rounded-2xl shadow-2xl border-none ring-1 ring-black/5 p-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-200" 
+            <TieredMenu
+              model={profileMenuItems}
+              popup
+              ref={menu}
+              breakpoint="767px"
+              className="rounded-2xl shadow-2xl border-none ring-1 ring-black/5 p-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
             />
-            
+
             <button
               onClick={(e) => menu.current?.toggle(e)}
               className="flex items-center gap-2.5 rounded-full bg-slate-50 hover:bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 transition-all border border-slate-200 group shadow-sm"
@@ -260,8 +285,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
               <div className="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center text-[10px] font-black text-white group-hover:scale-110 transition-transform">
                 {user?.full_name?.charAt(0) || "A"}
               </div>
-              <span className="tracking-tight">{user?.full_name || user?.email?.split("@")[0]}</span>
-              <ChevronDown size={14} className="opacity-40 group-hover:rotate-180 transition-transform" />
+              <span className="tracking-tight">
+                {user?.full_name || user?.email?.split("@")[0]}
+              </span>
+              <ChevronDown
+                size={14}
+                className="opacity-40 group-hover:rotate-180 transition-transform"
+              />
             </button>
           </div>
         </div>
@@ -271,10 +301,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         </div>
 
         {/* Modals */}
-        <UserInfoModal 
-          visible={showUserInfo} 
-          onHide={() => setShowUserInfo(false)} 
-          user={user} 
+        <UserInfoModal
+          visible={showUserInfo}
+          onHide={() => setShowUserInfo(false)}
+          user={user}
         />
       </main>
     </div>

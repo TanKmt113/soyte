@@ -76,7 +76,7 @@ export interface User {
   type?: string;
   facility_id?: string;
   unit?: string;
-  permissions?: any[];
+  permissions?: any; // Supporting nested object or array
   us?: string;
   pass?: string;
 }
@@ -84,6 +84,8 @@ export interface Permission {
   id: number;
   name: string;
   description: string;
+  parent_id?: number | null;
+  children?: Permission[];
   created_at?: string;
   updated_at?: string;
 }

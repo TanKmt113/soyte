@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { api } from "../api";
-import { User } from "../types";
+import { User, Permission } from "../types";
 import {
   FACILITIES_BV,
   FACILITIES_TT,
   FACILITIES_BT,
   FACILITIES_TYT,
-  FACILITIES_CC
+  FACILITIES_CC,
 } from "../constants";
 import {
   Users,
@@ -14,10 +14,13 @@ import {
   X,
   Save,
   Loader2,
+  ChevronRight,
+  ChevronDown,
+  PlusIcon,
+  Edit3Icon,
 } from "lucide-react";
 import { Toast } from "primereact/toast";
 import { Button, InputText, Dropdown } from "@/components/prime";
-
 
 interface UserModalProps {
   visible: boolean;
@@ -26,7 +29,85 @@ interface UserModalProps {
   onSaveSuccess: () => void;
 }
 
-const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSuccess }) => {
+// Helper to flatten nested permission object back into dot-notation strings
+const flattenPermissions = (obj: any): string[] => {
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return [];
+  const result: string[] = [];
+
+  const traverse = (currentObj: any, currentPath: string = "") => {
+    for (const key in currentObj) {
+      const value = currentObj[key];
+
+      // Handle structural 'children' key
+      if (key === "children" && typeof value === "object" && value !== null) {
+        traverse(value, currentPath);
+        continue;
+      }
+
+      const path = currentPath ? `${currentPath}.${key}` : key;
+
+      if (typeof value === "object" && value !== null) {
+        // It's a module
+        result.push(path);
+        // Recurse
+        traverse(value, path);
+      } else if (key === "view" && value === true) {
+        // It's a view action - this matches availablePermissions names like 'posts.view'
+        result.push(path);
+      }
+    }
+  };
+
+  traverse(obj);
+  return Array.from(new Set(result));
+};
+
+// Helper to nest flat dot-notation strings into nested object structure
+const nestPermissions = (paths: string[]): any => {
+  const result: any = {};
+  const actionKeys = [
+    "view",
+    "create",
+    "update",
+    "delete",
+    "reply",
+    "export",
+    "update_status",
+  ];
+
+  paths.forEach((path) => {
+    const parts = path.split(".");
+    let current = result;
+
+    parts.forEach((part, index) => {
+      // If it's an action key at the end of a path, set it as a boolean
+      if (actionKeys.includes(part)) {
+        current[part] = true;
+        return;
+      }
+
+      if (!current[part]) current[part] = {};
+
+      if (index === parts.length - 1) {
+        // If it's the last part and not an action key, it's a module.
+        // Grant 'view' by default to ensure it shows up in API filters.
+        current[part].view = true;
+      } else {
+        // Prepare for next level
+        if (!current[part].children) current[part].children = {};
+        current = current[part].children;
+      }
+    });
+  });
+  return result;
+};
+
+const UserModal: React.FC<UserModalProps> = ({
+  visible,
+  onHide,
+  user,
+  onSaveSuccess,
+}) => {
   const toast = useRef<Toast>(null);
   const isEdit = !!user;
 
@@ -38,13 +119,18 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
     status: 0,
     type: "",
     unit: "",
-    permissions: [],
+    permissions: {},
     us: "",
     pass: "",
   });
 
-  const [availablePermissions, setAvailablePermissions] = useState<any[]>([]);
+  const [availablePermissions, setAvailablePermissions] = useState<
+    Permission[]
+  >([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [expandedParents, setExpandedParents] = useState<
+    Record<number, boolean>
+  >({});
   const [emailAccounts, setEmailAccounts] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -74,9 +160,15 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
           us: user.us || "",
           pass: user.pass || "",
         });
-        const perms = Array.isArray(user.permissions)
-          ? user.permissions.map((p: any) => typeof p === 'object' ? p.name : p)
-          : [];
+
+        // Use flattener for nested object
+        const perms =
+          user.permissions && typeof user.permissions === "object"
+            ? flattenPermissions(user.permissions)
+            : Array.isArray(user.permissions)
+              ? user.permissions
+              : [];
+
         setSelectedPermissions(perms);
       } else {
         setFormData({
@@ -91,6 +183,7 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
           pass: "",
         });
         setSelectedPermissions([]);
+        setExpandedParents({});
       }
     }
   }, [visible, user]);
@@ -112,12 +205,11 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
       const accounts = Array.isArray(data) ? data : [];
       setEmailAccounts(accounts);
 
-      // Auto-select first account if present and in Add mode
       if (accounts.length > 0) {
-        setFormData(prev => ({
+        setFormData((prev: any) => ({
           ...prev,
           us: accounts[0].username,
-          pass: accounts[0].password
+          pass: accounts[0].password,
         }));
       }
     } catch (error) {
@@ -125,27 +217,151 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
     }
   };
 
-  const handleTogglePermission = (permissionName: string) => {
-    setSelectedPermissions((prev) =>
-      prev.includes(permissionName)
-        ? prev.filter((p) => p !== permissionName)
-        : [...prev, permissionName],
+  const hierarchicalPermissions = useMemo(() => {
+    // Recursive function to filter out granular actions from all levels
+    const filterActionsRecursive = (items: Permission[]): Permission[] => {
+      return items
+        .filter((p) => {
+          const name = p.name.toLowerCase();
+          return (
+            !name.endsWith(".create") &&
+            !name.endsWith(".update") &&
+            !name.endsWith(".delete") &&
+            !name.endsWith(".reply") &&
+            !name.endsWith(".export") &&
+            !name.endsWith(".update_status")
+          );
+        })
+        .map((p) => ({
+          ...p,
+          children: p.children ? filterActionsRecursive(p.children) : [],
+        }));
+    };
+
+    // If the API already returns a tree with 'children', use it.
+    // Otherwise, build it from parent_id.
+    const hasAlreadyNested = availablePermissions.some(
+      (p) => p.children && p.children.length > 0,
     );
+
+    if (hasAlreadyNested) {
+      const filtered = filterActionsRecursive(availablePermissions);
+      // Filter only root nodes (those without parent_id or parent_id not in the list)
+      const allIds = new Set(filtered.map((p) => p.id));
+      return filtered.filter((p) => !p.parent_id || !allIds.has(p.parent_id));
+    }
+
+    // Fallback: build from parent_id if flat
+    const map: Record<number, Permission & { children: Permission[] }> = {};
+    const filteredFlat = availablePermissions.filter((p) => {
+      const name = p.name.toLowerCase();
+      return (
+        !name.endsWith(".create") &&
+        !name.endsWith(".update") &&
+        !name.endsWith(".delete") &&
+        !name.endsWith(".reply") &&
+        !name.endsWith(".export") &&
+        !name.endsWith(".update_status")
+      );
+    });
+
+    filteredFlat.forEach((p) => {
+      map[p.id] = { ...p, children: p.children || [] };
+    });
+
+    const roots: (Permission & { children: Permission[] })[] = [];
+    filteredFlat.forEach((p) => {
+      if (p.parent_id && map[p.parent_id]) {
+        map[p.parent_id].children.push(map[p.id]);
+      } else {
+        roots.push(map[p.id]);
+      }
+    });
+
+    return roots;
+  }, [availablePermissions]);
+
+  const handleTogglePermission = (permission: any) => {
+    const permissionName = permission.name;
+    const isSelected = selectedPermissions.includes(permissionName);
+
+    let newSelected = [...selectedPermissions];
+
+    // Recursive function to get all descendant names (deep)
+    const getAllDescendantNames = (p: any): string[] => {
+      let names: string[] = [p.name];
+      if (p.children && p.children.length > 0) {
+        p.children.forEach((child: any) => {
+          names = [...names, ...getAllDescendantNames(child)];
+        });
+      }
+      return names;
+    };
+
+    // Recursive function to get all ancestor names
+    const getAncestorNames = (pName: string): string[] => {
+      const p = availablePermissions.find((x) => x.name === pName);
+      if (!p || !p.parent_id) return [];
+
+      // Find parent by ID
+      const parent = availablePermissions.find((x) => x.id === p.parent_id);
+      if (!parent) return [];
+
+      return [parent.name, ...getAncestorNames(parent.name)];
+    };
+
+    if (isSelected) {
+      // Deselecting: Remove self and ALL descendants
+      const descendantsToDeselect = getAllDescendantNames(permission);
+      newSelected = newSelected.filter((p) => !descendantsToDeselect.includes(p));
+    } else {
+      // Selecting: Add self AND ALL descendants
+      const descendantsToSelect = getAllDescendantNames(permission);
+      newSelected = Array.from(
+        new Set([...newSelected, ...descendantsToSelect]),
+      );
+
+      // Also ensure all ancestors are selected
+      const ancestorsToSelect = getAncestorNames(permissionName);
+      newSelected = Array.from(new Set([...newSelected, ...ancestorsToSelect]));
+
+      // Expand if has children
+      if (permission.children?.length > 0) {
+        setExpandedParents((prev) => ({ ...prev, [permission.id]: true }));
+      }
+    }
+
+    setSelectedPermissions(newSelected);
+  };
+
+  const toggleExpand = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setExpandedParents((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const getFacilityOptions = (type: string) => {
     switch (type) {
-      case "BV": return FACILITIES_BV.map(f => ({ label: f.name, value: f.id }));
-      case "TT": return FACILITIES_TT.map(f => ({ label: f.name, value: f.id }));
-      case "BT": return FACILITIES_BT.map(f => ({ label: f.name, value: f.id }));
-      case "TYT": return FACILITIES_TYT.map(f => ({ label: f.name, value: f.id }));
-      case "CC": return FACILITIES_CC.map(f => ({ label: f.name, value: f.id }));
-      default: return [];
+      case "BV":
+        return FACILITIES_BV.map((f) => ({ label: f.name, value: f.id }));
+      case "TT":
+        return FACILITIES_TT.map((f) => ({ label: f.name, value: f.id }));
+      case "BT":
+        return FACILITIES_BT.map((f) => ({ label: f.name, value: f.id }));
+      case "TYT":
+        return FACILITIES_TYT.map((f) => ({ label: f.name, value: f.id }));
+      case "CC":
+        return FACILITIES_CC.map((f) => ({ label: f.name, value: f.id }));
+      default:
+        return [];
     }
   };
 
   const handleSave = async () => {
-    if (!formData.full_name || !formData.email || (!isEdit && !formData.password)) {
+    if (
+      !formData.full_name ||
+      !formData.email ||
+      (!isEdit && !formData.password)
+    ) {
       toast.current?.show({
         severity: "warn",
         summary: "Cảnh báo",
@@ -168,9 +384,14 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
     setIsSaving(true);
     try {
       const { ...restOfFormData } = formData;
+
+      // Use nester to build the hierarchical object
+      const hierarchicalPermissions =
+        formData.role === "user" ? {} : nestPermissions(selectedPermissions);
+
       const dataToSubmit = {
         ...restOfFormData,
-        permissions: formData.role === "user" ? [] : selectedPermissions,
+        permissions: hierarchicalPermissions,
       };
 
       if (isEdit && user) {
@@ -182,7 +403,9 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
       toast.current?.show({
         severity: "success",
         summary: "Thành công",
-        detail: isEdit ? "Cập nhật người dùng thành công" : "Thêm người dùng mới thành công",
+        detail: isEdit
+          ? "Cập nhật người dùng thành công"
+          : "Thêm người dùng mới thành công",
       });
 
       setTimeout(() => {
@@ -201,12 +424,75 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
     }
   };
 
+  const renderPermissionItem = (
+    item: Permission,
+    level = 0,
+  ) => {
+    const isSelected = selectedPermissions.includes(item.name);
+    const children = item.children || [];
+    const hasChildren = children.length > 0;
+    // Automatically expand if selected OR if manually expanded
+    const isExpanded = !!expandedParents[item.id] || isSelected;
+
+    return (
+      <React.Fragment key={item.id}>
+        <div
+          className={`group flex items-center gap-3 p-3.5 rounded-xl transition-all cursor-pointer border mb-2 ${
+            isSelected
+              ? "bg-primary-50 border-primary-200 shadow-sm"
+              : "bg-white border-gray-100 hover:border-gray-300"
+          }`}
+          style={{ marginLeft: `${level * 24}px` }}
+          onClick={() => handleTogglePermission(item)}
+        >
+          <div className="flex items-center gap-3 flex-1">
+            <div
+              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                isSelected
+                  ? "bg-primary-600 border-primary-600 shadow-primary-100 shadow-lg"
+                  : "bg-gray-50 border-gray-200 group-hover:border-primary-300"
+              }`}
+            >
+              {isSelected && (
+                <div className="w-1.5 h-1.5 bg-white rounded-full animate-in zoom-in-50" />
+              )}
+            </div>
+
+            <div
+              className={`text-[11px] font-black tracking-tight leading-tight uppercase transition-colors ${
+                isSelected ? "text-primary-800" : "text-gray-600"
+              }`}
+            >
+              {item.description}
+            </div>
+          </div>
+
+          {hasChildren && (
+            <div className={`transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}>
+              <ChevronDown size={14} className={isSelected ? "text-primary-500" : "text-gray-400"} />
+            </div>
+          )}
+        </div>
+
+        {hasChildren && isExpanded && (
+          <div className="animate-in slide-in-from-top-1 fade-in duration-300">
+            {children.map((child) =>
+              renderPermissionItem(child, level + 1),
+            )}
+          </div>
+        )}
+      </React.Fragment>
+    );
+  };
+
   if (!visible) return null;
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <Toast ref={toast} />
-      <div className={`bg-white w-full ${formData.role === 'user' ? 'max-w-[40vw]' : 'max-w-[60vw]'} rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] transition-all duration-300`}>
+      <div
+        className={`bg-white w-full ${formData.role === "user" ? "max-w-[40vw]" : "max-w-[60vw]"} rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] transition-all duration-300`}
+      >
         <div className="bg-primary-700 p-4 flex justify-between items-center text-white shrink-0">
           <h3 className="font-bold flex items-center gap-2 text-lg uppercase tracking-tight">
             {isEdit ? <Edit3Icon size={20} /> : <PlusIcon size={20} />}
@@ -222,7 +508,9 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
         </div>
 
         <div className="p-8 overflow-y-auto custom-scrollbar">
-          <div className={`grid grid-cols-1 ${formData.role !== 'user' ? 'md:grid-cols-2' : ''} gap-8`}>
+          <div
+            className={`grid grid-cols-1 ${formData.role !== "user" ? "md:grid-cols-2" : ""} gap-8`}
+          >
             <div className="space-y-6">
               <h4 className="font-black text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2">
                 <Users size={18} className="text-primary-600" />
@@ -236,8 +524,10 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                   </label>
                   <InputText
                     value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-100 outline-none font-bold text-gray-700 transition-all"
+                    onChange={(e) =>
+                      setFormData({ ...formData, full_name: e.target.value })
+                    }
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-100 outline-none font-bold text-gray-700 transition-all font-inter"
                     placeholder="Nhập họ và tên đầy đủ"
                   />
                 </div>
@@ -248,9 +538,11 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                   </label>
                   <InputText
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     disabled={isEdit}
-                    className={`w-full p-3 border border-gray-200 rounded-xl outline-none font-bold transition-all ${isEdit ? 'bg-gray-100 text-gray-400' : 'bg-gray-50 text-gray-700 focus:ring-2 focus:ring-primary-100'}`}
+                    className={`w-full p-3 border border-gray-200 rounded-xl outline-none font-bold transition-all font-inter ${isEdit ? "bg-gray-100 text-gray-400" : "bg-gray-50 text-gray-700 focus:ring-2 focus:ring-primary-100"}`}
                     placeholder="example@gmail.com"
                   />
                 </div>
@@ -263,8 +555,10 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                     <InputText
                       type="password"
                       value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-100 outline-none font-bold text-gray-700 transition-all"
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-100 outline-none font-bold text-gray-700 transition-all font-inter"
                       placeholder="••••••••"
                     />
                   </div>
@@ -281,7 +575,9 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                         { label: "Người dùng", value: "user" },
                         { label: "Quản trị viên", value: "admin" },
                       ]}
-                      onChange={(e) => setFormData({ ...formData, role: e.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, role: e.value })
+                      }
                       className="w-full !bg-gray-50 !border-gray-200 !rounded-xl outline-none font-bold text-gray-700"
                     />
                   </div>
@@ -296,7 +592,9 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                           { label: "Hoạt động", value: 1 },
                           { label: "Vô hiệu hóa", value: 0 },
                         ]}
-                        onChange={(e) => setFormData({ ...formData, status: e.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, status: e.value })
+                        }
                         className="w-full !bg-gray-50 !border-gray-200 !rounded-xl outline-none font-bold text-gray-700"
                       />
                     </div>
@@ -316,7 +614,9 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                           { label: "Bảo trợ xã hội", value: "BT" },
                           { label: "Trạm y tế", value: "TYT" },
                         ]}
-                        onChange={(e) => setFormData({ ...formData, type: e.value, unit: "" })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, type: e.value, unit: "" })
+                        }
                         placeholder="-- Chọn loại hình --"
                         className="w-full !bg-white !border-gray-200 !rounded-xl outline-none font-bold text-gray-700"
                       />
@@ -330,7 +630,9 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
                         <Dropdown
                           value={formData.unit}
                           options={getFacilityOptions(formData.type)}
-                          onChange={(e) => setFormData({ ...formData, unit: e.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, unit: e.value })
+                          }
                           placeholder="-- Chọn đơn vị --"
                           filter
                           filterPlaceholder="Tìm kiếm tên đơn vị..."
@@ -345,37 +647,24 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
             </div>
             {formData.role !== "user" && (
               <div className="space-y-6">
-                <h4 className="font-black text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2 uppercase">
+                <h4 className="font-black text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2 uppercase text-sm">
                   <Shield size={18} className="text-primary-600" />
-                  PHÂN QUYỀN TRUY CẬP ({selectedPermissions.length})
+                  PHÂN QUYỀN ({selectedPermissions.length})
                 </h4>
 
-                <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 max-h-[400px] overflow-y-auto custom-scrollbar">
+                <div className="bg-gray-100 p-5 rounded-3xl border border-gray-200 max-h-[450px] overflow-y-auto custom-scrollbar-thin">
                   {availablePermissions.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-gray-400">
                       <Loader2 className="animate-spin mb-2" size={24} />
-                      <p className="text-xs font-bold uppercase tracking-widest">Đang tải quyền...</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest">
+                        Đang kết nối...
+                      </p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 gap-2">
-                      {availablePermissions.map((permission) => (
-                        <div
-                          key={permission.id}
-                          className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer border ${selectedPermissions.includes(permission.name)
-                            ? "bg-primary-50 border-primary-100"
-                            : "bg-white border-transparent hover:border-gray-200"
-                            }`}
-                          onClick={() => handleTogglePermission(permission.name)}
-                        >
-
-                          <div className={`text-xs font-black leading-tight ${selectedPermissions.includes(permission.name)
-                            ? "text-primary-700"
-                            : "text-gray-700"
-                            }`}>
-                            {permission.description}
-                          </div>
-                        </div>
-                      ))}
+                    <div className="flex flex-col">
+                      {hierarchicalPermissions.map((permission) =>
+                        renderPermissionItem(permission),
+                      )}
                     </div>
                   )}
                 </div>
@@ -388,25 +677,27 @@ const UserModal: React.FC<UserModalProps> = ({ visible, onHide, user, onSaveSucc
           <Button
             label="HỦY BỎ"
             onClick={onHide}
-            className="flex-1 py-3 border-gray-200 text-gray-500 font-black rounded-xl hover:bg-gray-50 transition-all uppercase tracking-widest text-[10px]"
+            className="flex-1 py-4 border-gray-200 text-gray-500 font-black rounded-2xl hover:bg-white transition-all uppercase tracking-widest text-[11px] shadow-sm"
             outlined
           />
           <Button
-            label={isEdit ? "CẬP NHẬT" : "LƯU NGƯỜI DÙNG"}
-            icon={isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+            label={isEdit ? "CẬP NHẬT DỮ LIỆU" : "KHỞI TẠO NGƯỜI DÙNG"}
+            icon={
+              isSaving ? (
+                <Loader2 className="animate-spin" size={18} />
+              ) : (
+                <Save size={18} />
+              )
+            }
             onClick={handleSave}
             loading={isSaving}
             disabled={isSaving}
-            className="flex-1 p-2 bg-primary-600 hover:bg-primary-700 text-white font-black rounded-xl shadow-lg shadow-primary-200 flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 uppercase tracking-widest text-[10px]"
+            className="flex-1 p-4 bg-primary-600 hover:bg-primary-700 text-white font-black rounded-2xl shadow-xl shadow-primary-200 flex items-center justify-center gap-3 transition-all transform hover:-translate-y-1 active:scale-95 uppercase tracking-widest text-[11px]"
           />
         </div>
       </div>
     </div>
   );
 };
-
-// Helper icons
-const PlusIcon = ({ size }: { size: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>;
-const Edit3Icon = ({ size }: { size: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>;
 
 export default UserModal;

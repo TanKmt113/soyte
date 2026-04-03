@@ -9,12 +9,13 @@ import {
   X,
   Save,
   Send,
+  ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import { api } from "../api";
 import AdminLayout from "../components/AdminLayout";
-import { Button, InputText, InputTextarea } from "@/components/prime";
+import { Button, InputText, InputTextarea, Dropdown } from "@/components/prime";
 import { Toast } from "primereact/toast";
-import { confirmDialog } from "primereact/confirmdialog";
 import { Permission } from "../types";
 
 const PermissionsManagement: React.FC = () => {
@@ -22,11 +23,15 @@ const PermissionsManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingPermission, setEditingPermission] = useState<Permission | null>(null);
+  const [editingPermission, setEditingPermission] = useState<Permission | null>(
+    null,
+  );
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    parent_id: null as number | null,
   });
+  const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<any>({});
 
@@ -36,7 +41,6 @@ const PermissionsManagement: React.FC = () => {
     setLoading(true);
     try {
       const response = await api.getPermissions();
-      // Handle response.permissions or response.data or response itself
       const data = response.permissions || response.data || response;
       setPermissions(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -56,14 +60,66 @@ const PermissionsManagement: React.FC = () => {
     fetchPermissions();
   }, []);
 
-  const filteredPermissions = useMemo(() => {
-    if (!Array.isArray(permissions)) return [];
-    return permissions.filter(
-      (p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.description && p.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+  const toggleRow = (id: number) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  // Helper to flatten a multi-level tree into a flat array
+  const flattenPermissions = (items: Permission[]): Permission[] => {
+    let result: Permission[] = [];
+    items.forEach((item) => {
+      result.push(item);
+      if (item.children && item.children.length > 0) {
+        result = [...result, ...flattenPermissions(item.children)];
+      }
+    });
+    return result;
+  };
+
+  const flatPermissions = useMemo(
+    () => flattenPermissions(permissions),
+    [permissions],
+  );
+
+  // Filter tree by search term recursively
+  const filterTree = (items: Permission[], lowerTerm: string): Permission[] => {
+    return items
+      .map((item) => {
+        const matchesCurrent =
+          item.name.toLowerCase().includes(lowerTerm) ||
+          (item.description &&
+            item.description.toLowerCase().includes(lowerTerm));
+
+        const filteredChildren = item.children
+          ? filterTree(item.children, lowerTerm)
+          : [];
+
+        if (matchesCurrent || filteredChildren.length > 0) {
+          if (filteredChildren.length > 0) {
+            setExpandedRows((prev) => ({ ...prev, [item.id]: true }));
+          }
+          return { ...item, children: filteredChildren };
+        }
+        return null;
+      })
+      .filter((item): item is any => item !== null) as Permission[];
+  };
+
+  // The hierarchical display structure
+  const hierarchicalPermissions = useMemo(() => {
+    if (!searchTerm) return permissions;
+    return filterTree(permissions, searchTerm.toLowerCase());
   }, [permissions, searchTerm]);
+
+  // Options for parent selection dropdown
+  const parentOptions = useMemo(() => {
+    return flatPermissions
+      .filter((p) => !editingPermission || p.id !== editingPermission.id)
+      .map((p) => ({ label: p.name, value: p.id }));
+  }, [flatPermissions, editingPermission]);
 
   const handleOpenForm = (permission?: Permission) => {
     if (permission) {
@@ -71,12 +127,14 @@ const PermissionsManagement: React.FC = () => {
       setFormData({
         name: permission.name,
         description: permission.description || "",
+        parent_id: permission.parent_id || null,
       });
     } else {
       setEditingPermission(null);
       setFormData({
         name: "",
         description: "",
+        parent_id: null,
       });
     }
     setErrors({});
@@ -124,6 +182,74 @@ const PermissionsManagement: React.FC = () => {
     }
   };
 
+  const renderPermissionRow = (
+    item: Permission,
+    level = 0,
+  ) => {
+    const children = item.children || [];
+    const hasChildren = children.length > 0;
+    const isExpanded = !!expandedRows[item.id];
+
+    return (
+      <React.Fragment key={item.id}>
+        <tr className="hover:bg-gray-50 transition-colors group border-b border-gray-50 text-xs">
+          <td className="px-6 py-4">
+            <div
+              className="flex items-center gap-3"
+              style={{ paddingLeft: `${level * 24}px` }}
+            >
+              {hasChildren ? (
+                <button
+                  onClick={() => toggleRow(item.id)}
+                  className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                  {isExpanded ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronRight size={16} />
+                  )}
+                </button>
+              ) : (
+                <div className="w-6" />
+              )}
+              <span
+                className={`font-black text-gray-800 uppercase tracking-tight ${level > 0 ? "text-gray-500 font-bold" : ""}`}
+              >
+                {item.name}
+              </span>
+            </div>
+          </td>
+          <td className="px-6 py-4">
+            <p className="text-[10px] font-bold text-gray-400 line-clamp-1 max-w-xs uppercase">
+              {item.description || "---"}
+            </p>
+          </td>
+          <td className="px-6 py-4">
+            <span className="text-[10px] text-gray-600 font-black">
+              {item.created_at
+                ? new Date(item.created_at).toLocaleString("vi-VN")
+                : "---"}
+            </span>
+          </td>
+          <td className="px-6 py-4 text-center">
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                icon={<Edit3 size={18} />}
+                text
+                rounded
+                onClick={() => handleOpenForm(item)}
+              />
+            </div>
+          </td>
+        </tr>
+        {hasChildren &&
+          isExpanded &&
+          children.map((child) =>
+            renderPermissionRow(child, level + 1),
+          )}
+      </React.Fragment>
+    );
+  };
 
   return (
     <AdminLayout title="Quản lý Quyền hệ thống">
@@ -139,7 +265,7 @@ const PermissionsManagement: React.FC = () => {
               Tổng số quyền
             </p>
             <h3 className="text-2xl font-black text-gray-800">
-              {permissions.length}
+              {flatPermissions.length}
             </h3>
           </div>
         </div>
@@ -182,7 +308,7 @@ const PermissionsManagement: React.FC = () => {
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-20 text-center">
+                  <td colSpan={5} className="px-6 py-20 text-center">
                     <Loader2
                       size={40}
                       className="animate-spin text-primary-600 mx-auto mb-4"
@@ -192,52 +318,17 @@ const PermissionsManagement: React.FC = () => {
                     </p>
                   </td>
                 </tr>
-              ) : filteredPermissions.length === 0 ? (
+              ) : hierarchicalPermissions.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-20 text-center text-gray-400">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-20 text-center text-gray-400"
+                  >
                     Không tìm thấy quyền nào.
                   </td>
                 </tr>
               ) : (
-                filteredPermissions.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-gray-50 transition-colors group"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <span className="font-bold text-gray-800 text-sm">
-                          {item.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-xs text-gray-500 line-clamp-1 max-w-xs">
-                        {item.description || "---"}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs text-gray-600 font-bold">
-                        {item.created_at ? new Date(item.created_at).toLocaleString("vi-VN") : "---"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs text-gray-600 font-bold">
-                        {item.updated_at ? new Date(item.updated_at).toLocaleString("vi-VN") : "---"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <Button
-                          icon={<Edit3 size={18} />}
-                          text
-                          rounded
-                          onClick={() => handleOpenForm(item)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                hierarchicalPermissions.map((item) => renderPermissionRow(item))
               )}
             </tbody>
           </table>
@@ -264,6 +355,22 @@ const PermissionsManagement: React.FC = () => {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                  Quyền cha (Không bắt buộc)
+                </label>
+                <Dropdown
+                  value={formData.parent_id}
+                  options={parentOptions}
+                  onChange={(e) =>
+                    setFormData({ ...formData, parent_id: e.value })
+                  }
+                  placeholder="Chọn quyền cha..."
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg font-bold focus:ring-2 focus:ring-primary-100 outline-none"
+                  showClear
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
                   Tên quyền <span className="text-red-500">*</span>
                 </label>
                 <InputText
@@ -273,9 +380,13 @@ const PermissionsManagement: React.FC = () => {
                   }
                   placeholder="Ví dụ: Xem danh sách bài viết"
                   disabled={!!editingPermission}
-                  className={`w-full p-3 ${editingPermission ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-gray-50 text-gray-800"
-                    } border ${errors.name ? "border-red-500" : "border-gray-200"
-                    } rounded-lg font-bold focus:ring-2 focus:ring-primary-100 outline-none`}
+                  className={`w-full p-3 ${
+                    editingPermission
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-gray-50 text-gray-800"
+                  } border ${
+                    errors.name ? "border-red-500" : "border-gray-200"
+                  } rounded-lg font-bold focus:ring-2 focus:ring-primary-100 outline-none`}
                 />
                 {errors.name && (
                   <p className="text-red-500 text-[10px] mt-1 font-bold">
