@@ -198,10 +198,11 @@ export const SERVICE_CATEGORIES_FILTER = [
 export const MOCK_VIDEOS = [
   {
     id: "v1",
-    title:
-      "Bản tin Y tế Hà Nội: Toàn cảnh công tác phòng chống dịch tuần 1 tháng 1/2026",
+    title: "HÀ NỘI: PHÁT TRIỂN Y TẾ CƠ SỞ - NỀN TẢNG HẠNH PHÚC CỦA NHÂN DÂN",
     duration: "05:30",
-    thumbnail: "https://picsum.photos/seed/video1/800/450",
+    thumbnail:
+      "https://i.ytimg.com/vi/jktlqMUULyg/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLDjHFPwlDTXD6NHjU_VsXjxEvyWgA",
+    videoUrl: "https://www.youtube.com/watch?v=9J5JpfjdaOQ",
     date: "07/01/2026",
   },
   {
@@ -209,28 +210,36 @@ export const MOCK_VIDEOS = [
     title:
       "Phóng sự: Những chiến sĩ áo trắng thầm lặng đêm Giao thừa Tết Bính Ngọ",
     duration: "08:45",
-    thumbnail: "https://picsum.photos/seed/video2/800/450",
+    thumbnail:
+      "https://i.ytimg.com/vi/Nbh669b37og/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLB6_51trXeI-BgkepOSqEIvzeu4Wg",
+    videoUrl: "https://www.youtube.com/watch?v=Nbh669b37og",
     date: "10/01/2026",
   },
   {
     id: "v3",
     title: "Hướng dẫn người dân sử dụng ứng dụng Hồ sơ sức khỏe điện tử",
     duration: "03:15",
-    thumbnail: "https://picsum.photos/seed/video3/800/450",
+    thumbnail:
+      "https://i.ytimg.com/vi/X7TgTrKMNjU/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLCPU252IQIdXnSl8Ko8JIZW8nWfXQ",
+    videoUrl: "https://www.youtube.com/watch?v=X7TgTrKMNjU",
     date: "02/01/2026",
   },
   {
     id: "v4",
     title: "Tọa đàm: Nâng cao chất lượng khám chữa bệnh tại y tế cơ sở",
     duration: "15:20",
-    thumbnail: "https://picsum.photos/seed/video4/800/450",
+    thumbnail:
+      "https://i.ytimg.com/vi/k-mVQlMF8yY/hqdefault.jpg?sqp=-oaymwEnCOADEI4CSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLA-xw-L62SQoLPy39iwD3tAC5cGhA",
+    videoUrl: "https://www.youtube.com/watch?v=k-mVQlMF8yY",
     date: "28/12/2025",
   },
   {
     id: "v5",
     title: "Chuyên mục Sức khỏe: Phòng chống bệnh tiểu đường",
     duration: "10:00",
-    thumbnail: "https://picsum.photos/seed/video5/800/450",
+    thumbnail:
+      "https://i.ytimg.com/vi/eBKARM9Lw2g/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLBTQxTkyf8R9fis7pTvT8fBTgYMlw",
+    videoUrl: "https://www.youtube.com/watch?v=eBKARM9Lw2g",
     date: "25/12/2025",
   },
 ];
@@ -365,7 +374,6 @@ export const MAIN_MENU: MenuItem[] = [
 ];
 
 export const MOCK_NEWS: NewsItem[] = [];
-
 
 export const CATEGORIES = [
   {
@@ -940,7 +948,7 @@ export const FACILITIES_BV = [
     address: "Lô 150, Nguyễn Sơn Hà, phường Hà Đông, thành phố Hà Nội", // [cite: 438]
     phone: "",
     coords: [20.969063, 105.787485], // [cite: 438]
-    description: ""
+    description: "",
   },
   {
     id: "bv-hong-ngoc-yen-ninh",
@@ -950,17 +958,18 @@ export const FACILITIES_BV = [
     address: "Số 55 Phố Yên Ninh, Phường Ba Đình, Thành phố Hà Nội, Việt Nam", // [cite: 439]
     phone: "",
     coords: [21.042482, 105.844177], // [cite: 439]
-    description: ""
+    description: "",
   },
   {
     id: "bv-hong-ngoc-phuc-truong-minh",
     name: "BVĐK Hồng Ngọc - Phúc Trường Minh", // [cite: 439]
     type: "BV",
     category: "Cơ sở y tế tư nhân", // [cite: 438]
-    address: "Số 8 đường Châu Văn Liêm, Phường Từ Liêm, Thành phố Hà Nội, Việt Nam", // [cite: 439]
+    address:
+      "Số 8 đường Châu Văn Liêm, Phường Từ Liêm, Thành phố Hà Nội, Việt Nam", // [cite: 439]
     phone: "",
     coords: [21.008998, 105.769454], // [cite: 439]
-    description: "Cơ sở 2 của BVĐK Hồng Ngọc"
+    description: "Cơ sở 2 của BVĐK Hồng Ngọc",
   },
   {
     id: "bv-vinmec-smart-city",
@@ -970,17 +979,18 @@ export const FACILITIES_BV = [
     address: "Số 2A, đường Tây Mỗ, phường Tây Mỗ, Hà Nội", // [cite: 439]
     phone: "",
     coords: [21.007557, 105.748198], // [cite: 439]
-    description: ""
+    description: "",
   },
   {
     id: "bv-phu-san-thien-an",
     name: "Bệnh viện Phụ sản Thiện An", // [cite: 439]
     type: "BV",
     category: "Cơ sở y tế tư nhân", // [cite: 438]
-    address: "Số 27, ngõ 603 phố Lạc Long Quân, phường Tây Hồ, Thành phố Hà Nội, Việt Nam", // [cite: 439]
+    address:
+      "Số 27, ngõ 603 phố Lạc Long Quân, phường Tây Hồ, Thành phố Hà Nội, Việt Nam", // [cite: 439]
     phone: "",
     coords: [21.067478, 105.809661], // [cite: 439]
-    description: ""
+    description: "",
   },
   {
     id: "bv-phoi-tw",
@@ -990,7 +1000,7 @@ export const FACILITIES_BV = [
     address: "Số 463 Hoàng Hoa Thám, Hà Nội",
     phone: "",
     coords: [21.040616, 105.811568],
-    description: "Quy mô: 1.046 giường bệnh"
+    description: "Quy mô: 1.046 giường bệnh",
   },
   {
     id: "bv-e",
@@ -1000,7 +1010,7 @@ export const FACILITIES_BV = [
     address: "Số 89 Đường Trần Cung, Hà Nội",
     phone: "",
     coords: [21.046816, 105.787687],
-    description: "Quy mô: 1.279 giường bệnh"
+    description: "Quy mô: 1.279 giường bệnh",
   },
   {
     id: "vien-huyet-hoc-tw",
@@ -1010,7 +1020,7 @@ export const FACILITIES_BV = [
     address: "Phạm Văn Bạch, Hà Nội",
     phone: "",
     coords: [21.025287, 105.791557],
-    description: "Quy mô: 819 giường bệnh"
+    description: "Quy mô: 819 giường bệnh",
   },
   {
     id: "bv-tai-mui-hong-tw",
@@ -1020,7 +1030,7 @@ export const FACILITIES_BV = [
     address: "Số 78 Giải Phóng, Hà Nội",
     phone: "",
     coords: [21.004229, 105.841571],
-    description: "Quy mô: 370 giường bệnh"
+    description: "Quy mô: 370 giường bệnh",
   },
   {
     id: "bv-cham-cuu-tw",
@@ -1029,8 +1039,8 @@ export const FACILITIES_BV = [
     category: "Cơ sở y tế thuộc Trung ương và Bộ Ngành",
     address: "Số 49 Thái Thịnh, Hà Nội",
     phone: "",
-    coords: [21.013580, 105.817730],
-    description: "Quy mô: 585 giường bệnh"
+    coords: [21.01358, 105.81773],
+    description: "Quy mô: 585 giường bệnh",
   },
   {
     id: "bv-noi-tiet-tw",
@@ -1040,7 +1050,7 @@ export const FACILITIES_BV = [
     address: "Số 80 Ngõ 82 Yên Lãng, Hà Nội",
     phone: "",
     coords: [21.011685, 105.818451],
-    description: "Quy mô: 1.142 giường bệnh"
+    description: "Quy mô: 1.142 giường bệnh",
   },
   {
     id: "bv-nhi-tw",
@@ -1050,7 +1060,7 @@ export const FACILITIES_BV = [
     address: "Số 18/879 La Thành, Hà Nội",
     phone: "",
     coords: [21.024564, 105.807865],
-    description: "Quy mô: 2.196 giường bệnh"
+    description: "Quy mô: 2.196 giường bệnh",
   },
   {
     id: "bv-da-lieu-tw",
@@ -1060,7 +1070,7 @@ export const FACILITIES_BV = [
     address: "Số 15A, Phương Mai, Hà Nội",
     phone: "",
     coords: [21.002871, 105.839801],
-    description: "Quy mô: 110 giường bệnh"
+    description: "Quy mô: 110 giường bệnh",
   },
   {
     id: "bv-lao-khoa-tw",
@@ -1070,7 +1080,7 @@ export const FACILITIES_BV = [
     address: "Số 1A Phương Mai, Hà Nội",
     phone: "",
     coords: [21.002821, 105.840243],
-    description: "Quy mô: 345 giường bệnh"
+    description: "Quy mô: 345 giường bệnh",
   },
   {
     id: "bv-bach-mai",
@@ -1080,7 +1090,7 @@ export const FACILITIES_BV = [
     address: "Số 78 Giải Phóng, Hà Nội",
     phone: "",
     coords: [21.000645, 105.842345],
-    description: "Quy mô: 3.464 giường bệnh"
+    description: "Quy mô: 3.464 giường bệnh",
   },
   {
     id: "bv-dai-hoc-y-hn",
@@ -1090,7 +1100,7 @@ export const FACILITIES_BV = [
     address: "Số 1 Tôn Thất Tùng, Hà Nội",
     phone: "",
     coords: [21.001632, 105.829377],
-    description: "Quy mô: 677 giường bệnh"
+    description: "Quy mô: 677 giường bệnh",
   },
   {
     id: "bv-huu-nghi-viet-xo",
@@ -1100,7 +1110,7 @@ export const FACILITIES_BV = [
     address: "Số 1 đường Trần Khánh Dư, Hà Nội",
     phone: "",
     coords: [21.016377, 105.861783],
-    description: "Quy mô: 918 giường bệnh"
+    description: "Quy mô: 918 giường bệnh",
   },
   {
     id: "bv-yhct-tw",
@@ -1110,7 +1120,7 @@ export const FACILITIES_BV = [
     address: "Số 29 Nguyễn Bỉnh Khiêm, Hà Nôi",
     phone: "",
     coords: [21.016075, 105.846571],
-    description: "Quy mô: 688 giường bệnh"
+    description: "Quy mô: 688 giường bệnh",
   },
   {
     id: "bv-mat-tw",
@@ -1120,7 +1130,7 @@ export const FACILITIES_BV = [
     address: "Số 85 Bà Triệu, Hà Nội",
     phone: "",
     coords: [21.018939, 105.849182],
-    description: "Quy mô: 406 giường bệnh"
+    description: "Quy mô: 406 giường bệnh",
   },
   {
     id: "bv-huu-nghi-viet-duc",
@@ -1130,7 +1140,7 @@ export const FACILITIES_BV = [
     address: "Số 40 Tràng Thi, Hà Nội",
     phone: "",
     coords: [21.028574, 105.846467],
-    description: "Quy mô: 1.768 giường bệnh"
+    description: "Quy mô: 1.768 giường bệnh",
   },
   {
     id: "bv-phu-san-tw",
@@ -1140,7 +1150,7 @@ export const FACILITIES_BV = [
     address: "Số 43 Tràng Thi, Hà Nội",
     phone: "",
     coords: [21.027878, 105.845942],
-    description: "Quy mô: 907 giường bệnh"
+    description: "Quy mô: 907 giường bệnh",
   },
   {
     id: "bv-k",
@@ -1150,7 +1160,7 @@ export const FACILITIES_BV = [
     address: "Số 43 Quán Sứ, Hà Nội",
     phone: "",
     coords: [21.026046, 105.845171],
-    description: "Quy mô: 3.569 giường bệnh"
+    description: "Quy mô: 3.569 giường bệnh",
   },
   {
     id: "bv-rhm-tw",
@@ -1160,7 +1170,7 @@ export const FACILITIES_BV = [
     address: "Số 40B Tràng Thi, Hà Nội",
     phone: "",
     coords: [21.028442, 105.846059],
-    description: "Quy mô: 131 giường bệnh"
+    description: "Quy mô: 131 giường bệnh",
   },
   {
     id: "bv-benh-nhiet-doi-tw",
@@ -1170,7 +1180,7 @@ export const FACILITIES_BV = [
     address: "Thôn Bầu, xã Kim Chung, Hà Nội",
     phone: "",
     coords: [21.144577, 105.787702],
-    description: "Quy mô: 1.718 giường bệnh"
+    description: "Quy mô: 1.718 giường bệnh",
   },
   {
     id: "bv-tam-than-tw1",
@@ -1180,7 +1190,7 @@ export const FACILITIES_BV = [
     address: "ĐT427B, Hoà Bình, Hà Nội",
     phone: "",
     coords: [20.874136, 105.831518],
-    description: "Quy mô: 620 giường bệnh"
+    description: "Quy mô: 620 giường bệnh",
   },
   {
     id: "bv-hadong",
@@ -1625,7 +1635,7 @@ export const FACILITIES_TT = [
     address: "Số 89 Đường Trần Cung, Hà Nội",
     phone: "",
     coords: [21.046816, 105.787687],
-    description: "Quy mô: 202 giường bệnh"
+    description: "Quy mô: 202 giường bệnh",
   },
   {
     id: "tt-1",
