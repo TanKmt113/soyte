@@ -22,6 +22,16 @@ import { Button } from "@/components/prime";
 import HospitalSlider from "../components/HospitalSlider";
 import { api } from "../api";
 const Home = () => {
+  const getEmbedUrl = (url: string) => {
+    if (!url) return "";
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+      return `https://www.youtube.com/embed/${match[2]}`;
+    }
+    return url;
+  };
   const [activeChannel, setActiveChannel] = useState("H1");
   const [dbPosts, setDbPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +40,7 @@ const Home = () => {
   const tieuDiem = dbPosts.slice(1, 6);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentVideo, setCurrentVideo] = useState(MOCK_VIDEOS[0]);
+  const [isPlaying, setIsPlaying] = useState(false);
   const images = [
     // "https://suckhoethudo.vn/assets/anh2-r7WidWql.jpg",
     "https://suckhoethudo.vn/assets/anh1-CFkqSFx4.png",
@@ -536,39 +547,57 @@ const Home = () => {
 
                 <div className="flex flex-col md:flex-row h-[450px]">
                   {/* Main Video Player (Wider) */}
-                  <div className="md:w-3/4 bg-black relative group cursor-pointer border-r border-gray-800">
-                    <img
-                      src={currentVideo.thumbnail}
-                      alt="Video cover"
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition"
-                    />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <Button
-                        icon={
-                          <Play
-                            size={40}
-                            fill="currentColor"
-                            className="ml-1"
+                  <div
+                    className="md:w-3/4 bg-black relative group cursor-pointer border-r border-gray-800"
+                    onClick={() => !isPlaying && setIsPlaying(true)}
+                  >
+                    {isPlaying ? (
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src={`${getEmbedUrl(currentVideo.videoUrl)}?autoplay=1`}
+                        title={currentVideo.title}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full"
+                      ></iframe>
+                    ) : (
+                      <>
+                        <img
+                          src={currentVideo.thumbnail}
+                          alt="Video cover"
+                          className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition"
+                        />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <Button
+                            icon={
+                              <Play
+                                size={40}
+                                fill="currentColor"
+                                className="ml-1"
+                              />
+                            }
+                            rounded
+                            text
+                            className="w-20 h-20 rounded-full !bg-red-600/90 !text-white flex items-center justify-center group-hover:scale-110 transition shadow-[0_0_20px_rgba(220,38,38,0.5)]"
                           />
-                        }
-                        rounded
-                        text
-                        className="w-20 h-20 rounded-full !bg-red-600/90 !text-white flex items-center justify-center group-hover:scale-110 transition shadow-[0_0_20px_rgba(220,38,38,0.5)]"
-                      />
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded uppercase">
-                          Trực tiếp
-                        </span>
-                        <span className="text-gray-300 text-sm">
-                          {currentVideo.date}
-                        </span>
-                      </div>
-                      <h3 className="text-white font-bold text-2xl leading-tight line-clamp-2">
-                        {currentVideo.title}
-                      </h3>
-                    </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/80 to-transparent">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded uppercase">
+                              Trực tiếp
+                            </span>
+                            <span className="text-gray-300 text-sm">
+                              {currentVideo.date}
+                            </span>
+                          </div>
+                          <h3 className="text-white font-bold text-2xl leading-tight line-clamp-2">
+                            {currentVideo.title}
+                          </h3>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Playlist Sidebar (Narrower) */}
@@ -577,7 +606,10 @@ const Home = () => {
                       {MOCK_VIDEOS.map((video, idx) => (
                         <div
                           key={video.id}
-                          onClick={() => setCurrentVideo(video)}
+                          onClick={() => {
+                            setCurrentVideo(video);
+                            setIsPlaying(false);
+                          }}
                           className={`flex flex-col gap-2 p-2 rounded cursor-pointer mb-2 transition border border-transparent
                                        ${currentVideo.id === video.id
                               ? "bg-gray-700 border-gray-600"
