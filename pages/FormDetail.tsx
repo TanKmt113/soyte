@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { api } from "@/api";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 
 import BieuMau1Table from "../components/formDetail/Form1";
 import SurveyForm from "../components/formDetail/Form2";
@@ -9,6 +9,13 @@ export default function EvaluationTable() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const survey_key = searchParams.get("survey_key");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!survey_key) {
+      navigate("/");
+    }
+  }, [survey_key, navigate]);
 
   const [formType, setFormType] = useState("");
   const [formData, setFormData] = useState(null);

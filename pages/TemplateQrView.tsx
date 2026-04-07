@@ -22,6 +22,12 @@ const TemplateQrView: React.FC = () => {
   const surveyKey = searchParams.get("survey_key");
 
   useEffect(() => {
+    if (!surveyKey) {
+      navigate("/");
+    }
+  }, [surveyKey, navigate]);
+
+  useEffect(() => {
     const fetchForm = async () => {
       try {
         setLoading(true);

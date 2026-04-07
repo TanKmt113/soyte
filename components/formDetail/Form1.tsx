@@ -428,6 +428,8 @@ export default function BieuMau1Table({ id, type, formJson, survey_key }: any) {
   const sectionRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const [customerName, setCustomerName] = useState("");
   const [fullNameError, setFullNameError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const navigateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevOpenSection = useRef(openSection);
   const visibleInfo = useMemo(() => {
@@ -665,6 +667,11 @@ export default function BieuMau1Table({ id, type, formJson, survey_key }: any) {
   }, [formData, tableData, visibleInfo]);
 
   const submitForm = useCallback(async () => {
+    console.log("submitForm called, submittingRef:", submittingRef.current);
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+
     let nameIsValid = true;
     const formIsValidate = formJson.isValidate !== false;
     if (formIsValidate && !customerName.trim()) {
@@ -680,6 +687,8 @@ export default function BieuMau1Table({ id, type, formJson, survey_key }: any) {
         summary: "Thiếu thông tin",
         detail: "Vui lòng nhập đầy đủ tất cả trường bắt buộc trước khi gửi",
       });
+      submittingRef.current = false;
+      setSubmitting(false);
       return;
     }
 
@@ -724,6 +733,9 @@ export default function BieuMau1Table({ id, type, formJson, survey_key }: any) {
         summary: "Lỗi",
         detail: "Gửi biểu mẫu thất bại",
       });
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
     }
   }, [
     validateForm,
@@ -735,6 +747,7 @@ export default function BieuMau1Table({ id, type, formJson, survey_key }: any) {
     type,
     tableData,
     navigate,
+    submitting,
   ]);
 
   return (
@@ -828,16 +841,18 @@ export default function BieuMau1Table({ id, type, formJson, survey_key }: any) {
 
       <div className="mb-4 mt-6 flex justify-end">
         <Button
-          label="Gửi biểu mẫu"
-          icon="pi pi-send"
+          label={submitting ? "Đang gửi..." : "Gửi biểu mẫu"}
+          icon={submitting ? "pi pi-spin pi-spinner" : "pi pi-send"}
           onClick={submitForm}
-          className="
+          disabled={submitting}
+          className={`
             rounded-2xl border-0 bg-gradient-to-r from-emerald-400 to-green-500
             px-5 py-3 text-sm font-semibold text-white
             shadow-lg shadow-emerald-200 transition-all duration-200
             hover:-translate-y-0.5 hover:shadow-xl
             active:translate-y-0 sm:text-base
-          "
+            ${submitting ? "opacity-50 pointer-events-none cursor-not-allowed" : ""}
+          `}
         />
       </div>
     </div>
