@@ -2,6 +2,9 @@ import React from 'react';
 import { Dialog } from 'primereact/dialog';
 import { FeedbackItem } from '../../types/feedbacks';
 import { formatDisplayDateTime } from '../../utils/dateUtils';
+import { Button } from 'primereact/button';
+import { Trash2 } from 'lucide-react';
+import { confirmDialog } from 'primereact/confirmdialog';
 
 interface FeedbackDetailsDialogProps {
   dialogVisible: boolean;
@@ -9,6 +12,7 @@ interface FeedbackDetailsDialogProps {
   selectedFeedback: FeedbackItem | null;
   infoLabels: Record<string, string>;
   type?: string;
+  onDelete?: (id: string) => void;
 }
 
 const resolveInfoValue = (value: any): string => {
@@ -56,13 +60,33 @@ export const FeedbackDetailsDialog: React.FC<FeedbackDetailsDialogProps> = ({
   setDialogVisible,
   selectedFeedback,
   infoLabels,
-  type
+  type,
+  onDelete
 }) => {
+  const handleDelete = () => {
+    const id = selectedFeedback?.id || selectedFeedback?._id;
+    if (!id || !onDelete) return;
+
+    confirmDialog({
+      message: 'Bạn có chắc chắn muốn xoá phản hồi này?',
+      header: 'Xác nhận xoá',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Xoá',
+      rejectLabel: 'Hủy',
+      acceptClassName: "!bg-red-600 !border-red-600 hover:!bg-red-700 !px-6 !py-2.5 !rounded-xl !font-black !text-white !shadow-lg !shadow-red-100 !transition-all !transform hover:!-translate-y-0.5",
+      rejectClassName: "!text-gray-600 hover:!bg-gray-50 !px-6 !py-2.5 !rounded-xl !font-black !border-none !transition-all",
+      accept: () => {
+        onDelete(id);
+        setDialogVisible(false);
+      }
+    });
+  };
+
   return (
     <Dialog
       header="Chi tiết phiếu đã điền"
       visible={dialogVisible}
-      style={{ width: "90vw" }}
+      style={{ width: "95vw" }}
       maximizable
       onHide={() => setDialogVisible(false)}
       breakpoints={{ "960px": "95vw", "641px": "100vw" }}
@@ -78,17 +102,25 @@ export const FeedbackDetailsDialog: React.FC<FeedbackDetailsDialogProps> = ({
                 {selectedFeedback.info?.title || "Chi tiết phản hồi"}
               </h3>
               <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
-                <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-                  <span className="font-medium">Ngày gửi:</span>{" "}
+                {onDelete && (
+                  <Button
+                    icon={<Trash2 size={16} />}
+                    label="XOÁ PHẢN HỒI"
+                    onClick={handleDelete}
+                    className="!bg-red-100 !text-red-700 !border-red-200 hover:!bg-red-200 !px-4 !py-2 !rounded-xl !text-[10px] !font-black !tracking-widest !transition-all !shadow-sm"
+                  />
+                )}
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 px-3 py-2 rounded-xl border border-slate-200">
+                  <span className="opacity-50">Ngày gửi:</span>{" "}
                   {formatDisplayDateTime(selectedFeedback.created_at || selectedFeedback.createdAt || selectedFeedback.date)}
                 </span>
                 {selectedFeedback.creator_name && (
-                  <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-                    <span className="font-medium">Người gửi:</span>{" "}
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 px-3 py-2 rounded-xl border border-slate-200">
+                    <span className="opacity-50">Người gửi:</span>{" "}
                     {selectedFeedback.creator_name}
                   </span>
                 )}
-                <span className="text-xs font-semibold text-green-700 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-100 shadow-sm shadow-emerald-100/50">
                   Đã tiếp nhận
                 </span>
               </div>

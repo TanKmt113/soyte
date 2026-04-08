@@ -39,6 +39,7 @@ const FeedbacksManagement: React.FC = () => {
     infoLabels,
     onPage,
     viewDetails,
+    deleteFeedback,
     setDialogVisible,
   } = useFeedbacks(type, toast, selectedSurveyKeys);
 
@@ -157,6 +158,7 @@ const FeedbacksManagement: React.FC = () => {
         lazyParams={lazyParams}
         onPage={onPage}
         viewDetails={viewDetails}
+        onDelete={deleteFeedback}
       />
 
       <FeedbackDetailsDialog
@@ -165,6 +167,7 @@ const FeedbacksManagement: React.FC = () => {
         selectedFeedback={selectedFeedback}
         infoLabels={infoLabels}
         type={type}
+        onDelete={deleteFeedback}
       />
     </AdminLayout>
   );

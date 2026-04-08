@@ -4,6 +4,8 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { FeedbackItem } from '../../types/feedbacks';
 import { formatDisplayDateTime } from '../../utils/dateUtils';
+import { confirmDialog } from 'primereact/confirmdialog';
+import { Trash2 } from 'lucide-react';
 
 interface FeedbackDataTableProps {
   feedbacks: FeedbackItem[];
@@ -12,6 +14,7 @@ interface FeedbackDataTableProps {
   lazyParams: { first: number, rows: number, page: number };
   onPage: (event: any) => void;
   viewDetails: (rowData: FeedbackItem) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const FeedbackDataTable: React.FC<FeedbackDataTableProps> = ({
@@ -20,13 +23,47 @@ export const FeedbackDataTable: React.FC<FeedbackDataTableProps> = ({
   totalRecords,
   lazyParams,
   onPage,
-  viewDetails
+  viewDetails,
+  onDelete
 }) => {
-  const actionBodyTemplate = (rowData: FeedbackItem) => (
-    <div className="flex gap-2">
-      <Button icon="pi pi-eye" rounded outlined className="w-8 h-8 p-0 text-primary-600 border-primary-600 hover:bg-primary-50" onClick={() => viewDetails(rowData)} title="Xem chi tiết" />
-    </div>
-  );
+  const actionBodyTemplate = (rowData: FeedbackItem) => {
+    const id = rowData.id || rowData._id;
+
+    const confirmDelete = () => {
+      confirmDialog({
+        message: 'Bạn có chắc chắn muốn xoá phản hồi này?',
+        header: 'Xác nhận xoá',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Xoá',
+        rejectLabel: 'Hủy',
+        acceptClassName: "!bg-red-600 !border-red-600 hover:!bg-red-700 !px-6 !py-2.5 !rounded-xl !font-black !text-white !shadow-lg !shadow-red-100 !transition-all",
+        rejectClassName: "!text-gray-600 hover:!bg-gray-50 !px-6 !py-2.5 !rounded-xl !font-black !border-none !transition-all",
+        accept: () => {
+          if (id && onDelete) {
+            onDelete(id);
+          }
+        }
+      });
+    };
+
+    return (
+      <div className="flex gap-2">
+        <Button icon="pi pi-eye" rounded outlined className="w-8 h-8 p-0 text-primary-600 border-primary-600 hover:bg-primary-50" onClick={() => viewDetails(rowData)} title="Xem chi tiết" />
+        {onDelete && (
+          <Button
+            icon={<Trash2 size={16} />}
+            rounded
+            outlined
+            severity="danger"
+            className="w-8 h-8 p-0"
+            onClick={confirmDelete}
+            title="Xoá phản hồi"
+            disabled={!id}
+          />
+        )}
+      </div>
+    );
+  };
 
   const dateBodyTemplate = (rowData: FeedbackItem) => {
     const d = rowData.createdAt || rowData.created_at || rowData.date;

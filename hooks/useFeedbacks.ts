@@ -90,6 +90,20 @@ export const useFeedbacks = (type?: string, toastRef?: React.RefObject<Toast | n
     }
   };
 
+  const deleteFeedback = async (id: string) => {
+    try {
+      setLoading(true);
+      await feedBacksSevice.deleteFeedBack(id);
+      toastRef?.current?.show({ severity: 'success', summary: 'Thành công', detail: 'Đã xoá phản hồi' });
+      await fetchFeedbacks();
+    } catch (error) {
+      console.error(error);
+      toastRef?.current?.show({ severity: 'error', summary: 'Lỗi', detail: 'Không thể xoá phản hồi' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     feedbacks,
     loading,
@@ -100,6 +114,7 @@ export const useFeedbacks = (type?: string, toastRef?: React.RefObject<Toast | n
     infoLabels,
     onPage,
     viewDetails,
+    deleteFeedback,
     setDialogVisible,
     fetchFeedbacks
   };

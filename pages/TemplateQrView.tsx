@@ -21,11 +21,11 @@ const TemplateQrView: React.FC = () => {
   const [searchParams] = useSearchParams();
   const surveyKey = searchParams.get("survey_key");
 
-  useEffect(() => {
-    if (!surveyKey) {
-      navigate("/");
-    }
-  }, [surveyKey, navigate]);
+  // useEffect(() => {
+  //   if (!surveyKey) {
+  //     navigate("/");
+  //   }
+  // }, [surveyKey, navigate]);
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -123,7 +123,7 @@ const TemplateQrView: React.FC = () => {
         <div className="w-full max-w-5xl flex flex-row items-center justify-between gap-10 p-10 border border-gray-100 rounded-[3rem] bg-white relative overflow-hidden shadow-sm">
           {/* Vertical Accent Line */}
           <div className="absolute left-0 top-0 bottom-0 w-4 bg-[#0066a2]"></div>
-          
+
           {/* Left: Metadata */}
           <div className="flex-1 text-left space-y-8 pl-8 max-w-[60%]">
             <div className="space-y-4">
@@ -134,7 +134,7 @@ const TemplateQrView: React.FC = () => {
                 {form.description || "Bảng kiểm đánh giá kết quả kiểm tra việc khắc phục tồn tại, hạn chế mang tính phổ thông năm 2026 tại các trạm y tế xã, phường."}
               </p>
             </div>
-            
+
             <div className="bg-slate-50 px-6 py-5 rounded-3xl border border-gray-100 w-fit mt-6">
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2 leading-none">
                 Liên kết chính thức để đánh giá
@@ -151,14 +151,14 @@ const TemplateQrView: React.FC = () => {
           {/* Right: QR Code Visuals */}
           <div className="shrink-0 flex flex-col items-center justify-center space-y-6 min-w-[340px] pr-4">
             <div className="bg-white p-6 rounded-[3rem] border border-gray-50 flex items-center justify-center shadow-lg shadow-blue-50/50">
-              <img 
-                src={qrUrl} 
-                alt="Form QR Code" 
+              <img
+                src={qrUrl}
+                alt="Form QR Code"
                 className="w-[8cm] h-[8cm] block object-contain"
                 style={{ imageRendering: 'crisp-edges' }}
               />
             </div>
-            
+
             <div className="text-center space-y-1.5">
               <p className="text-[13px] font-black text-[#0066a2] uppercase tracking-[0.4em]">
                 QUÉT MÃ ĐỂ ĐÁNH GIÁ

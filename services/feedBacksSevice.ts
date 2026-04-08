@@ -36,4 +36,8 @@ export const feedBacksSevice = {
         if (type && type !== "") params.type = type;
         return api.get(`/feedbacks/compare`, params);
     },
+
+    async deleteFeedBack(id: string) {
+        return api.delete(`/feedbacks/${id}`);
+    }
 };

@@ -11,11 +11,11 @@ export default function EvaluationTable() {
   const survey_key = searchParams.get("survey_key");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!survey_key) {
-      navigate("/");
-    }
-  }, [survey_key, navigate]);
+  // useEffect(() => {
+  //   if (!survey_key) {
+  //     navigate("/");
+  //   }
+  // }, [survey_key, navigate]);
 
   const [formType, setFormType] = useState("");
   const [formData, setFormData] = useState(null);
