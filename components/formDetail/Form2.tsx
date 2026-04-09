@@ -488,14 +488,17 @@ export default function SurveyForm({ id, type, formJson, survey_key }: any) {
         status: "pending",
       };
 
-      await api.post("/feedbacks", payload);
+      const result = await api.post("/feedbacks", payload);
 
-      toast.current?.show({
-        severity: "success",
-        summary: "Thành công",
-        detail: "Lưu thành công",
-        life: 2000,
-      });
+      // Chỉ show toast khi server không có message (api.ts chưa bắn)
+      if (!result?.message) {
+        toast.current?.show({
+          severity: "success",
+          summary: "Thành công",
+          detail: "Lưu thành công",
+          life: 2000,
+        });
+      }
 
       if (navigateTimeoutRef.current) {
         clearTimeout(navigateTimeoutRef.current);
@@ -504,13 +507,18 @@ export default function SurveyForm({ id, type, formJson, survey_key }: any) {
       navigateTimeoutRef.current = setTimeout(() => {
         navigate(-1);
       }, 500);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Submit error:", error);
-      toast.current?.show({
-        severity: "error",
-        summary: "Lỗi",
-        detail: "Gửi biểu mẫu thất bại",
-      });
+      // api.ts đã tự bắn toast từ server message qua window.$toast
+      // Chỉ show fallback toast khi không có server message
+      const serverMessage = error?.message && !error.message.startsWith("API Error:");
+      if (!serverMessage) {
+        toast.current?.show({
+          severity: "error",
+          summary: "Lỗi",
+          detail: "Gửi biểu mẫu thất bại",
+        });
+      }
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
